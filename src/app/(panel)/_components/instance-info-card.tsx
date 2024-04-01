@@ -11,6 +11,7 @@ import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
 import { type ServiceInstance } from "@prisma/client";
 import { api } from "@/trpc/react";
+import StatusLabel from "@/components/custom/status-label";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -24,16 +25,18 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
 
   const generateToken = async (instanceId: string) => {
     await generateTokenMutation.mutateAsync({ instanceId });
-  }
+  };
 
   return (
     <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <CardTitle>{instance.name}</CardTitle>
+      <CardHeader className="border-b">
+        <CardTitle>
+          <StatusLabel status={"success"}>{instance.name}</StatusLabel>
+        </CardTitle>
         {instance?.description && <CardDescription>{instance.description}</CardDescription>}
       </CardHeader>
       <CardContent></CardContent>
-      <CardFooter className="border-t p-3">
+      <CardFooter className="border-t py-3">
         <div className="flex w-full flex-row items-center justify-between">
           <div className="flex flex-row items-center space-x-3">
             {/* <Input id="name" className="w-[400px]" defaultValue={token} placeholder="你还没有任何 UserToken" size={32} /> */}

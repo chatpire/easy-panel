@@ -143,7 +143,7 @@ export const userRouter = createTRPCRouter({
         data: {
           user: { connect: { id: user.id } },
           instance: { connect: { id: instance.id } },
-          token: generateId(16),
+          token: user.username + "__" + generateId(16),
         },
       });
 
