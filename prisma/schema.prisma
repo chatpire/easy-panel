@@ -1,0 +1,130 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+generator json {
+    provider = "prisma-json-types-generator"
+    // namespace = "PrismaJson" 
+    // clientOutput = "<finds it automatically>"
+    // (./ -> relative to schema, or an importable path to require() it)
+}
+
+generator zod {
+    // see https://www.npmjs.com/package/zod-prisma-types#field-validators
+    provider                         = "zod-prisma-types"
+    output                           = "../src/schema/generated/zod"
+    createInputTypes                 = true
+    useMultipleFiles                 = false
+    useTypeAssertions                = true
+    createOptionalDefaultValuesTypes = true
+    createRelationValuesTypes        = true // https://github.com/chrishoermann/zod-prisma-types/issues/235#issuecomment-1983736773
+    // addIncludeType            = false
+    // addSelectType             = false
+}
+
+datasource db {
+    provider = "postgresql"
+    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    USER
+    ADMIN
+}
+
+/// @zod.import(["import { ServiceTypeSchema, ResourceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/json.schema'"])
+model User {
+    id                   String                 @id @default(cuid())
+    name                 String /// @zod.string.min(1).max(50)
+    username             String                 @unique /// @zod.string.min(4).max(20).regex(/^[a-zA-Z0-9_]+$/)  
+    email                String?                @unique /// @zod.string.email()
+    emailVerified        Boolean?
+    role                 UserRole               @default(USER)
+    image                String?
+    comment              String? /// @zod.string.max(500)
+    validUntil           DateTime?
+    isActive             Boolean                @default(true)
+    createdAt            DateTime               @default(now()) /// @zod.custom.omit("input")
+    updatedAt            DateTime               @updatedAt /// @zod.custom.omit("input")
+    hashedPassword       String
+    sessions             Session[]
+    logs                 UserSystemLog[]
+    UserResourceEventLog UserResourceEventLog[]
+    UserInstanceToken    UserInstanceToken[]
+}
+
+model Session {
+    id        String   @id @default(cuid())
+    userId    String
+    expiresAt DateTime /// @zod.date.min(new Date())
+    currentIp String? /// @zod.string.ip()
+    createdAt DateTime @default(now()) /// @zod.custom.omit("input")
+    user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model ServiceInstance {
+    id                   String                 @id @default(cuid())
+    /// [ServiceType]
+    type                 String /// @zod.custom.use(z.lazy(() => ServiceTypeSchema))
+    name                 String                 @unique /// @zod.string.min(1).max(100)
+    description          String?
+    url                  String?
+    createdAt            DateTime               @default(now()) /// @zod.custom.omit("input")
+    updatedAt            DateTime               @updatedAt /// @zod.custom.omit("input")
+    UserResourceEventLog UserResourceEventLog[]
+    UserInstanceToken    UserInstanceToken[]
+}
+
+model UserInstanceToken {
+    id         String          @id @default(cuid())
+    userId     String
+    user       User            @relation(references: [id], fields: [userId], onDelete: Cascade)
+    instanceId String
+    instance   ServiceInstance @relation(references: [id], fields: [instanceId], onDelete: Cascade)
+    token      String          @unique
+    validUntil DateTime
+    isActive   Boolean         @default(true)
+    createdAt  DateTime        @default(now()) /// @zod.custom.omit("input")
+    updatedAt  DateTime        @updatedAt /// @zod.custom.omit("input")
+}
+
+enum ResourceUnit {
+    COUNT
+    TOKEN
+    CHARACTER
+}
+
+enum RefreshPeriod {
+    DAILY
+    MONTHLY
+    YEARLY
+    NEVER
+}
+
+model UserSystemLog {
+    id         String   @id @default(cuid())
+    user       User?    @relation(fields: [userId], references: [id])
+    userId     String?
+    /// [EventType]
+    type       String /// @zod.custom.use(z.lazy(() => EventTypeSchema))
+    detail     String? /// @zod.string.max(1000)
+    /// [EventResultType]
+    resultType String /// @zod.custom.use(z.lazy(() => EventResultTypeSchema))
+    timestamp  DateTime @default(now())
+}
+
+model UserResourceEventLog {
+    id           String           @id @default(cuid())
+    userId       String?
+    user         User?            @relation(fields: [userId], references: [id])
+    instanceId   String?
+    instance     ServiceInstance? @relation(fields: [instanceId], references: [id])
+    /// [ResourceType]
+    resourceType String /// @zod.custom.use(z.lazy(() => ResourceTypeSchema))
+    /// [ResourceEventType]
+    type         String /// @zod.custom.use(z.lazy(() => ResourceEventTypeSchema))
+    unit         ResourceUnit
+    amount       Int
+    timestamp    DateTime         @default(now())
+}
