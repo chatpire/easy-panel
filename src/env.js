@@ -7,6 +7,7 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    DATABASE_TYPE: z.enum(["postgres", "neon"]),
     DATABASE_URL: z
       .string()
       .url()
@@ -38,6 +39,7 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    DATABASE_TYPE: process.env.DATABASE_TYPE,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
     LUCIA_ID_LENGTH: process.env.LUCIA_ID_LENGTH,

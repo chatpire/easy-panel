@@ -1,5 +1,5 @@
 import { UserRole } from "@prisma/client";
-import { Dict, initTRPC, TRPCError } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
@@ -138,9 +138,6 @@ const withUserSchema = t.middleware(async ({ ctx, next }) => {
   if (!ctx.session?.userAttr) throw new TRPCError({ code: "UNAUTHORIZED" });
   const user = await ctx.db.user.findUnique({
     where: { id: ctx.session.userAttr.id },
-    include: {
-      group: true,
-    },
   });
   if (!user) throw new TRPCError({ code: "NOT_FOUND" });
   return next({

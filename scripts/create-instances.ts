@@ -25,7 +25,7 @@ async function main() {
     await prisma.$disconnect();
     process.exit(0);
   } catch (error) {
-    console.error("Error creating admin user:", error);
+    console.error("Error", error);
     await prisma.$disconnect();
     process.exit(1);
   }

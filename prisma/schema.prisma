@@ -1,5 +1,6 @@
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["driverAdapters"]
 }
 
 generator json {
@@ -39,7 +40,6 @@ model User {
     name                 String /// @zod.string.min(1).max(50)
     username             String                 @unique /// @zod.string.min(4).max(20).regex(/^[a-zA-Z0-9_]+$/)  
     email                String?                @unique /// @zod.string.email()
-    emailVerified        Boolean?
     role                 UserRole               @default(USER)
     image                String?
     comment              String? /// @zod.string.max(500)
@@ -122,8 +122,6 @@ model UserResourceEventLog {
     instance     ServiceInstance? @relation(fields: [instanceId], references: [id])
     /// [ResourceType]
     resourceType String /// @zod.custom.use(z.lazy(() => ResourceTypeSchema))
-    /// [ResourceEventType]
-    type         String /// @zod.custom.use(z.lazy(() => ResourceEventTypeSchema))
     unit         ResourceUnit
     amount       Int
     timestamp    DateTime         @default(now())

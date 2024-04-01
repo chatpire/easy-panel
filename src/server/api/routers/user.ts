@@ -20,7 +20,6 @@ import { lucia } from "@/server/auth";
 import { cookies } from "next/headers";
 import { UserRole } from "@prisma/client";
 import {
-  UserGroupCreateInputSchema,
   UserOptionalDefaultsSchema,
   UserWhereUniqueInputSchema,
 } from "@/schema/generated/zod";
@@ -56,7 +55,6 @@ export const userRouter = createTRPCRouter({
         user: UserOptionalDefaultsSchema.omit({
           hashedPassword: true,
         }),
-        group: UserGroupCreateInputSchema,
         password: z.string().min(6),
       }),
     )
@@ -64,9 +62,6 @@ export const userRouter = createTRPCRouter({
       const hashedPassword = await hashPassword(input.password);
       const result = await ctx.db.user.create({
         data: { ...input.user, hashedPassword: hashedPassword },
-        include: {
-          group: true,
-        },
       });
       return UserReadAdminSchema.parse(result);
     }),
@@ -116,10 +111,8 @@ export const userRouter = createTRPCRouter({
 
   getAll: adminProcedure.query(async ({ ctx }) => {
     const users = await ctx.db.user.findMany({
-      include: {
-        group: true,
-      },
     });
     return users.map((user) => UserReadAdminSchema.parse(user));
   }),
 });
+    

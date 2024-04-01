@@ -1,16 +1,9 @@
-import {
-  UserGroupSchema,
-  UserSchema,
-} from "@/schema/generated/zod";
+import { UserSchema } from "@/schema/generated/zod";
 import { z } from "zod";
 
 export const UserReadAdminSchema = UserSchema.omit({
   hashedPassword: true,
-}).merge(
-  z.object({
-    group: UserGroupSchema
-  }),
-);
+});
 
 export type UserReadAdmin = z.infer<typeof UserReadAdminSchema>;
 
@@ -38,5 +31,4 @@ export const UserUpdateAdminSchema = UserReadAdminSchema.omit({
 
 export const UserUpdateSelfSchema = UserUpdateAdminSchema.omit({
   id: true,
-  group: true,
 });
