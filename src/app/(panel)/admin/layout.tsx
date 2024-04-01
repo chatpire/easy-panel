@@ -1,5 +1,5 @@
 import { getSessionOrRedirect } from "@/lib/session";
-import AdminShell from "../_components/admin-shell";
+import AdminShell from "./_components/admin-shell";
 import SessionProvider from "@/components/session-provider";
 
 interface DashboardLayoutProps {

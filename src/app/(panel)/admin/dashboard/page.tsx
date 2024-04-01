@@ -1,14 +1,14 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentUserOrRedirect } from "@/lib/session";
 import { DashboardShell } from "../../_components/dashboard-shell";
-import { DashboardHeader } from "../../_components/dashboard-header";
+import { PageHeader } from "../../_components/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export default async function DashboardPage({}) {
   return (
     <DashboardShell>
-      <DashboardHeader heading="System Info" text="系统概览" />
+      <PageHeader heading="System Info" text="系统概览" />
       <div className="grid gap-10">
         <Card>
           <CardHeader>

@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getSessionUserAttrOrRedirect } from "@/lib/session";
-import { DashboardHeader } from "@/app/(panel)/_components/dashboard-header";
+import { PageHeader } from "@/app/(panel)/_components/page-header";
 import { DashboardShell } from "@/app/(panel)/_components/dashboard-shell";
 import { UserNameForm } from "@/app/(panel)/_components/user-name-form";
 
@@ -19,7 +19,7 @@ export default async function SettingsPage() {
 
   return (
     <DashboardShell>
-      <DashboardHeader heading="Settings" text="Manage account and website settings." />
+      <PageHeader heading="Settings" text="Manage account and website settings." />
       <div className="grid gap-10">
         <UserNameForm user={{ id: user.id, name: user.name || "" }} />
       </div>
