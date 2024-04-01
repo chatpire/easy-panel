@@ -63,15 +63,16 @@ CREATE TABLE "UserInstanceToken" (
 );
 
 -- CreateTable
-CREATE TABLE "UserSystemLog" (
+CREATE TABLE "UserEventLog" (
     "id" TEXT NOT NULL,
     "userId" TEXT,
     "type" TEXT NOT NULL,
     "detail" TEXT,
     "resultType" TEXT NOT NULL,
+    "content" JSONB NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "UserSystemLog_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserEventLog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -109,7 +110,7 @@ ALTER TABLE "UserInstanceToken" ADD CONSTRAINT "UserInstanceToken_userId_fkey" F
 ALTER TABLE "UserInstanceToken" ADD CONSTRAINT "UserInstanceToken_instanceId_fkey" FOREIGN KEY ("instanceId") REFERENCES "ServiceInstance"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserSystemLog" ADD CONSTRAINT "UserSystemLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserEventLog" ADD CONSTRAINT "UserEventLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "UserResourceUsageLog" ADD CONSTRAINT "UserResourceUsageLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -28,6 +28,7 @@ import {
   Info,
   ChevronDown,
   Copy,
+  Rocket,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -54,6 +55,7 @@ export const Icons = {
   arrowRight: ArrowRight,
   help: HelpCircle,
   pizza: Pizza,
+  rocket: Rocket,
   sun: SunMedium,
   moon: Moon,
   laptop: Laptop,

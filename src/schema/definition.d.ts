@@ -19,6 +19,8 @@ declare global {
 
   type EventType = z.infer<typeof EventTypeSchema>;
 
+  type EventContent = z.infer<typeof EventContentSchema>;
+
   type EventResultType = z.infer<typeof EventResultTypeSchema>;
 
   type ResourceEventType = z.infer<typeof ResourceEventTypeSchema>;

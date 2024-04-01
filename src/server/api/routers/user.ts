@@ -14,7 +14,6 @@ import {
   UserReadSchema,
   UserUpdateSelfSchema,
   UserUpdatePasswordSchema,
-  UserInstanceDetailSchema,
 } from "@/schema/user.schema";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { lucia } from "@/server/auth";
@@ -150,17 +149,20 @@ export const userRouter = createTRPCRouter({
 
       return UserInstanceTokenSchema.parse(token);
     }),
-  
-  getInstanceDetails: protectedWithUserProcedure.query(async ({ ctx }) => {
-    const user = ctx.user;
-    const tokens = await ctx.db.userInstanceToken.findMany({
-      where: {
-        userId: user.id,
-      },
-      include: {
-        instance: true,
-      },
-    });
-    return UserInstanceDetailSchema.array().parse(tokens);
-  })
+
+  getInstanceToken: protectedWithUserProcedure
+    .input(z.object({ instanceId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user = ctx.user;
+      const token = await ctx.db.userInstanceToken.findFirst({
+        where: {
+          userId: user.id,
+          instanceId: input.instanceId,
+        },
+      });
+      if (!token) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Token not found" });
+      }
+      return UserInstanceTokenSchema.parse(token);
+    }),
 });

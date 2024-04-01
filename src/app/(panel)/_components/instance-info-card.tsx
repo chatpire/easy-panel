@@ -3,22 +3,28 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { type UserInstanceDetail } from "@/schema/user.schema";
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { FunctionButton, LoadingButton } from "@/components/loading-button";
+import { FunctionButton } from "@/components/loading-button";
+import { type ServiceInstance } from "@prisma/client";
+import { api } from "@/trpc/react";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
-  instanceDetail: UserInstanceDetail;
+  instance: ServiceInstance;
   className?: string;
-  generateToken: (instanceId: string) => Promise<void>;
 }
 
-export function InstanceInfoCard({ instanceDetail, className, generateToken }: Props) {
-  const { instance, token } = instanceDetail;
+export function UserInstanceInfoCard({ instance, className }: Props) {
+  const instanceTokenQuery = api.user.getInstanceToken.useQuery({ instanceId: instance.id });
+  const token = instanceTokenQuery.data?.token;
+  const generateTokenMutation = api.user.generateToken.useMutation();
+
+  const generateToken = async (instanceId: string) => {
+    await generateTokenMutation.mutateAsync({ instanceId });
+  }
 
   return (
     <Card className={cn("w-full", className)}>
@@ -33,7 +39,7 @@ export function InstanceInfoCard({ instanceDetail, className, generateToken }: P
             {/* <Input id="name" className="w-[400px]" defaultValue={token} placeholder="你还没有任何 UserToken" size={32} /> */}
             <Label>Token</Label>
             <span className="rounded-md border px-3 py-1 text-sm">
-              {token}
+              {token ?? "无"}
               <Button className="ml-2 rounded p-1" variant={"ghost"} size={"sm"} disabled={!token}>
                 <Icons.copy className="h-3 w-3" />
               </Button>

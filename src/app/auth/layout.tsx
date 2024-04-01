@@ -1,11 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { getSessionUserAttrOrRedirect } from "@/lib/session";
 import { getSessionData } from "@/server/auth";
 import { redirect } from "next/navigation";
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {
   const session = await getSessionData();
-  if (session) {
+  if (session?.userAttr) {
     redirect("/dashboard");
   }
 

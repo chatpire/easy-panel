@@ -1,5 +1,8 @@
 import { z } from "zod";
-import { ChatGPTSharedInstanceAttributesSchema } from "./service/chatgpt-shared.schema";
+import {
+  ChatGPTSharedInstanceAttributesSchema,
+  ChatGPTSharedOAuthEventContentSchema,
+} from "./service/chatgpt-shared.schema";
 
 export const ServiceTypeSchema = z.enum(["CHATGPT_SHARED"]);
 
@@ -27,7 +30,10 @@ export const EventTypeSchema = z.enum([
   "user.update",
   "user.delete",
   "user.password_change",
+  "chatgpt_shared.oauth",
 ]);
+
+export const EventContentSchema = z.discriminatedUnion("type", [ChatGPTSharedOAuthEventContentSchema]);
 
 export const EventResultTypeSchema = z.enum(["success", "failure"]);
 

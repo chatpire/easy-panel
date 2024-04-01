@@ -31,7 +31,7 @@ async function main() {
     const user = await prisma.user.create({
       data: UserCreateInputSchema.parse({
         name: faker.person.fullName(),
-        username: faker.internet.userName().replace(".", ""),
+        username: faker.internet.userName().substring(0, 16).replace(".", ""),
         email: faker.internet.email(),
         hashedPassword: await hashPassword(password),
         role: UserRole.USER,
@@ -57,17 +57,17 @@ async function main() {
   }
 
   // Create instance tokens for users
-  for (const user of users) {
-    for (const instance of instances) {
-      await prisma.userInstanceToken.create({
-        data: UserInstanceTokenCreateInputSchema.parse({
-          token: faker.string.alphanumeric(16),
-          user: { connect: { id: user.id } },
-          instance: { connect: { id: instance.id } },
-        }),
-      });
-    }
-  }
+  // for (const user of users) {
+  //   for (const instance of instances) {
+  //     await prisma.userInstanceToken.create({
+  //       data: UserInstanceTokenCreateInputSchema.parse({
+  //         token: faker.string.alphanumeric(16),
+  //         user: { connect: { id: user.id } },
+  //         instance: { connect: { id: instance.id } },
+  //       }),
+  //     });
+  //   }
+  // }
 
   // Create logs over the past LOG_DAY_SPAN days
   for (const user of users) {

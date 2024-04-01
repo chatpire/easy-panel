@@ -32,11 +32,3 @@ export const UserUpdateAdminSchema = UserReadAdminSchema.omit({
 export const UserUpdateSelfSchema = UserUpdateAdminSchema.omit({
   id: true,
 });
-
-export const UserInstanceDetailSchema = UserInstanceTokenSchema.merge(
-  z.object({
-    instance: ServiceInstanceSchema,
-  }),
-);
-
-export type UserInstanceDetail = z.infer<typeof UserInstanceDetailSchema>;
