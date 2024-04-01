@@ -27,6 +27,7 @@ import {
   ExternalLink,
   Info,
   ChevronDown,
+  Copy,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -34,6 +35,7 @@ export type Icon = LucideIcon;
 export const Icons = {
   logo: Command,
   close: X,
+  copy: Copy,
   spinner: Loader2,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,

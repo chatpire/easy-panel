@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
+import { LoadingButton } from "@/components/loading-button";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -28,6 +29,7 @@ const formSchema = z.object({
 export default function LoginPage() {
   const router = useRouter();
   const loginMutation = api.user.login.useMutation();
+  const [loading, setLoading] = React.useState(false);
   const [loginFormRemember, saveloginFormRemember] = useLocalStorage<{ username: string; rememberMe: boolean } | null>(
     "cock-panel-login-form-remember",
     null,
@@ -50,6 +52,7 @@ export default function LoginPage() {
       saveloginFormRemember(null);
     }
     try {
+      setLoading(true);
       form.clearErrors();
       await loginMutation.mutateAsync(UserLoginFormSchema.parse(values));
       form.resetField("password");
@@ -62,6 +65,8 @@ export default function LoginPage() {
         form.setError("password", { message: "An error occured" });
       }
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -98,9 +103,9 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="mt-4 w-full">
+          <LoadingButton loading={loading} type="submit" className="mt-4 w-full">
             Submit
-          </Button>
+          </LoadingButton>
           <FormField
             control={form.control}
             name="rememberMe"

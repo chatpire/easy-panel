@@ -90,7 +90,7 @@ export function UsersTable() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={async () => copyToClipBoard(user.userToken)}>Copy UserToken</DropdownMenuItem>
+              <DropdownMenuItem>View Tokens (TODO)</DropdownMenuItem>
               <DropdownMenuItem onClick={() => popupEditPasswordForm(user.id, user.username)}>
                 Edit Password
               </DropdownMenuItem>

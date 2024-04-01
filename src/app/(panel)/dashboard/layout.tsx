@@ -7,6 +7,7 @@ import { LegacySidebarNav } from "../../../components/legacy-sidebar-nav";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
+import { ThemeToggle } from "@/components/mode-toggle";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -27,6 +28,7 @@ export default async function UserDashboardLayout({ children }: DashboardLayoutP
               <Link href="/admin">Admin Panel</Link>
             </Button>
             <UserAccountNav user={user} />
+            <ThemeToggle />
           </div>
         </div>
       </header>

@@ -1,33 +1,26 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCurrentUserOrRedirect } from "@/lib/session";
 import { DashboardShell } from "../_components/dashboard-shell";
 import { PageHeader } from "../_components/page-header";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { api } from "@/trpc/server";
+import { InstanceInfoCard } from "../_components/instance-info-card";
 
 export default async function DashboardPage({}) {
-  const user = await getCurrentUserOrRedirect();
-  const userToken = user?.userToken ?? undefined;
+  await getCurrentUserOrRedirect();
+  let instanceDetails = await api.user.getInstanceDetails();
+
+  const generateToken = async (instanceId: string) => {
+    "use server";
+    await api.user.generateToken({ instanceId });
+    instanceDetails = await api.user.getInstanceDetails();
+  };
 
   return (
     <DashboardShell>
       <PageHeader heading="Dashboard" text="" />
       <div className="grid gap-10">
-        <Card>
-          <CardHeader>
-            <CardTitle>User Token</CardTitle>
-            <CardDescription>用于 CockroachAI 面板登录</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-row space-x-3">
-              <Input id="name" className="w-[400px]" value={userToken} placeholder="你还没有任何 UserToken" size={32} />
-              <Button disabled={!userToken}>Copy</Button>
-            </div>
-          </CardContent>
-          <CardFooter>
-            <Button>跳转到 ChatGPT</Button>
-          </CardFooter>
-        </Card>
+        {instanceDetails.map((instanceDetail) => (
+          <InstanceInfoCard key={instanceDetail.id} instanceDetail={instanceDetail} generateToken={generateToken} />
+        ))}
       </div>
     </DashboardShell>
   );

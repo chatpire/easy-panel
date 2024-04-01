@@ -14,6 +14,7 @@ import {
   UserReadSchema,
   UserUpdateSelfSchema,
   UserUpdatePasswordSchema,
+  UserInstanceDetailSchema,
 } from "@/schema/user.schema";
 import { hashPassword, verifyPassword } from "@/lib/password";
 import { lucia } from "@/server/auth";
@@ -149,4 +150,17 @@ export const userRouter = createTRPCRouter({
 
       return UserInstanceTokenSchema.parse(token);
     }),
+  
+  getInstanceDetails: protectedWithUserProcedure.query(async ({ ctx }) => {
+    const user = ctx.user;
+    const tokens = await ctx.db.userInstanceToken.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: {
+        instance: true,
+      },
+    });
+    return UserInstanceDetailSchema.array().parse(tokens);
+  })
 });
