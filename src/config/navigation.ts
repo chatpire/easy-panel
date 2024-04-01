@@ -40,6 +40,15 @@ export const adminNavConfig: SideLink[] = [
       },
     ],
   },
+  {
+    title: "Logs",
+    sub: [
+      {
+        title: "Resource Usage",
+        href: "/admin/resource-logs",
+      },
+    ],
+  },
 ];
 
 // const filterRole = (role: UserRole | null, item: { access?: UserRole }) => {

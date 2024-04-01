@@ -1,3 +1,5 @@
+"use client";
+
 // data-table.ts
 import * as React from "react";
 import { ChevronDownIcon, DotsHorizontalIcon } from "@radix-ui/react-icons";
@@ -15,6 +17,7 @@ import {
   type RowSelectionState,
   type Table as ReactTable,
   type Row,
+  type ColumnDef,
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,6 +29,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DataTableColumnHeader, getDataTableCheckboxColumn } from "@/app/_helpers/data-table-helper";
@@ -34,6 +47,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { extractKeysFromSchema } from "@/lib/utils";
 import { z } from "zod";
 import { Icons } from "./icons";
+import { PaginatedData, PaginationInput } from "@/schema/pagination.schema";
 
 export interface DataTableIconAction<T> {
   key: string;
@@ -48,11 +62,10 @@ export interface DataTableDropdownAction<T> {
   onClick?: (row: Row<T>) => void;
 }
 
-interface DataTableProps<T> {
-  data: T[];
-  schema: z.ZodObject<z.ZodRawShape>;
-  rowIconActions?: DataTableIconAction<T>[];
-  rowDropdownActions?: DataTableDropdownAction<T>[];
+export interface DatatableSelectedRowAction<T> {
+  key: string;
+  content: React.ReactNode;
+  onClick: (rows: Row<T>[]) => void;
 }
 
 export function DataTableColumnSelector<T>({ table }: { table: ReactTable<T> }) {
@@ -84,15 +97,17 @@ export function DataTableColumnSelector<T>({ table }: { table: ReactTable<T> }) 
   );
 }
 
-export function DataTableHeader<T>({ table, filterField }: { table: ReactTable<T>; filterField: string }) {
+export function DataTableHeader<T>({ table, filterSearchField }: { table: ReactTable<T>; filterSearchField?: string }) {
   return (
     <div className="flex flex-col items-center space-y-4 py-4 md:flex-row md:space-y-0">
-      <Input
-        placeholder="Filter..."
-        value={(table.getColumn(filterField)?.getFilterValue() as string) ?? ""}
-        onChange={(event) => table.getColumn(filterField)?.setFilterValue(event.target.value)}
-        className="max-w-sm"
-      />
+      {filterSearchField && (
+        <Input
+          placeholder={"Filter" + (filterSearchField ? ` by ${camelCaseToTitleCase(filterSearchField)}` : "")}
+          value={(table.getColumn(filterSearchField)?.getFilterValue() as string) ?? ""}
+          onChange={(event) => table.getColumn(filterSearchField)?.setFilterValue(event.target.value)}
+          className="max-w-sm"
+        />
+      )}
       <DataTableColumnSelector table={table} />
     </div>
   );
@@ -102,7 +117,7 @@ export function createColumns<T>(
   schema: z.ZodObject<z.ZodRawShape>,
   rowIconActions?: DataTableIconAction<T>[],
   rowDropdownActions?: DataTableDropdownAction<T>[],
-) {
+): ColumnDef<T>[] {
   const columnHelper = createColumnHelper<T>();
 
   const columns = [
@@ -161,7 +176,7 @@ export function createColumns<T>(
                 action.type === "separator" ? (
                   <DropdownMenuSeparator key={action.key} />
                 ) : (
-                  <DropdownMenuItem key={action.key} onClick={action.onClick ? (() => action.onClick!(row)) : undefined}>
+                  <DropdownMenuItem key={action.key} onClick={action.onClick ? () => action.onClick!(row) : undefined}>
                     {action.content}
                   </DropdownMenuItem>
                 ),
@@ -176,17 +191,72 @@ export function createColumns<T>(
   return columns;
 }
 
-export function DataTable<T>({ data, schema, rowIconActions, rowDropdownActions }: DataTableProps<T>) {
+interface DataTableProps<T> {
+  data?: T[];
+  className?: string;
+  schema: z.ZodObject<z.ZodRawShape>;
+  filterSearchField?: string;
+  rowIconActions?: DataTableIconAction<T>[];
+  rowDropdownActions?: DataTableDropdownAction<T>[];
+  allowSelection?: boolean; // todo
+  selectedRowActions?: DatatableSelectedRowAction<T>[];
+  lazyPagination?: boolean;
+  defaultPageSize?: number;
+  fetchData?: (pagination: PaginationInput) => Promise<PaginatedData<T>>;
+}
+
+export function DataTable<T>({
+  data,
+  schema,
+  filterSearchField,
+  rowIconActions,
+  rowDropdownActions,
+  className,
+  lazyPagination,
+  defaultPageSize,
+  fetchData,
+}: DataTableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
+  const [pageSize, setPageSize] = React.useState(defaultPageSize ?? 10);
+  const [tableData, setTableData] = React.useState<T[]>([]);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [lastPage, setLastPage] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(1);
 
-  const columns = createColumns(schema, rowIconActions, rowDropdownActions);
+  const columns = React.useMemo(() => createColumns(schema, rowIconActions, rowDropdownActions), []);
+
+  // TODO: Implement lazy pagination
+  if (lazyPagination) {
+    if (!!data) {
+      throw new Error("data prop is not allowed with lazy pagination");
+    }
+    if (!fetchData) {
+      throw new Error("fetchData function is required for lazy pagination");
+    }
+  }
+
+  React.useEffect(() => {
+    if (!lazyPagination || !fetchData) {
+      return;
+    }
+    fetchData({ currentPage, pageSize })
+      .then((response) => {
+        setTableData(response.data);
+        setLastPage(response.pagination.totalPages);
+        setTotalPages(response.pagination.totalPages);
+      })
+      .catch((error) => {
+        console.error("Error fetching data", error);
+      });
+  }, [currentPage]);
 
   const table = useReactTable({
-    data,
-    columns,
+    data: lazyPagination ? tableData : data!,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    columns: columns as any,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -195,6 +265,7 @@ export function DataTable<T>({ data, schema, rowIconActions, rowDropdownActions 
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    manualPagination: lazyPagination,
     state: {
       sorting,
       columnFilters,
@@ -204,8 +275,29 @@ export function DataTable<T>({ data, schema, rowIconActions, rowDropdownActions 
     enableColumnPinning: true,
   });
 
+  const toPreviousPage = () => {
+    if (lazyPagination) {
+      setCurrentPage((prev) => prev - 1);
+    } else {
+      table.previousPage();
+    }
+  };
+
+  const isPreviousPageDisabled = lazyPagination ? currentPage === 1 : !table.getCanPreviousPage();
+
+  const toNextPage = () => {
+    if (lazyPagination) {
+      setCurrentPage((prev) => prev + 1);
+    } else {
+      table.nextPage();
+    }
+  };
+
+  const isNextPageDisabled = lazyPagination ? currentPage === lastPage : !table.getCanNextPage();
+
   return (
-    <div className="">
+    <div className={className}>
+      <DataTableHeader table={table} filterSearchField={filterSearchField} />
       <ScrollArea className="max-h-[600px] w-full rounded-md border">
         <Table className="relative">
           <TableHeader>
@@ -243,38 +335,36 @@ export function DataTable<T>({ data, schema, rowIconActions, rowDropdownActions 
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      <DataTableFooter table={table} rowSelection={rowSelection} setRowSelection={setRowSelection} />
-    </div>
-  );
-}
-
-interface DataTableFooterProps<T> {
-  table: ReactTable<T>;
-  rowSelection: RowSelectionState;
-  setRowSelection: React.Dispatch<React.SetStateAction<RowSelectionState>>;
-}
-
-export function DataTableFooter<T>({ table, rowSelection, setRowSelection }: DataTableFooterProps<T>) {
-  return (
-    <div className="flex items-center justify-end space-x-2 py-4">
-      <div className="flex-1 text-sm text-muted-foreground">
-        <div>
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
+      <div className="flex flex-row items-center justify-between space-x-2 py-4">
+        <div className="text-sm text-muted-foreground">
+          <div className="">
+            {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} selected
+            {Object.keys(rowSelection).length > 0 && (
+              <Button className="ml-2" variant="ghost" size="sm" onClick={() => table.toggleAllPageRowsSelected(false)}>
+                Clear selection
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
-      <div className="space-x-2">
-        {Object.keys(rowSelection).length > 0 && (
-          <Button variant="outline" size="sm" onClick={() => table.toggleAllPageRowsSelected(false)}>
-            Clear selection
+        {/* <div className="space-x-2">
+          <Button variant="outline" size="sm" onClick={toPreviousPage} disabled={isPreviousPageDisabled}>
+            Previous
           </Button>
-        )}
-        <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-          Previous
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-          Next
-        </Button>
+          <Button variant="outline" size="sm" onClick={toNextPage} disabled={isNextPageDisabled}>
+            Next
+          </Button>
+        </div> */}
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious onClick={toPreviousPage} disabled={isPreviousPageDisabled} />
+            </PaginationItem>
+            <PaginationItem>{currentPage}</PaginationItem>/<PaginationItem>{totalPages}</PaginationItem>
+            <PaginationItem>
+              <PaginationNext onClick={toNextPage} disabled={isNextPageDisabled} />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       </div>
     </div>
   );

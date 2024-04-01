@@ -4,7 +4,7 @@ import {
   UserResourceUsageLogSchema,
   UserResourceUsageLogWhereInputSchema,
 } from "@/schema/generated/zod";
-import { PaginatedDataSchema, PaginationInputSchema } from "@/schema/pagination.schema";
+import { getPaginatedDataSchema, PaginationInputSchema } from "@/schema/pagination.schema";
 import { computeSkip } from "@/lib/utils";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -20,25 +20,35 @@ export const resourceLogRouter = createTRPCRouter({
     return UserResourceUsageLogSchema.array().parse(result);
   }),
 
-  getAllByUser: protectedWithUserProcedure.input(PaginationInputSchema).query(async ({ input, ctx }) => {
+  getAllByUser: protectedWithUserProcedure.input(z.object({
+    userId: z.string().optional(),
+    pagination: PaginationInputSchema,
+  })).query(async ({ input, ctx }) => {
+    const { userId, pagination } = input;
+    if (ctx.user.role !== UserRole.ADMIN && ctx.user.id !== userId) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to access this data" });
+    }
     const result = await ctx.db.userResourceUsageLog.findMany({
       where: {
-        userId: ctx.user.id,
+        userId,
       },
-      skip: computeSkip(input.offset, input.limit),
-      take: input.limit,
+      skip: computeSkip(pagination),
+      take: pagination.pageSize,
     });
     const total = await ctx.db.userResourceUsageLog.count({
       where: {
-        userId: ctx.user.id,
+        userId
       },
     });
-    return PaginatedDataSchema(UserResourceUsageLogSchema.array()).parse({
+    const totalPages = Math.ceil(total / pagination.pageSize);
+    return getPaginatedDataSchema(UserResourceUsageLogSchema).parse({
       data: result,
       pagination: {
         total,
-        offset: input.offset ?? 0,
-        count: result.length,
+        currentPage: pagination.currentPage,
+        totalPages,
+        nextPage: pagination.currentPage + 1 <= totalPages ? pagination.currentPage + 1 : null,
+        prevPage: pagination.currentPage - 1 > 0 ? pagination.currentPage - 1 : null,
       },
     });
   }),

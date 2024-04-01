@@ -1,5 +1,5 @@
 import { getCurrentUserOrRedirect } from "@/lib/session";
-import { DashboardShell } from "../_components/dashboard-shell";
+import { PageShell } from "../_components/dashboard-shell";
 import { PageHeader } from "../_components/page-header";
 import { api } from "@/trpc/server";
 import { UserInstanceInfoCard } from "../_components/instance-info-card";
@@ -11,7 +11,7 @@ export default async function DashboardPage({}) {
   const instances = await api.serviceInstance.getAll();
 
   return (
-    <DashboardShell>
+    <PageShell>
       <PageHeader heading="Dashboard" text="" />
       <Alert>
         <Icons.rocket className="h-4 w-4" />
@@ -28,6 +28,6 @@ export default async function DashboardPage({}) {
           <UserInstanceInfoCard key={instance.id} instance={instance} />
         ))}
       </div>
-    </DashboardShell>
+    </PageShell>
   );
 }

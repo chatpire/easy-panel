@@ -1,3 +1,4 @@
+import { PaginationInput } from "@/schema/pagination.schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
@@ -33,7 +34,8 @@ export function extractKeysFromSchema(
   return keys;
 }
 
-export function computeSkip(offset: number | undefined, limit: number) {
-  const skip = Math.max(0, (offset ?? 1) - 1) * limit;
+export function computeSkip(paginationInput: PaginationInput) {
+  const { currentPage, pageSize } = paginationInput;
+  const skip = Math.max(0, (currentPage ?? 1) - 1) * pageSize;
   return skip;
 }

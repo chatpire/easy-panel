@@ -5,7 +5,7 @@ import { type UserReadAdmin, UserReadAdminSchema } from "@/schema/user.schema";
 import { api } from "@/trpc/react";
 import { popupEditPasswordForm } from "@/app/_helpers/edit-password-popup";
 import { banUser, deleteUser } from "./user-table-actions";
-import { DataTable, type DataTableDropdownAction } from "@/components/data-table";
+import { DataTable, DataTableHeader, type DataTableDropdownAction } from "@/components/data-table";
 
 export function UsersTable() {
   const getAllUserQuery = api.user.getAll.useQuery();
@@ -45,6 +45,7 @@ export function UsersTable() {
     <div className="w-full">
       <DataTable
         data={getAllUserQuery.data ?? []}
+        filterSearchField={"username"}
         schema={UserReadAdminSchema}
         rowDropdownActions={rowDropdownActions}
       />
