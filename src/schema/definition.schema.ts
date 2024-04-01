@@ -14,8 +14,8 @@ const DURATION_WINDOWS = {
   "1h": 1 * 60 * 60,
   "3h": 3 * 60 * 60,
   "1d": 24 * 60 * 60,
+  "1w": 7 * 24 * 60 * 60,
 } as const;
-
 export const DurationWindowSchema = z.nativeEnum(DURATION_WINDOWS);
 
 export const ServiceInstanceAttributesSchema = z.discriminatedUnion("type", [ChatGPTSharedInstanceAttributesSchema]);

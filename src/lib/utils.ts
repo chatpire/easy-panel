@@ -10,7 +10,7 @@ export function extractKeysFromSchema(
   schema: z.ZodObject<z.ZodRawShape>,
   currentDepth = 1,
   prefix = "",
-  maxDepth?: number
+  maxDepth?: number,
 ): string[] {
   let keys: string[] = [];
   if (maxDepth && currentDepth > maxDepth) return keys;
@@ -31,4 +31,9 @@ export function extractKeysFromSchema(
   }
 
   return keys;
+}
+
+export function computeSkip(offset: number | undefined, limit: number) {
+  const skip = Math.max(0, (offset ?? 1) - 1) * limit;
+  return skip;
 }

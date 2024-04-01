@@ -6,7 +6,7 @@ import {
   type EventTypeSchema,
   type EventResultTypeSchema,
   type ResourceEventTypeSchema,
-} from "@/schema/json.schema";
+} from "@/schema/definition.schema";
 
 declare global {
   type ServiceType = z.infer<typeof ServiceTypeSchema>;

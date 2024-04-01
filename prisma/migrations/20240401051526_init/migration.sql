@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "ResourceUnit" AS ENUM ('COUNT', 'TOKEN', 'CHARACTER');
+CREATE TYPE "ResourceUnit" AS ENUM ('TOKEN', 'INPUT_CHAR', 'CREDITS');
 
 -- CreateEnum
 CREATE TYPE "RefreshPeriod" AS ENUM ('DAILY', 'MONTHLY', 'YEARLY', 'NEVER');
@@ -55,7 +55,6 @@ CREATE TABLE "UserInstanceToken" (
     "userId" TEXT NOT NULL,
     "instanceId" TEXT NOT NULL,
     "token" TEXT NOT NULL,
-    "validUntil" TIMESTAMP(3) NOT NULL,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -76,7 +75,7 @@ CREATE TABLE "UserSystemLog" (
 );
 
 -- CreateTable
-CREATE TABLE "UserResourceEventLog" (
+CREATE TABLE "UserResourceUsageLog" (
     "id" TEXT NOT NULL,
     "userId" TEXT,
     "instanceId" TEXT,
@@ -85,7 +84,7 @@ CREATE TABLE "UserResourceEventLog" (
     "amount" INTEGER NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "UserResourceEventLog_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserResourceUsageLog_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -113,7 +112,7 @@ ALTER TABLE "UserInstanceToken" ADD CONSTRAINT "UserInstanceToken_instanceId_fke
 ALTER TABLE "UserSystemLog" ADD CONSTRAINT "UserSystemLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserResourceEventLog" ADD CONSTRAINT "UserResourceEventLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserResourceUsageLog" ADD CONSTRAINT "UserResourceUsageLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "UserResourceEventLog" ADD CONSTRAINT "UserResourceEventLog_instanceId_fkey" FOREIGN KEY ("instanceId") REFERENCES "ServiceInstance"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "UserResourceUsageLog" ADD CONSTRAINT "UserResourceUsageLog_instanceId_fkey" FOREIGN KEY ("instanceId") REFERENCES "ServiceInstance"("id") ON DELETE SET NULL ON UPDATE CASCADE;

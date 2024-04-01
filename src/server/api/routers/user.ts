@@ -20,9 +20,11 @@ import { lucia } from "@/server/auth";
 import { cookies } from "next/headers";
 import { UserRole } from "@prisma/client";
 import {
+  UserInstanceTokenSchema,
   UserOptionalDefaultsSchema,
   UserWhereUniqueInputSchema,
 } from "@/schema/generated/zod";
+import { generateId } from "lucia";
 
 export const userRouter = createTRPCRouter({
   login: publicProcedure.input(UserLoginFormSchema).mutation(async ({ ctx, input }) => {
@@ -71,7 +73,7 @@ export const userRouter = createTRPCRouter({
     return UserReadSchema.parse(user);
   }),
 
-  get: adminProcedure.input(UserWhereUniqueInputSchema).query(async ({ ctx, input }) => {
+  getUnique: adminProcedure.input(UserWhereUniqueInputSchema).query(async ({ ctx, input }) => {
     const user = await ctx.db.user.findFirst({ where: input });
     if (!user) {
       throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
@@ -99,7 +101,7 @@ export const userRouter = createTRPCRouter({
       throw new TRPCError({ code: "FORBIDDEN", message: "You can only change your own password" });
     }
 
-    return ctx.db.user.update({
+    await ctx.db.user.update({
       where: {
         id: input.id,
       },
@@ -110,9 +112,41 @@ export const userRouter = createTRPCRouter({
   }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const users = await ctx.db.user.findMany({
-    });
+    const users = await ctx.db.user.findMany({});
     return users.map((user) => UserReadAdminSchema.parse(user));
   }),
+
+  generateToken: protectedWithUserProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.user;
+      const instance = await ctx.db.serviceInstance.findUnique({ where: { id: input.instanceId } });
+      if (!instance) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Instance not found" });
+      }
+
+      const existingToken = await ctx.db.userInstanceToken.findFirst({
+        where: {
+          userId: user.id,
+          instanceId: instance.id,
+        },
+      });
+      if (existingToken) {
+        throw new TRPCError({ code: "CONFLICT", message: "Token already exists" });
+      }
+
+      const token = await ctx.db.userInstanceToken.create({
+        data: {
+          user: { connect: { id: user.id } },
+          instance: { connect: { id: instance.id } },
+          token: generateId(16),
+        },
+      });
+
+      return UserInstanceTokenSchema.parse(token);
+    }),
 });
-    

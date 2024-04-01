@@ -34,24 +34,24 @@ enum UserRole {
     ADMIN
 }
 
-/// @zod.import(["import { ServiceTypeSchema, ResourceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/json.schema'"])
+/// @zod.import(["import { ServiceTypeSchema, ResourceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/definition.schema'"])
 model User {
-    id                   String                 @id @default(cuid())
-    name                 String /// @zod.string.min(1).max(50)
-    username             String                 @unique /// @zod.string.min(4).max(20).regex(/^[a-zA-Z0-9_]+$/)  
-    email                String?                @unique /// @zod.string.email()
-    role                 UserRole               @default(USER)
-    image                String?
-    comment              String? /// @zod.string.max(500)
-    validUntil           DateTime?
-    isActive             Boolean                @default(true)
-    createdAt            DateTime               @default(now()) /// @zod.custom.omit("input")
-    updatedAt            DateTime               @updatedAt /// @zod.custom.omit("input")
-    hashedPassword       String
-    sessions             Session[]
-    logs                 UserSystemLog[]
-    UserResourceEventLog UserResourceEventLog[]
-    UserInstanceToken    UserInstanceToken[]
+    id                 String                 @id @default(cuid())
+    name               String /// @zod.string.min(1).max(50)
+    username           String                 @unique /// @zod.string.min(4).max(20).regex(/^[a-zA-Z0-9_]+$/)  
+    email              String?                @unique /// @zod.string.email()
+    role               UserRole               @default(USER)
+    image              String?
+    comment            String? /// @zod.string.max(500)
+    validUntil         DateTime?
+    isActive           Boolean                @default(true)
+    createdAt          DateTime               @default(now()) /// @zod.custom.omit("input")
+    updatedAt          DateTime               @updatedAt /// @zod.custom.omit("input")
+    hashedPassword     String
+    sessions           Session[]
+    logs               UserSystemLog[]
+    usageLogs          UserResourceUsageLog[]
+    userInstanceTokens UserInstanceToken[]
 }
 
 model Session {
@@ -64,16 +64,16 @@ model Session {
 }
 
 model ServiceInstance {
-    id                   String                 @id @default(cuid())
+    id                 String                 @id @default(cuid())
     /// [ServiceType]
-    type                 String /// @zod.custom.use(z.lazy(() => ServiceTypeSchema))
-    name                 String                 @unique /// @zod.string.min(1).max(100)
-    description          String?
-    url                  String?
-    createdAt            DateTime               @default(now()) /// @zod.custom.omit("input")
-    updatedAt            DateTime               @updatedAt /// @zod.custom.omit("input")
-    UserResourceEventLog UserResourceEventLog[]
-    UserInstanceToken    UserInstanceToken[]
+    type               String /// @zod.custom.use(z.lazy(() => ServiceTypeSchema))
+    name               String                 @unique /// @zod.string.min(1).max(100)
+    description        String?
+    url                String?
+    createdAt          DateTime               @default(now()) /// @zod.custom.omit("input")
+    updatedAt          DateTime               @updatedAt /// @zod.custom.omit("input")
+    usageLogs          UserResourceUsageLog[]
+    userInstanceTokens UserInstanceToken[]
 }
 
 model UserInstanceToken {
@@ -83,16 +83,15 @@ model UserInstanceToken {
     instanceId String
     instance   ServiceInstance @relation(references: [id], fields: [instanceId], onDelete: Cascade)
     token      String          @unique
-    validUntil DateTime
     isActive   Boolean         @default(true)
     createdAt  DateTime        @default(now()) /// @zod.custom.omit("input")
     updatedAt  DateTime        @updatedAt /// @zod.custom.omit("input")
 }
 
 enum ResourceUnit {
-    COUNT
     TOKEN
-    CHARACTER
+    INPUT_CHAR
+    CREDITS
 }
 
 enum RefreshPeriod {
@@ -114,7 +113,7 @@ model UserSystemLog {
     timestamp  DateTime @default(now())
 }
 
-model UserResourceEventLog {
+model UserResourceUsageLog {
     id           String           @id @default(cuid())
     userId       String?
     user         User?            @relation(fields: [userId], references: [id])

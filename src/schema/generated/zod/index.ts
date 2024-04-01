@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Prisma } from '@prisma/client';
-import { ServiceTypeSchema, ResourceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/json.schema'
+import { ServiceTypeSchema, ResourceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/definition.schema'
 
 /////////////////////////////////////////
 // HELPER FUNCTIONS
@@ -19,11 +19,11 @@ export const SessionScalarFieldEnumSchema = z.enum(['id','userId','expiresAt','c
 
 export const ServiceInstanceScalarFieldEnumSchema = z.enum(['id','type','name','description','url','createdAt','updatedAt']);
 
-export const UserInstanceTokenScalarFieldEnumSchema = z.enum(['id','userId','instanceId','token','validUntil','isActive','createdAt','updatedAt']);
+export const UserInstanceTokenScalarFieldEnumSchema = z.enum(['id','userId','instanceId','token','isActive','createdAt','updatedAt']);
 
 export const UserSystemLogScalarFieldEnumSchema = z.enum(['id','userId','type','detail','resultType','timestamp']);
 
-export const UserResourceEventLogScalarFieldEnumSchema = z.enum(['id','userId','instanceId','resourceType','unit','amount','timestamp']);
+export const UserResourceUsageLogScalarFieldEnumSchema = z.enum(['id','userId','instanceId','resourceType','unit','amount','timestamp']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -35,7 +35,7 @@ export const UserRoleSchema = z.enum(['USER','ADMIN']);
 
 export type UserRoleType = `${z.infer<typeof UserRoleSchema>}`
 
-export const ResourceUnitSchema = z.enum(['COUNT','TOKEN','CHARACTER']);
+export const ResourceUnitSchema = z.enum(['TOKEN','INPUT_CHAR','CREDITS']);
 
 export type ResourceUnitType = `${z.infer<typeof ResourceUnitSchema>}`
 
@@ -95,8 +95,8 @@ export type UserOptionalDefaults = z.infer<typeof UserOptionalDefaultsSchema>
 export type UserRelations = {
   sessions: SessionWithRelations[];
   logs: UserSystemLogWithRelations[];
-  UserResourceEventLog: UserResourceEventLogWithRelations[];
-  UserInstanceToken: UserInstanceTokenWithRelations[];
+  usageLogs: UserResourceUsageLogWithRelations[];
+  userInstanceTokens: UserInstanceTokenWithRelations[];
 };
 
 export type UserWithRelations = z.infer<typeof UserSchema> & UserRelations
@@ -104,8 +104,8 @@ export type UserWithRelations = z.infer<typeof UserSchema> & UserRelations
 export const UserWithRelationsSchema: z.ZodType<UserWithRelations> = UserSchema.merge(z.object({
   sessions: z.lazy(() => SessionWithRelationsSchema).array(),
   logs: z.lazy(() => UserSystemLogWithRelationsSchema).array(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogWithRelationsSchema).array(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenWithRelationsSchema).array(),
+  usageLogs: z.lazy(() => UserResourceUsageLogWithRelationsSchema).array(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenWithRelationsSchema).array(),
 }))
 
 // USER OPTIONAL DEFAULTS RELATION SCHEMA
@@ -114,8 +114,8 @@ export const UserWithRelationsSchema: z.ZodType<UserWithRelations> = UserSchema.
 export type UserOptionalDefaultsRelations = {
   sessions: SessionOptionalDefaultsWithRelations[];
   logs: UserSystemLogOptionalDefaultsWithRelations[];
-  UserResourceEventLog: UserResourceEventLogOptionalDefaultsWithRelations[];
-  UserInstanceToken: UserInstanceTokenOptionalDefaultsWithRelations[];
+  usageLogs: UserResourceUsageLogOptionalDefaultsWithRelations[];
+  userInstanceTokens: UserInstanceTokenOptionalDefaultsWithRelations[];
 };
 
 export type UserOptionalDefaultsWithRelations = z.infer<typeof UserOptionalDefaultsSchema> & UserOptionalDefaultsRelations
@@ -123,8 +123,8 @@ export type UserOptionalDefaultsWithRelations = z.infer<typeof UserOptionalDefau
 export const UserOptionalDefaultsWithRelationsSchema: z.ZodType<UserOptionalDefaultsWithRelations> = UserOptionalDefaultsSchema.merge(z.object({
   sessions: z.lazy(() => SessionOptionalDefaultsWithRelationsSchema).array(),
   logs: z.lazy(() => UserSystemLogOptionalDefaultsWithRelationsSchema).array(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogOptionalDefaultsWithRelationsSchema).array(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenOptionalDefaultsWithRelationsSchema).array(),
+  usageLogs: z.lazy(() => UserResourceUsageLogOptionalDefaultsWithRelationsSchema).array(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenOptionalDefaultsWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -211,30 +211,30 @@ export type ServiceInstanceOptionalDefaults = z.infer<typeof ServiceInstanceOpti
 //------------------------------------------------------
 
 export type ServiceInstanceRelations = {
-  UserResourceEventLog: UserResourceEventLogWithRelations[];
-  UserInstanceToken: UserInstanceTokenWithRelations[];
+  usageLogs: UserResourceUsageLogWithRelations[];
+  userInstanceTokens: UserInstanceTokenWithRelations[];
 };
 
 export type ServiceInstanceWithRelations = z.infer<typeof ServiceInstanceSchema> & ServiceInstanceRelations
 
 export const ServiceInstanceWithRelationsSchema: z.ZodType<ServiceInstanceWithRelations> = ServiceInstanceSchema.merge(z.object({
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogWithRelationsSchema).array(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenWithRelationsSchema).array(),
+  usageLogs: z.lazy(() => UserResourceUsageLogWithRelationsSchema).array(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenWithRelationsSchema).array(),
 }))
 
 // SERVICE INSTANCE OPTIONAL DEFAULTS RELATION SCHEMA
 //------------------------------------------------------
 
 export type ServiceInstanceOptionalDefaultsRelations = {
-  UserResourceEventLog: UserResourceEventLogOptionalDefaultsWithRelations[];
-  UserInstanceToken: UserInstanceTokenOptionalDefaultsWithRelations[];
+  usageLogs: UserResourceUsageLogOptionalDefaultsWithRelations[];
+  userInstanceTokens: UserInstanceTokenOptionalDefaultsWithRelations[];
 };
 
 export type ServiceInstanceOptionalDefaultsWithRelations = z.infer<typeof ServiceInstanceOptionalDefaultsSchema> & ServiceInstanceOptionalDefaultsRelations
 
 export const ServiceInstanceOptionalDefaultsWithRelationsSchema: z.ZodType<ServiceInstanceOptionalDefaultsWithRelations> = ServiceInstanceOptionalDefaultsSchema.merge(z.object({
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogOptionalDefaultsWithRelationsSchema).array(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenOptionalDefaultsWithRelationsSchema).array(),
+  usageLogs: z.lazy(() => UserResourceUsageLogOptionalDefaultsWithRelationsSchema).array(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenOptionalDefaultsWithRelationsSchema).array(),
 }))
 
 /////////////////////////////////////////
@@ -246,7 +246,6 @@ export const UserInstanceTokenSchema = z.object({
   userId: z.string(),
   instanceId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -354,10 +353,10 @@ export const UserSystemLogOptionalDefaultsWithRelationsSchema: z.ZodType<UserSys
 }))
 
 /////////////////////////////////////////
-// USER RESOURCE EVENT LOG SCHEMA
+// USER RESOURCE USAGE LOG SCHEMA
 /////////////////////////////////////////
 
-export const UserResourceEventLogSchema = z.object({
+export const UserResourceUsageLogSchema = z.object({
   unit: ResourceUnitSchema,
   id: z.string().cuid(),
   userId: z.string().nullable(),
@@ -370,44 +369,44 @@ export const UserResourceEventLogSchema = z.object({
   timestamp: z.coerce.date(),
 })
 
-export type UserResourceEventLog = z.infer<typeof UserResourceEventLogSchema>
+export type UserResourceUsageLog = z.infer<typeof UserResourceUsageLogSchema>
 
-// USER RESOURCE EVENT LOG OPTIONAL DEFAULTS SCHEMA
+// USER RESOURCE USAGE LOG OPTIONAL DEFAULTS SCHEMA
 //------------------------------------------------------
 
-export const UserResourceEventLogOptionalDefaultsSchema = UserResourceEventLogSchema.merge(z.object({
+export const UserResourceUsageLogOptionalDefaultsSchema = UserResourceUsageLogSchema.merge(z.object({
   id: z.string().cuid().optional(),
   timestamp: z.coerce.date().optional(),
 }))
 
-export type UserResourceEventLogOptionalDefaults = z.infer<typeof UserResourceEventLogOptionalDefaultsSchema>
+export type UserResourceUsageLogOptionalDefaults = z.infer<typeof UserResourceUsageLogOptionalDefaultsSchema>
 
-// USER RESOURCE EVENT LOG RELATION SCHEMA
+// USER RESOURCE USAGE LOG RELATION SCHEMA
 //------------------------------------------------------
 
-export type UserResourceEventLogRelations = {
+export type UserResourceUsageLogRelations = {
   user?: UserWithRelations | null;
   instance?: ServiceInstanceWithRelations | null;
 };
 
-export type UserResourceEventLogWithRelations = z.infer<typeof UserResourceEventLogSchema> & UserResourceEventLogRelations
+export type UserResourceUsageLogWithRelations = z.infer<typeof UserResourceUsageLogSchema> & UserResourceUsageLogRelations
 
-export const UserResourceEventLogWithRelationsSchema: z.ZodType<UserResourceEventLogWithRelations> = UserResourceEventLogSchema.merge(z.object({
+export const UserResourceUsageLogWithRelationsSchema: z.ZodType<UserResourceUsageLogWithRelations> = UserResourceUsageLogSchema.merge(z.object({
   user: z.lazy(() => UserWithRelationsSchema).nullable(),
   instance: z.lazy(() => ServiceInstanceWithRelationsSchema).nullable(),
 }))
 
-// USER RESOURCE EVENT LOG OPTIONAL DEFAULTS RELATION SCHEMA
+// USER RESOURCE USAGE LOG OPTIONAL DEFAULTS RELATION SCHEMA
 //------------------------------------------------------
 
-export type UserResourceEventLogOptionalDefaultsRelations = {
+export type UserResourceUsageLogOptionalDefaultsRelations = {
   user?: UserOptionalDefaultsWithRelations | null;
   instance?: ServiceInstanceOptionalDefaultsWithRelations | null;
 };
 
-export type UserResourceEventLogOptionalDefaultsWithRelations = z.infer<typeof UserResourceEventLogOptionalDefaultsSchema> & UserResourceEventLogOptionalDefaultsRelations
+export type UserResourceUsageLogOptionalDefaultsWithRelations = z.infer<typeof UserResourceUsageLogOptionalDefaultsSchema> & UserResourceUsageLogOptionalDefaultsRelations
 
-export const UserResourceEventLogOptionalDefaultsWithRelationsSchema: z.ZodType<UserResourceEventLogOptionalDefaultsWithRelations> = UserResourceEventLogOptionalDefaultsSchema.merge(z.object({
+export const UserResourceUsageLogOptionalDefaultsWithRelationsSchema: z.ZodType<UserResourceUsageLogOptionalDefaultsWithRelations> = UserResourceUsageLogOptionalDefaultsSchema.merge(z.object({
   user: z.lazy(() => UserOptionalDefaultsWithRelationsSchema).nullable(),
   instance: z.lazy(() => ServiceInstanceOptionalDefaultsWithRelationsSchema).nullable(),
 }))
@@ -422,8 +421,8 @@ export const UserResourceEventLogOptionalDefaultsWithRelationsSchema: z.ZodType<
 export const UserIncludeSchema: z.ZodType<Prisma.UserInclude> = z.object({
   sessions: z.union([z.boolean(),z.lazy(() => SessionFindManyArgsSchema)]).optional(),
   logs: z.union([z.boolean(),z.lazy(() => UserSystemLogFindManyArgsSchema)]).optional(),
-  UserResourceEventLog: z.union([z.boolean(),z.lazy(() => UserResourceEventLogFindManyArgsSchema)]).optional(),
-  UserInstanceToken: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
+  usageLogs: z.union([z.boolean(),z.lazy(() => UserResourceUsageLogFindManyArgsSchema)]).optional(),
+  userInstanceTokens: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -439,8 +438,8 @@ export const UserCountOutputTypeArgsSchema: z.ZodType<Prisma.UserCountOutputType
 export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTypeSelect> = z.object({
   sessions: z.boolean().optional(),
   logs: z.boolean().optional(),
-  UserResourceEventLog: z.boolean().optional(),
-  UserInstanceToken: z.boolean().optional(),
+  usageLogs: z.boolean().optional(),
+  userInstanceTokens: z.boolean().optional(),
 }).strict();
 
 export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
@@ -458,8 +457,8 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   hashedPassword: z.boolean().optional(),
   sessions: z.union([z.boolean(),z.lazy(() => SessionFindManyArgsSchema)]).optional(),
   logs: z.union([z.boolean(),z.lazy(() => UserSystemLogFindManyArgsSchema)]).optional(),
-  UserResourceEventLog: z.union([z.boolean(),z.lazy(() => UserResourceEventLogFindManyArgsSchema)]).optional(),
-  UserInstanceToken: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
+  usageLogs: z.union([z.boolean(),z.lazy(() => UserResourceUsageLogFindManyArgsSchema)]).optional(),
+  userInstanceTokens: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -488,8 +487,8 @@ export const SessionSelectSchema: z.ZodType<Prisma.SessionSelect> = z.object({
 //------------------------------------------------------
 
 export const ServiceInstanceIncludeSchema: z.ZodType<Prisma.ServiceInstanceInclude> = z.object({
-  UserResourceEventLog: z.union([z.boolean(),z.lazy(() => UserResourceEventLogFindManyArgsSchema)]).optional(),
-  UserInstanceToken: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
+  usageLogs: z.union([z.boolean(),z.lazy(() => UserResourceUsageLogFindManyArgsSchema)]).optional(),
+  userInstanceTokens: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ServiceInstanceCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -503,8 +502,8 @@ export const ServiceInstanceCountOutputTypeArgsSchema: z.ZodType<Prisma.ServiceI
 }).strict();
 
 export const ServiceInstanceCountOutputTypeSelectSchema: z.ZodType<Prisma.ServiceInstanceCountOutputTypeSelect> = z.object({
-  UserResourceEventLog: z.boolean().optional(),
-  UserInstanceToken: z.boolean().optional(),
+  usageLogs: z.boolean().optional(),
+  userInstanceTokens: z.boolean().optional(),
 }).strict();
 
 export const ServiceInstanceSelectSchema: z.ZodType<Prisma.ServiceInstanceSelect> = z.object({
@@ -515,8 +514,8 @@ export const ServiceInstanceSelectSchema: z.ZodType<Prisma.ServiceInstanceSelect
   url: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
-  UserResourceEventLog: z.union([z.boolean(),z.lazy(() => UserResourceEventLogFindManyArgsSchema)]).optional(),
-  UserInstanceToken: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
+  usageLogs: z.union([z.boolean(),z.lazy(() => UserResourceUsageLogFindManyArgsSchema)]).optional(),
+  userInstanceTokens: z.union([z.boolean(),z.lazy(() => UserInstanceTokenFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ServiceInstanceCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -538,7 +537,6 @@ export const UserInstanceTokenSelectSchema: z.ZodType<Prisma.UserInstanceTokenSe
   userId: z.boolean().optional(),
   instanceId: z.boolean().optional(),
   token: z.boolean().optional(),
-  validUntil: z.boolean().optional(),
   isActive: z.boolean().optional(),
   createdAt: z.boolean().optional(),
   updatedAt: z.boolean().optional(),
@@ -568,20 +566,20 @@ export const UserSystemLogSelectSchema: z.ZodType<Prisma.UserSystemLogSelect> = 
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
 }).strict()
 
-// USER RESOURCE EVENT LOG
+// USER RESOURCE USAGE LOG
 //------------------------------------------------------
 
-export const UserResourceEventLogIncludeSchema: z.ZodType<Prisma.UserResourceEventLogInclude> = z.object({
+export const UserResourceUsageLogIncludeSchema: z.ZodType<Prisma.UserResourceUsageLogInclude> = z.object({
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
   instance: z.union([z.boolean(),z.lazy(() => ServiceInstanceArgsSchema)]).optional(),
 }).strict()
 
-export const UserResourceEventLogArgsSchema: z.ZodType<Prisma.UserResourceEventLogDefaultArgs> = z.object({
-  select: z.lazy(() => UserResourceEventLogSelectSchema).optional(),
-  include: z.lazy(() => UserResourceEventLogIncludeSchema).optional(),
+export const UserResourceUsageLogArgsSchema: z.ZodType<Prisma.UserResourceUsageLogDefaultArgs> = z.object({
+  select: z.lazy(() => UserResourceUsageLogSelectSchema).optional(),
+  include: z.lazy(() => UserResourceUsageLogIncludeSchema).optional(),
 }).strict();
 
-export const UserResourceEventLogSelectSchema: z.ZodType<Prisma.UserResourceEventLogSelect> = z.object({
+export const UserResourceUsageLogSelectSchema: z.ZodType<Prisma.UserResourceUsageLogSelect> = z.object({
   id: z.boolean().optional(),
   userId: z.boolean().optional(),
   instanceId: z.boolean().optional(),
@@ -616,8 +614,8 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   hashedPassword: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   sessions: z.lazy(() => SessionListRelationFilterSchema).optional(),
   logs: z.lazy(() => UserSystemLogListRelationFilterSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogListRelationFilterSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogListRelationFilterSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
 }).strict() as z.ZodType<Prisma.UserWhereInput>;
 
 export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWithRelationInput> = z.object({
@@ -635,8 +633,8 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   hashedPassword: z.lazy(() => SortOrderSchema).optional(),
   sessions: z.lazy(() => SessionOrderByRelationAggregateInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogOrderByRelationAggregateInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogOrderByRelationAggregateInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenOrderByRelationAggregateInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogOrderByRelationAggregateInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenOrderByRelationAggregateInputSchema).optional()
 }).strict() as z.ZodType<Prisma.UserOrderByWithRelationInput>;
 
 export const UserWhereUniqueInputSchema: z.ZodType<Omit<Prisma.UserWhereUniqueInput, "createdAt" | "updatedAt">> = z.union([
@@ -685,8 +683,8 @@ export const UserWhereUniqueInputSchema: z.ZodType<Omit<Prisma.UserWhereUniqueIn
   hashedPassword: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   sessions: z.lazy(() => SessionListRelationFilterSchema).optional(),
   logs: z.lazy(() => UserSystemLogListRelationFilterSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogListRelationFilterSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogListRelationFilterSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
 }).strict()) as z.ZodType<Omit<Prisma.UserWhereUniqueInput, "createdAt" | "updatedAt">>;
 
 export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderByWithAggregationInput> = z.object({
@@ -794,8 +792,8 @@ export const ServiceInstanceWhereInputSchema: z.ZodType<Prisma.ServiceInstanceWh
   url: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogListRelationFilterSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogListRelationFilterSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
 }).strict() as z.ZodType<Prisma.ServiceInstanceWhereInput>;
 
 export const ServiceInstanceOrderByWithRelationInputSchema: z.ZodType<Prisma.ServiceInstanceOrderByWithRelationInput> = z.object({
@@ -806,8 +804,8 @@ export const ServiceInstanceOrderByWithRelationInputSchema: z.ZodType<Prisma.Ser
   url: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogOrderByRelationAggregateInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenOrderByRelationAggregateInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogOrderByRelationAggregateInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenOrderByRelationAggregateInputSchema).optional()
 }).strict() as z.ZodType<Prisma.ServiceInstanceOrderByWithRelationInput>;
 
 export const ServiceInstanceWhereUniqueInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceWhereUniqueInput, "createdAt" | "updatedAt">> = z.union([
@@ -833,8 +831,8 @@ export const ServiceInstanceWhereUniqueInputSchema: z.ZodType<Omit<Prisma.Servic
   url: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   // omitted: updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogListRelationFilterSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogListRelationFilterSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenListRelationFilterSchema).optional()
 }).strict()) as z.ZodType<Omit<Prisma.ServiceInstanceWhereUniqueInput, "createdAt" | "updatedAt">>;
 
 export const ServiceInstanceOrderByWithAggregationInputSchema: z.ZodType<Prisma.ServiceInstanceOrderByWithAggregationInput> = z.object({
@@ -871,7 +869,6 @@ export const UserInstanceTokenWhereInputSchema: z.ZodType<Prisma.UserInstanceTok
   userId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instanceId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   token: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  validUntil: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
@@ -884,7 +881,6 @@ export const UserInstanceTokenOrderByWithRelationInputSchema: z.ZodType<Prisma.U
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   token: z.lazy(() => SortOrderSchema).optional(),
-  validUntil: z.lazy(() => SortOrderSchema).optional(),
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
@@ -912,7 +908,6 @@ export const UserInstanceTokenWhereUniqueInputSchema: z.ZodType<Omit<Prisma.User
   NOT: z.union([ z.lazy(() => UserInstanceTokenWhereInputSchema),z.lazy(() => UserInstanceTokenWhereInputSchema).array() ]).optional(),
   userId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instanceId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  validUntil: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   // omitted: createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   // omitted: updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
@@ -925,7 +920,6 @@ export const UserInstanceTokenOrderByWithAggregationInputSchema: z.ZodType<Prism
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   token: z.lazy(() => SortOrderSchema).optional(),
-  validUntil: z.lazy(() => SortOrderSchema).optional(),
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
@@ -942,7 +936,6 @@ export const UserInstanceTokenScalarWhereWithAggregatesInputSchema: z.ZodType<Pr
   userId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   instanceId: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   token: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  validUntil: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   isActive: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
@@ -1011,10 +1004,10 @@ export const UserSystemLogScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma
   timestamp: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogScalarWhereWithAggregatesInput>;
 
-export const UserResourceEventLogWhereInputSchema: z.ZodType<Prisma.UserResourceEventLogWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => UserResourceEventLogWhereInputSchema),z.lazy(() => UserResourceEventLogWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => UserResourceEventLogWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => UserResourceEventLogWhereInputSchema),z.lazy(() => UserResourceEventLogWhereInputSchema).array() ]).optional(),
+export const UserResourceUsageLogWhereInputSchema: z.ZodType<Prisma.UserResourceUsageLogWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => UserResourceUsageLogWhereInputSchema),z.lazy(() => UserResourceUsageLogWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => UserResourceUsageLogWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => UserResourceUsageLogWhereInputSchema),z.lazy(() => UserResourceUsageLogWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   userId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -1024,9 +1017,9 @@ export const UserResourceEventLogWhereInputSchema: z.ZodType<Prisma.UserResource
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   instance: z.union([ z.lazy(() => ServiceInstanceNullableRelationFilterSchema),z.lazy(() => ServiceInstanceWhereInputSchema) ]).optional().nullable(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogWhereInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogWhereInput>;
 
-export const UserResourceEventLogOrderByWithRelationInputSchema: z.ZodType<Prisma.UserResourceEventLogOrderByWithRelationInput> = z.object({
+export const UserResourceUsageLogOrderByWithRelationInputSchema: z.ZodType<Prisma.UserResourceUsageLogOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   userId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   instanceId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1036,16 +1029,16 @@ export const UserResourceEventLogOrderByWithRelationInputSchema: z.ZodType<Prism
   timestamp: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   instance: z.lazy(() => ServiceInstanceOrderByWithRelationInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogOrderByWithRelationInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogOrderByWithRelationInput>;
 
-export const UserResourceEventLogWhereUniqueInputSchema: z.ZodType<Prisma.UserResourceEventLogWhereUniqueInput> = z.object({
+export const UserResourceUsageLogWhereUniqueInputSchema: z.ZodType<Prisma.UserResourceUsageLogWhereUniqueInput> = z.object({
   id: z.string().cuid()
 })
 .and(z.object({
   id: z.string().cuid().optional(),
-  AND: z.union([ z.lazy(() => UserResourceEventLogWhereInputSchema),z.lazy(() => UserResourceEventLogWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => UserResourceEventLogWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => UserResourceEventLogWhereInputSchema),z.lazy(() => UserResourceEventLogWhereInputSchema).array() ]).optional(),
+  AND: z.union([ z.lazy(() => UserResourceUsageLogWhereInputSchema),z.lazy(() => UserResourceUsageLogWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => UserResourceUsageLogWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => UserResourceUsageLogWhereInputSchema),z.lazy(() => UserResourceUsageLogWhereInputSchema).array() ]).optional(),
   userId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => StringFilterSchema),z.lazy(() => ResourceTypeSchema) ]).optional(),
@@ -1054,9 +1047,9 @@ export const UserResourceEventLogWhereUniqueInputSchema: z.ZodType<Prisma.UserRe
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
   instance: z.union([ z.lazy(() => ServiceInstanceNullableRelationFilterSchema),z.lazy(() => ServiceInstanceWhereInputSchema) ]).optional().nullable(),
-}).strict()) as z.ZodType<Prisma.UserResourceEventLogWhereUniqueInput>;
+}).strict()) as z.ZodType<Prisma.UserResourceUsageLogWhereUniqueInput>;
 
-export const UserResourceEventLogOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserResourceEventLogOrderByWithAggregationInput> = z.object({
+export const UserResourceUsageLogOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserResourceUsageLogOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   userId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   instanceId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1064,17 +1057,17 @@ export const UserResourceEventLogOrderByWithAggregationInputSchema: z.ZodType<Pr
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional(),
-  _count: z.lazy(() => UserResourceEventLogCountOrderByAggregateInputSchema).optional(),
-  _avg: z.lazy(() => UserResourceEventLogAvgOrderByAggregateInputSchema).optional(),
-  _max: z.lazy(() => UserResourceEventLogMaxOrderByAggregateInputSchema).optional(),
-  _min: z.lazy(() => UserResourceEventLogMinOrderByAggregateInputSchema).optional(),
-  _sum: z.lazy(() => UserResourceEventLogSumOrderByAggregateInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogOrderByWithAggregationInput>;
+  _count: z.lazy(() => UserResourceUsageLogCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => UserResourceUsageLogAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => UserResourceUsageLogMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => UserResourceUsageLogMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => UserResourceUsageLogSumOrderByAggregateInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogOrderByWithAggregationInput>;
 
-export const UserResourceEventLogScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserResourceEventLogScalarWhereWithAggregatesInput> = z.object({
-  AND: z.union([ z.lazy(() => UserResourceEventLogScalarWhereWithAggregatesInputSchema),z.lazy(() => UserResourceEventLogScalarWhereWithAggregatesInputSchema).array() ]).optional(),
-  OR: z.lazy(() => UserResourceEventLogScalarWhereWithAggregatesInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => UserResourceEventLogScalarWhereWithAggregatesInputSchema),z.lazy(() => UserResourceEventLogScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+export const UserResourceUsageLogScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserResourceUsageLogScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereWithAggregatesInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => UserResourceUsageLogScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereWithAggregatesInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   userId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
@@ -1082,7 +1075,7 @@ export const UserResourceEventLogScalarWhereWithAggregatesInputSchema: z.ZodType
   unit: z.union([ z.lazy(() => EnumResourceUnitWithAggregatesFilterSchema),z.lazy(() => ResourceUnitSchema) ]).optional(),
   amount: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   timestamp: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogScalarWhereWithAggregatesInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogScalarWhereWithAggregatesInput>;
 
 export const UserCreateInputSchema: z.ZodType<Omit<Prisma.UserCreateInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
@@ -1099,8 +1092,8 @@ export const UserCreateInputSchema: z.ZodType<Omit<Prisma.UserCreateInput, "crea
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserCreateInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1118,8 +1111,8 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.UserUnchecked
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateInput, "createdAt" | "updatedAt">>;
 
 export const UserUpdateInputSchema: z.ZodType<Omit<Prisma.UserUpdateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1137,8 +1130,8 @@ export const UserUpdateInputSchema: z.ZodType<Omit<Prisma.UserUpdateInput, "crea
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUpdateInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1156,8 +1149,8 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.UserUnchecked
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateInput, "createdAt" | "updatedAt">>;
 
 export const UserCreateManyInputSchema: z.ZodType<Omit<Prisma.UserCreateManyInput, "createdAt" | "updatedAt">> = z.object({
@@ -1268,8 +1261,8 @@ export const ServiceInstanceCreateInputSchema: z.ZodType<Omit<Prisma.ServiceInst
   url: z.string().optional().nullable(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogCreateNestedManyWithoutInstanceInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutInstanceInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutInstanceInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutInstanceInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.ServiceInstanceCreateInput, "createdAt" | "updatedAt">>;
 
 export const ServiceInstanceUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1280,8 +1273,8 @@ export const ServiceInstanceUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.Se
   url: z.string().optional().nullable(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedCreateNestedManyWithoutInstanceInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutInstanceInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateInput, "createdAt" | "updatedAt">>;
 
 export const ServiceInstanceUpdateInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUpdateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1292,8 +1285,8 @@ export const ServiceInstanceUpdateInputSchema: z.ZodType<Omit<Prisma.ServiceInst
   url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUpdateManyWithoutInstanceNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUpdateManyWithoutInstanceNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutInstanceNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutInstanceNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUpdateInput, "createdAt" | "updatedAt">>;
 
 export const ServiceInstanceUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1304,8 +1297,8 @@ export const ServiceInstanceUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.Se
   url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateInput, "createdAt" | "updatedAt">>;
 
 export const ServiceInstanceCreateManyInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceCreateManyInput, "createdAt" | "updatedAt">> = z.object({
@@ -1341,12 +1334,11 @@ export const ServiceInstanceUncheckedUpdateManyInputSchema: z.ZodType<Omit<Prism
 export const UserInstanceTokenCreateInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenCreateInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  user: z.lazy(() => UserCreateNestedOneWithoutUserInstanceTokenInputSchema),
-  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUserInstanceTokenInputSchema)
+  user: z.lazy(() => UserCreateNestedOneWithoutUserInstanceTokensInputSchema),
+  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUserInstanceTokensInputSchema)
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenCreateInput, "createdAt" | "updatedAt">>;
 
 export const UserInstanceTokenUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedCreateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1354,7 +1346,6 @@ export const UserInstanceTokenUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.
   userId: z.string(),
   instanceId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional()
@@ -1363,12 +1354,11 @@ export const UserInstanceTokenUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.
 export const UserInstanceTokenUpdateInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUpdateInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  user: z.lazy(() => UserUpdateOneRequiredWithoutUserInstanceTokenNestedInputSchema).optional(),
-  instance: z.lazy(() => ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokenNestedInputSchema).optional()
+  user: z.lazy(() => UserUpdateOneRequiredWithoutUserInstanceTokensNestedInputSchema).optional(),
+  instance: z.lazy(() => ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokensNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenUpdateInput, "createdAt" | "updatedAt">>;
 
 export const UserInstanceTokenUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedUpdateInput, "createdAt" | "updatedAt">> = z.object({
@@ -1376,7 +1366,6 @@ export const UserInstanceTokenUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1387,7 +1376,6 @@ export const UserInstanceTokenCreateManyInputSchema: z.ZodType<Omit<Prisma.UserI
   userId: z.string(),
   instanceId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional()
@@ -1396,7 +1384,6 @@ export const UserInstanceTokenCreateManyInputSchema: z.ZodType<Omit<Prisma.UserI
 export const UserInstanceTokenUpdateManyMutationInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUpdateManyMutationInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1407,7 +1394,6 @@ export const UserInstanceTokenUncheckedUpdateManyInputSchema: z.ZodType<Omit<Pri
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1475,17 +1461,17 @@ export const UserSystemLogUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserS
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogUncheckedUpdateManyInput>;
 
-export const UserResourceEventLogCreateInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateInput> = z.object({
+export const UserResourceUsageLogCreateInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateInput> = z.object({
   id: z.string().cuid().optional(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional(),
-  user: z.lazy(() => UserCreateNestedOneWithoutUserResourceEventLogInputSchema).optional(),
-  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUserResourceEventLogInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateInput>;
+  user: z.lazy(() => UserCreateNestedOneWithoutUsageLogsInputSchema).optional(),
+  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUsageLogsInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateInput>;
 
-export const UserResourceEventLogUncheckedCreateInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedCreateInput> = z.object({
+export const UserResourceUsageLogUncheckedCreateInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateInput> = z.object({
   id: z.string().cuid().optional(),
   userId: z.string().optional().nullable(),
   instanceId: z.string().optional().nullable(),
@@ -1493,19 +1479,19 @@ export const UserResourceEventLogUncheckedCreateInputSchema: z.ZodType<Prisma.Us
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedCreateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateInput>;
 
-export const UserResourceEventLogUpdateInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateInput> = z.object({
+export const UserResourceUsageLogUpdateInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  user: z.lazy(() => UserUpdateOneWithoutUserResourceEventLogNestedInputSchema).optional(),
-  instance: z.lazy(() => ServiceInstanceUpdateOneWithoutUserResourceEventLogNestedInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateInput>;
+  user: z.lazy(() => UserUpdateOneWithoutUsageLogsNestedInputSchema).optional(),
+  instance: z.lazy(() => ServiceInstanceUpdateOneWithoutUsageLogsNestedInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateInput>;
 
-export const UserResourceEventLogUncheckedUpdateInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateInput> = z.object({
+export const UserResourceUsageLogUncheckedUpdateInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -1513,9 +1499,9 @@ export const UserResourceEventLogUncheckedUpdateInputSchema: z.ZodType<Prisma.Us
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateInput>;
 
-export const UserResourceEventLogCreateManyInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateManyInput> = z.object({
+export const UserResourceUsageLogCreateManyInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateManyInput> = z.object({
   id: z.string().cuid().optional(),
   userId: z.string().optional().nullable(),
   instanceId: z.string().optional().nullable(),
@@ -1523,17 +1509,17 @@ export const UserResourceEventLogCreateManyInputSchema: z.ZodType<Prisma.UserRes
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateManyInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateManyInput>;
 
-export const UserResourceEventLogUpdateManyMutationInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateManyMutationInput> = z.object({
+export const UserResourceUsageLogUpdateManyMutationInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyMutationInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateManyMutationInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateManyMutationInput>;
 
-export const UserResourceEventLogUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyInput> = z.object({
+export const UserResourceUsageLogUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -1541,7 +1527,7 @@ export const UserResourceEventLogUncheckedUpdateManyInputSchema: z.ZodType<Prism
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyInput>;
 
 export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.object({
   equals: z.string().optional(),
@@ -1619,11 +1605,11 @@ export const UserSystemLogListRelationFilterSchema: z.ZodType<Prisma.UserSystemL
   none: z.lazy(() => UserSystemLogWhereInputSchema).optional()
 }).strict() as z.ZodType<Prisma.UserSystemLogListRelationFilter>;
 
-export const UserResourceEventLogListRelationFilterSchema: z.ZodType<Prisma.UserResourceEventLogListRelationFilter> = z.object({
-  every: z.lazy(() => UserResourceEventLogWhereInputSchema).optional(),
-  some: z.lazy(() => UserResourceEventLogWhereInputSchema).optional(),
-  none: z.lazy(() => UserResourceEventLogWhereInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogListRelationFilter>;
+export const UserResourceUsageLogListRelationFilterSchema: z.ZodType<Prisma.UserResourceUsageLogListRelationFilter> = z.object({
+  every: z.lazy(() => UserResourceUsageLogWhereInputSchema).optional(),
+  some: z.lazy(() => UserResourceUsageLogWhereInputSchema).optional(),
+  none: z.lazy(() => UserResourceUsageLogWhereInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogListRelationFilter>;
 
 export const UserInstanceTokenListRelationFilterSchema: z.ZodType<Prisma.UserInstanceTokenListRelationFilter> = z.object({
   every: z.lazy(() => UserInstanceTokenWhereInputSchema).optional(),
@@ -1644,9 +1630,9 @@ export const UserSystemLogOrderByRelationAggregateInputSchema: z.ZodType<Prisma.
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict() as z.ZodType<Prisma.UserSystemLogOrderByRelationAggregateInput>;
 
-export const UserResourceEventLogOrderByRelationAggregateInputSchema: z.ZodType<Prisma.UserResourceEventLogOrderByRelationAggregateInput> = z.object({
+export const UserResourceUsageLogOrderByRelationAggregateInputSchema: z.ZodType<Prisma.UserResourceUsageLogOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogOrderByRelationAggregateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogOrderByRelationAggregateInput>;
 
 export const UserInstanceTokenOrderByRelationAggregateInputSchema: z.ZodType<Prisma.UserInstanceTokenOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
@@ -1848,7 +1834,6 @@ export const UserInstanceTokenCountOrderByAggregateInputSchema: z.ZodType<Prisma
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   token: z.lazy(() => SortOrderSchema).optional(),
-  validUntil: z.lazy(() => SortOrderSchema).optional(),
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional()
@@ -1859,7 +1844,6 @@ export const UserInstanceTokenMaxOrderByAggregateInputSchema: z.ZodType<Prisma.U
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   token: z.lazy(() => SortOrderSchema).optional(),
-  validUntil: z.lazy(() => SortOrderSchema).optional(),
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional()
@@ -1870,7 +1854,6 @@ export const UserInstanceTokenMinOrderByAggregateInputSchema: z.ZodType<Prisma.U
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   token: z.lazy(() => SortOrderSchema).optional(),
-  validUntil: z.lazy(() => SortOrderSchema).optional(),
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional()
@@ -1931,7 +1914,7 @@ export const ServiceInstanceNullableRelationFilterSchema: z.ZodType<Prisma.Servi
   isNot: z.lazy(() => ServiceInstanceWhereInputSchema).optional().nullable()
 }).strict() as z.ZodType<Prisma.ServiceInstanceNullableRelationFilter>;
 
-export const UserResourceEventLogCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceEventLogCountOrderByAggregateInput> = z.object({
+export const UserResourceUsageLogCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceUsageLogCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
@@ -1939,13 +1922,13 @@ export const UserResourceEventLogCountOrderByAggregateInputSchema: z.ZodType<Pri
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCountOrderByAggregateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCountOrderByAggregateInput>;
 
-export const UserResourceEventLogAvgOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceEventLogAvgOrderByAggregateInput> = z.object({
+export const UserResourceUsageLogAvgOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceUsageLogAvgOrderByAggregateInput> = z.object({
   amount: z.lazy(() => SortOrderSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogAvgOrderByAggregateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogAvgOrderByAggregateInput>;
 
-export const UserResourceEventLogMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceEventLogMaxOrderByAggregateInput> = z.object({
+export const UserResourceUsageLogMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceUsageLogMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
@@ -1953,9 +1936,9 @@ export const UserResourceEventLogMaxOrderByAggregateInputSchema: z.ZodType<Prism
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogMaxOrderByAggregateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogMaxOrderByAggregateInput>;
 
-export const UserResourceEventLogMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceEventLogMinOrderByAggregateInput> = z.object({
+export const UserResourceUsageLogMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceUsageLogMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
@@ -1963,11 +1946,11 @@ export const UserResourceEventLogMinOrderByAggregateInputSchema: z.ZodType<Prism
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogMinOrderByAggregateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogMinOrderByAggregateInput>;
 
-export const UserResourceEventLogSumOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceEventLogSumOrderByAggregateInput> = z.object({
+export const UserResourceUsageLogSumOrderByAggregateInputSchema: z.ZodType<Prisma.UserResourceUsageLogSumOrderByAggregateInput> = z.object({
   amount: z.lazy(() => SortOrderSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogSumOrderByAggregateInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogSumOrderByAggregateInput>;
 
 export const EnumResourceUnitWithAggregatesFilterSchema: z.ZodType<Prisma.EnumResourceUnitWithAggregatesFilter> = z.object({
   equals: z.lazy(() => ResourceUnitSchema).optional(),
@@ -2009,12 +1992,12 @@ export const UserSystemLogCreateNestedManyWithoutUserInputSchema: z.ZodType<Pris
   connect: z.union([ z.lazy(() => UserSystemLogWhereUniqueInputSchema),z.lazy(() => UserSystemLogWhereUniqueInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogCreateNestedManyWithoutUserInput>;
 
-export const UserResourceEventLogCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateNestedManyWithoutUserInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyUserInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateNestedManyWithoutUserInput>;
+export const UserResourceUsageLogCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateNestedManyWithoutUserInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateNestedManyWithoutUserInput>;
 
 export const UserInstanceTokenCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserInstanceTokenCreateNestedManyWithoutUserInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
@@ -2037,12 +2020,12 @@ export const UserSystemLogUncheckedCreateNestedManyWithoutUserInputSchema: z.Zod
   connect: z.union([ z.lazy(() => UserSystemLogWhereUniqueInputSchema),z.lazy(() => UserSystemLogWhereUniqueInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogUncheckedCreateNestedManyWithoutUserInput>;
 
-export const UserResourceEventLogUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedCreateNestedManyWithoutUserInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyUserInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedCreateNestedManyWithoutUserInput>;
+export const UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInput>;
 
 export const UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserInstanceTokenUncheckedCreateNestedManyWithoutUserInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
@@ -2103,19 +2086,19 @@ export const UserSystemLogUpdateManyWithoutUserNestedInputSchema: z.ZodType<Pris
   deleteMany: z.union([ z.lazy(() => UserSystemLogScalarWhereInputSchema),z.lazy(() => UserSystemLogScalarWhereInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogUpdateManyWithoutUserNestedInput>;
 
-export const UserResourceEventLogUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateManyWithoutUserNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyUserInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => UserResourceEventLogScalarWhereInputSchema),z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateManyWithoutUserNestedInput>;
+export const UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithoutUserNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithoutUserNestedInput>;
 
 export const UserInstanceTokenUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserInstanceTokenUpdateManyWithoutUserNestedInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
@@ -2159,19 +2142,19 @@ export const UserSystemLogUncheckedUpdateManyWithoutUserNestedInputSchema: z.Zod
   deleteMany: z.union([ z.lazy(() => UserSystemLogScalarWhereInputSchema),z.lazy(() => UserSystemLogScalarWhereInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogUncheckedUpdateManyWithoutUserNestedInput>;
 
-export const UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyUserInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => UserResourceEventLogScalarWhereInputSchema),z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInput>;
+export const UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInput>;
 
 export const UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutUserInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
@@ -2201,12 +2184,12 @@ export const UserUpdateOneRequiredWithoutSessionsNestedInputSchema: z.ZodType<Pr
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutSessionsInputSchema),z.lazy(() => UserUpdateWithoutSessionsInputSchema),z.lazy(() => UserUncheckedUpdateWithoutSessionsInputSchema) ]).optional(),
 }).strict() as z.ZodType<Prisma.UserUpdateOneRequiredWithoutSessionsNestedInput>;
 
-export const UserResourceEventLogCreateNestedManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateNestedManyWithoutInstanceInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyInstanceInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateNestedManyWithoutInstanceInput>;
+export const UserResourceUsageLogCreateNestedManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateNestedManyWithoutInstanceInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyInstanceInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateNestedManyWithoutInstanceInput>;
 
 export const UserInstanceTokenCreateNestedManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserInstanceTokenCreateNestedManyWithoutInstanceInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
@@ -2215,12 +2198,12 @@ export const UserInstanceTokenCreateNestedManyWithoutInstanceInputSchema: z.ZodT
   connect: z.union([ z.lazy(() => UserInstanceTokenWhereUniqueInputSchema),z.lazy(() => UserInstanceTokenWhereUniqueInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserInstanceTokenCreateNestedManyWithoutInstanceInput>;
 
-export const UserResourceEventLogUncheckedCreateNestedManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedCreateNestedManyWithoutInstanceInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyInstanceInputEnvelopeSchema).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedCreateNestedManyWithoutInstanceInput>;
+export const UserResourceUsageLogUncheckedCreateNestedManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateNestedManyWithoutInstanceInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyInstanceInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateNestedManyWithoutInstanceInput>;
 
 export const UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
@@ -2229,19 +2212,19 @@ export const UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInputSchem
   connect: z.union([ z.lazy(() => UserInstanceTokenWhereUniqueInputSchema),z.lazy(() => UserInstanceTokenWhereUniqueInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInput>;
 
-export const UserResourceEventLogUpdateManyWithoutInstanceNestedInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateManyWithoutInstanceNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyInstanceInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutInstanceInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => UserResourceEventLogScalarWhereInputSchema),z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateManyWithoutInstanceNestedInput>;
+export const UserResourceUsageLogUpdateManyWithoutInstanceNestedInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithoutInstanceNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyInstanceInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithoutInstanceNestedInput>;
 
 export const UserInstanceTokenUpdateManyWithoutInstanceNestedInputSchema: z.ZodType<Prisma.UserInstanceTokenUpdateManyWithoutInstanceNestedInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
@@ -2257,19 +2240,19 @@ export const UserInstanceTokenUpdateManyWithoutInstanceNestedInputSchema: z.ZodT
   deleteMany: z.union([ z.lazy(() => UserInstanceTokenScalarWhereInputSchema),z.lazy(() => UserInstanceTokenScalarWhereInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserInstanceTokenUpdateManyWithoutInstanceNestedInput>;
 
-export const UserResourceEventLogUncheckedUpdateManyWithoutInstanceNestedInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutInstanceNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
-  connectOrCreate: z.union([ z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
-  upsert: z.union([ z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
-  createMany: z.lazy(() => UserResourceEventLogCreateManyInstanceInputEnvelopeSchema).optional(),
-  set: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  disconnect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  delete: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  connect: z.union([ z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),z.lazy(() => UserResourceEventLogWhereUniqueInputSchema).array() ]).optional(),
-  update: z.union([ z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
-  updateMany: z.union([ z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUpdateManyWithWhereWithoutInstanceInputSchema).array() ]).optional(),
-  deleteMany: z.union([ z.lazy(() => UserResourceEventLogScalarWhereInputSchema),z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutInstanceNestedInput>;
+export const UserResourceUsageLogUncheckedUpdateManyWithoutInstanceNestedInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutInstanceNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserResourceUsageLogCreateManyInstanceInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutInstanceNestedInput>;
 
 export const UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInputSchema: z.ZodType<Prisma.UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInput> = z.object({
   create: z.union([ z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenCreateWithoutInstanceInputSchema).array(),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema),z.lazy(() => UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema).array() ]).optional(),
@@ -2285,33 +2268,33 @@ export const UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInputSchem
   deleteMany: z.union([ z.lazy(() => UserInstanceTokenScalarWhereInputSchema),z.lazy(() => UserInstanceTokenScalarWhereInputSchema).array() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInput>;
 
-export const UserCreateNestedOneWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutUserInstanceTokenInput> = z.object({
-  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokenInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUserInstanceTokenInputSchema).optional(),
+export const UserCreateNestedOneWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutUserInstanceTokensInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokensInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUserInstanceTokensInputSchema).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserCreateNestedOneWithoutUserInstanceTokenInput>;
+}).strict() as z.ZodType<Prisma.UserCreateNestedOneWithoutUserInstanceTokensInput>;
 
-export const ServiceInstanceCreateNestedOneWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUserInstanceTokenInput> = z.object({
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUserInstanceTokenInputSchema).optional(),
+export const ServiceInstanceCreateNestedOneWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUserInstanceTokensInput> = z.object({
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUserInstanceTokensInputSchema).optional(),
   connect: z.lazy(() => ServiceInstanceWhereUniqueInputSchema).optional()
-}).strict() as z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUserInstanceTokenInput>;
+}).strict() as z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUserInstanceTokensInput>;
 
-export const UserUpdateOneRequiredWithoutUserInstanceTokenNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutUserInstanceTokenNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokenInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUserInstanceTokenInputSchema).optional(),
-  upsert: z.lazy(() => UserUpsertWithoutUserInstanceTokenInputSchema).optional(),
+export const UserUpdateOneRequiredWithoutUserInstanceTokensNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutUserInstanceTokensNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokensInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUserInstanceTokensInputSchema).optional(),
+  upsert: z.lazy(() => UserUpsertWithoutUserInstanceTokensInputSchema).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUpdateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserInstanceTokenInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserUpdateOneRequiredWithoutUserInstanceTokenNestedInput>;
+  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUpdateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserInstanceTokensInputSchema) ]).optional(),
+}).strict() as z.ZodType<Prisma.UserUpdateOneRequiredWithoutUserInstanceTokensNestedInput>;
 
-export const ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokenNestedInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokenNestedInput> = z.object({
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUserInstanceTokenInputSchema).optional(),
-  upsert: z.lazy(() => ServiceInstanceUpsertWithoutUserInstanceTokenInputSchema).optional(),
+export const ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokensNestedInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokensNestedInput> = z.object({
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUserInstanceTokensInputSchema).optional(),
+  upsert: z.lazy(() => ServiceInstanceUpsertWithoutUserInstanceTokensInputSchema).optional(),
   connect: z.lazy(() => ServiceInstanceWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUpdateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokenNestedInput>;
+  update: z.union([ z.lazy(() => ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUpdateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserInstanceTokensInputSchema) ]).optional(),
+}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokensNestedInput>;
 
 export const UserCreateNestedOneWithoutLogsInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutLogsInput> = z.object({
   create: z.union([ z.lazy(() => UserCreateWithoutLogsInputSchema),z.lazy(() => UserUncheckedCreateWithoutLogsInputSchema) ]).optional(),
@@ -2329,17 +2312,17 @@ export const UserUpdateOneWithoutLogsNestedInputSchema: z.ZodType<Prisma.UserUpd
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutLogsInputSchema),z.lazy(() => UserUpdateWithoutLogsInputSchema),z.lazy(() => UserUncheckedUpdateWithoutLogsInputSchema) ]).optional(),
 }).strict() as z.ZodType<Prisma.UserUpdateOneWithoutLogsNestedInput>;
 
-export const UserCreateNestedOneWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutUserResourceEventLogInput> = z.object({
-  create: z.union([ z.lazy(() => UserCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserResourceEventLogInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUserResourceEventLogInputSchema).optional(),
+export const UserCreateNestedOneWithoutUsageLogsInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutUsageLogsInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedCreateWithoutUsageLogsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUsageLogsInputSchema).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserCreateNestedOneWithoutUserResourceEventLogInput>;
+}).strict() as z.ZodType<Prisma.UserCreateNestedOneWithoutUsageLogsInput>;
 
-export const ServiceInstanceCreateNestedOneWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUserResourceEventLogInput> = z.object({
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUserResourceEventLogInputSchema).optional(),
+export const ServiceInstanceCreateNestedOneWithoutUsageLogsInputSchema: z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUsageLogsInput> = z.object({
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUsageLogsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUsageLogsInputSchema).optional(),
   connect: z.lazy(() => ServiceInstanceWhereUniqueInputSchema).optional()
-}).strict() as z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUserResourceEventLogInput>;
+}).strict() as z.ZodType<Prisma.ServiceInstanceCreateNestedOneWithoutUsageLogsInput>;
 
 export const EnumResourceUnitFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumResourceUnitFieldUpdateOperationsInput> = z.object({
   set: z.lazy(() => ResourceUnitSchema).optional()
@@ -2353,25 +2336,25 @@ export const IntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.IntFieldUpdat
   divide: z.number().optional()
 }).strict() as z.ZodType<Prisma.IntFieldUpdateOperationsInput>;
 
-export const UserUpdateOneWithoutUserResourceEventLogNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutUserResourceEventLogNestedInput> = z.object({
-  create: z.union([ z.lazy(() => UserCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserResourceEventLogInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUserResourceEventLogInputSchema).optional(),
-  upsert: z.lazy(() => UserUpsertWithoutUserResourceEventLogInputSchema).optional(),
+export const UserUpdateOneWithoutUsageLogsNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutUsageLogsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedCreateWithoutUsageLogsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutUsageLogsInputSchema).optional(),
+  upsert: z.lazy(() => UserUpsertWithoutUsageLogsInputSchema).optional(),
   disconnect: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
   delete: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUpdateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserResourceEventLogInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserUpdateOneWithoutUserResourceEventLogNestedInput>;
+  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutUsageLogsInputSchema),z.lazy(() => UserUpdateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUsageLogsInputSchema) ]).optional(),
+}).strict() as z.ZodType<Prisma.UserUpdateOneWithoutUsageLogsNestedInput>;
 
-export const ServiceInstanceUpdateOneWithoutUserResourceEventLogNestedInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateOneWithoutUserResourceEventLogNestedInput> = z.object({
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUserResourceEventLogInputSchema).optional(),
-  upsert: z.lazy(() => ServiceInstanceUpsertWithoutUserResourceEventLogInputSchema).optional(),
+export const ServiceInstanceUpdateOneWithoutUsageLogsNestedInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateOneWithoutUsageLogsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUsageLogsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => ServiceInstanceCreateOrConnectWithoutUsageLogsInputSchema).optional(),
+  upsert: z.lazy(() => ServiceInstanceUpsertWithoutUsageLogsInputSchema).optional(),
   disconnect: z.union([ z.boolean(),z.lazy(() => ServiceInstanceWhereInputSchema) ]).optional(),
   delete: z.union([ z.boolean(),z.lazy(() => ServiceInstanceWhereInputSchema) ]).optional(),
   connect: z.lazy(() => ServiceInstanceWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => ServiceInstanceUpdateToOneWithWhereWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUpdateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateOneWithoutUserResourceEventLogNestedInput>;
+  update: z.union([ z.lazy(() => ServiceInstanceUpdateToOneWithWhereWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUpdateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUsageLogsInputSchema) ]).optional(),
+}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateOneWithoutUsageLogsNestedInput>;
 
 export const NestedStringFilterSchema: z.ZodType<Prisma.NestedStringFilter> = z.object({
   equals: z.string().optional(),
@@ -2631,49 +2614,47 @@ export const UserSystemLogCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.Us
   skipDuplicates: z.boolean().optional()
 }).strict() as z.ZodType<Prisma.UserSystemLogCreateManyUserInputEnvelope>;
 
-export const UserResourceEventLogCreateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateWithoutUserInput> = z.object({
+export const UserResourceUsageLogCreateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateWithoutUserInput> = z.object({
   id: z.string().cuid().optional(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional(),
-  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUserResourceEventLogInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateWithoutUserInput>;
+  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUsageLogsInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateWithoutUserInput>;
 
-export const UserResourceEventLogUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedCreateWithoutUserInput> = z.object({
+export const UserResourceUsageLogUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateWithoutUserInput> = z.object({
   id: z.string().cuid().optional(),
   instanceId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedCreateWithoutUserInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateWithoutUserInput>;
 
-export const UserResourceEventLogCreateOrConnectWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateOrConnectWithoutUserInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateOrConnectWithoutUserInput>;
+export const UserResourceUsageLogCreateOrConnectWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateOrConnectWithoutUserInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateOrConnectWithoutUserInput>;
 
-export const UserResourceEventLogCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.UserResourceEventLogCreateManyUserInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => UserResourceEventLogCreateManyUserInputSchema),z.lazy(() => UserResourceEventLogCreateManyUserInputSchema).array() ]),
+export const UserResourceUsageLogCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.UserResourceUsageLogCreateManyUserInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => UserResourceUsageLogCreateManyUserInputSchema),z.lazy(() => UserResourceUsageLogCreateManyUserInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateManyUserInputEnvelope>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateManyUserInputEnvelope>;
 
 export const UserInstanceTokenCreateWithoutUserInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenCreateWithoutUserInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUserInstanceTokenInputSchema)
+  instance: z.lazy(() => ServiceInstanceCreateNestedOneWithoutUserInstanceTokensInputSchema)
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenCreateWithoutUserInput, "createdAt" | "updatedAt">>;
 
 export const UserInstanceTokenUncheckedCreateWithoutUserInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedCreateWithoutUserInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   instanceId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional()
@@ -2744,26 +2725,26 @@ export const UserSystemLogScalarWhereInputSchema: z.ZodType<Prisma.UserSystemLog
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogScalarWhereInput>;
 
-export const UserResourceEventLogUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUpsertWithWhereUniqueWithoutUserInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => UserResourceEventLogUpdateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedUpdateWithoutUserInputSchema) ]),
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutUserInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpsertWithWhereUniqueWithoutUserInput>;
+export const UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedUpdateWithoutUserInputSchema) ]),
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutUserInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpsertWithWhereUniqueWithoutUserInput>;
 
-export const UserResourceEventLogUpdateWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateWithWhereUniqueWithoutUserInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => UserResourceEventLogUpdateWithoutUserInputSchema),z.lazy(() => UserResourceEventLogUncheckedUpdateWithoutUserInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateWithWhereUniqueWithoutUserInput>;
+export const UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithoutUserInputSchema),z.lazy(() => UserResourceUsageLogUncheckedUpdateWithoutUserInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateWithWhereUniqueWithoutUserInput>;
 
-export const UserResourceEventLogUpdateManyWithWhereWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateManyWithWhereWithoutUserInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => UserResourceEventLogUpdateManyMutationInputSchema),z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutUserInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateManyWithWhereWithoutUserInput>;
+export const UserResourceUsageLogUpdateManyWithWhereWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithWhereWithoutUserInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => UserResourceUsageLogUpdateManyMutationInputSchema),z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithWhereWithoutUserInput>;
 
-export const UserResourceEventLogScalarWhereInputSchema: z.ZodType<Prisma.UserResourceEventLogScalarWhereInput> = z.object({
-  AND: z.union([ z.lazy(() => UserResourceEventLogScalarWhereInputSchema),z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array() ]).optional(),
-  OR: z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array().optional(),
-  NOT: z.union([ z.lazy(() => UserResourceEventLogScalarWhereInputSchema),z.lazy(() => UserResourceEventLogScalarWhereInputSchema).array() ]).optional(),
+export const UserResourceUsageLogScalarWhereInputSchema: z.ZodType<Prisma.UserResourceUsageLogScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),z.lazy(() => UserResourceUsageLogScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   userId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
@@ -2771,7 +2752,7 @@ export const UserResourceEventLogScalarWhereInputSchema: z.ZodType<Prisma.UserRe
   unit: z.union([ z.lazy(() => EnumResourceUnitFilterSchema),z.lazy(() => ResourceUnitSchema) ]).optional(),
   amount: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogScalarWhereInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogScalarWhereInput>;
 
 export const UserInstanceTokenUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserInstanceTokenUpsertWithWhereUniqueWithoutUserInput> = z.object({
   where: z.lazy(() => UserInstanceTokenWhereUniqueInputSchema),
@@ -2797,7 +2778,6 @@ export const UserInstanceTokenScalarWhereInputSchema: z.ZodType<Prisma.UserInsta
   userId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   instanceId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   token: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  validUntil: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
@@ -2817,8 +2797,8 @@ export const UserCreateWithoutSessionsInputSchema: z.ZodType<Omit<Prisma.UserCre
   // omitted: updatedAt: z.coerce.date().optional(),
   hashedPassword: z.string(),
   logs: z.lazy(() => UserSystemLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserCreateWithoutSessionsInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedCreateWithoutSessionsInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutSessionsInput, "createdAt" | "updatedAt">> = z.object({
@@ -2835,8 +2815,8 @@ export const UserUncheckedCreateWithoutSessionsInputSchema: z.ZodType<Omit<Prism
   // omitted: updatedAt: z.coerce.date().optional(),
   hashedPassword: z.string(),
   logs: z.lazy(() => UserSystemLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutSessionsInput, "createdAt" | "updatedAt">>;
 
 export const UserCreateOrConnectWithoutSessionsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutSessionsInput> = z.object({
@@ -2869,8 +2849,8 @@ export const UserUpdateWithoutSessionsInputSchema: z.ZodType<Omit<Prisma.UserUpd
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   logs: z.lazy(() => UserSystemLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUpdateWithoutSessionsInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedUpdateWithoutSessionsInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutSessionsInput, "createdAt" | "updatedAt">> = z.object({
@@ -2887,53 +2867,51 @@ export const UserUncheckedUpdateWithoutSessionsInputSchema: z.ZodType<Omit<Prism
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutSessionsInput, "createdAt" | "updatedAt">>;
 
-export const UserResourceEventLogCreateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateWithoutInstanceInput> = z.object({
+export const UserResourceUsageLogCreateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateWithoutInstanceInput> = z.object({
   id: z.string().cuid().optional(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional(),
-  user: z.lazy(() => UserCreateNestedOneWithoutUserResourceEventLogInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateWithoutInstanceInput>;
+  user: z.lazy(() => UserCreateNestedOneWithoutUsageLogsInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateWithoutInstanceInput>;
 
-export const UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedCreateWithoutInstanceInput> = z.object({
+export const UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateWithoutInstanceInput> = z.object({
   id: z.string().cuid().optional(),
   userId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedCreateWithoutInstanceInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedCreateWithoutInstanceInput>;
 
-export const UserResourceEventLogCreateOrConnectWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateOrConnectWithoutInstanceInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateOrConnectWithoutInstanceInput>;
+export const UserResourceUsageLogCreateOrConnectWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateOrConnectWithoutInstanceInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateOrConnectWithoutInstanceInput>;
 
-export const UserResourceEventLogCreateManyInstanceInputEnvelopeSchema: z.ZodType<Prisma.UserResourceEventLogCreateManyInstanceInputEnvelope> = z.object({
-  data: z.union([ z.lazy(() => UserResourceEventLogCreateManyInstanceInputSchema),z.lazy(() => UserResourceEventLogCreateManyInstanceInputSchema).array() ]),
+export const UserResourceUsageLogCreateManyInstanceInputEnvelopeSchema: z.ZodType<Prisma.UserResourceUsageLogCreateManyInstanceInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => UserResourceUsageLogCreateManyInstanceInputSchema),z.lazy(() => UserResourceUsageLogCreateManyInstanceInputSchema).array() ]),
   skipDuplicates: z.boolean().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateManyInstanceInputEnvelope>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateManyInstanceInputEnvelope>;
 
 export const UserInstanceTokenCreateWithoutInstanceInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenCreateWithoutInstanceInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  user: z.lazy(() => UserCreateNestedOneWithoutUserInstanceTokenInputSchema)
+  user: z.lazy(() => UserCreateNestedOneWithoutUserInstanceTokensInputSchema)
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenCreateWithoutInstanceInput, "createdAt" | "updatedAt">>;
 
 export const UserInstanceTokenUncheckedCreateWithoutInstanceInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedCreateWithoutInstanceInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   userId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional()
@@ -2949,21 +2927,21 @@ export const UserInstanceTokenCreateManyInstanceInputEnvelopeSchema: z.ZodType<P
   skipDuplicates: z.boolean().optional()
 }).strict() as z.ZodType<Prisma.UserInstanceTokenCreateManyInstanceInputEnvelope>;
 
-export const UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),
-  update: z.union([ z.lazy(() => UserResourceEventLogUpdateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedUpdateWithoutInstanceInputSchema) ]),
-  create: z.union([ z.lazy(() => UserResourceEventLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedCreateWithoutInstanceInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpsertWithWhereUniqueWithoutInstanceInput>;
+export const UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedUpdateWithoutInstanceInputSchema) ]),
+  create: z.union([ z.lazy(() => UserResourceUsageLogCreateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpsertWithWhereUniqueWithoutInstanceInput>;
 
-export const UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogWhereUniqueInputSchema),
-  data: z.union([ z.lazy(() => UserResourceEventLogUpdateWithoutInstanceInputSchema),z.lazy(() => UserResourceEventLogUncheckedUpdateWithoutInstanceInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateWithWhereUniqueWithoutInstanceInput>;
+export const UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => UserResourceUsageLogUpdateWithoutInstanceInputSchema),z.lazy(() => UserResourceUsageLogUncheckedUpdateWithoutInstanceInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateWithWhereUniqueWithoutInstanceInput>;
 
-export const UserResourceEventLogUpdateManyWithWhereWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateManyWithWhereWithoutInstanceInput> = z.object({
-  where: z.lazy(() => UserResourceEventLogScalarWhereInputSchema),
-  data: z.union([ z.lazy(() => UserResourceEventLogUpdateManyMutationInputSchema),z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutInstanceInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateManyWithWhereWithoutInstanceInput>;
+export const UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInput> = z.object({
+  where: z.lazy(() => UserResourceUsageLogScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => UserResourceUsageLogUpdateManyMutationInputSchema),z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutInstanceInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateManyWithWhereWithoutInstanceInput>;
 
 export const UserInstanceTokenUpsertWithWhereUniqueWithoutInstanceInputSchema: z.ZodType<Prisma.UserInstanceTokenUpsertWithWhereUniqueWithoutInstanceInput> = z.object({
   where: z.lazy(() => UserInstanceTokenWhereUniqueInputSchema),
@@ -2981,7 +2959,7 @@ export const UserInstanceTokenUpdateManyWithWhereWithoutInstanceInputSchema: z.Z
   data: z.union([ z.lazy(() => UserInstanceTokenUpdateManyMutationInputSchema),z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutInstanceInputSchema) ]),
 }).strict() as z.ZodType<Prisma.UserInstanceTokenUpdateManyWithWhereWithoutInstanceInput>;
 
-export const UserCreateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.UserCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const UserCreateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.UserCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   name: z.string().min(1).max(50),
   username: z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),
@@ -2996,10 +2974,10 @@ export const UserCreateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prism
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogCreateNestedManyWithoutUserInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const UserUncheckedCreateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const UserUncheckedCreateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   name: z.string().min(1).max(50),
   username: z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),
@@ -3014,15 +2992,15 @@ export const UserUncheckedCreateWithoutUserInstanceTokenInputSchema: z.ZodType<O
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const UserCreateOrConnectWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutUserInstanceTokenInput> = z.object({
+export const UserCreateOrConnectWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutUserInstanceTokensInput> = z.object({
   where: z.lazy(() => UserWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokenInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserCreateOrConnectWithoutUserInstanceTokenInput>;
+  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokensInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserCreateOrConnectWithoutUserInstanceTokensInput>;
 
-export const ServiceInstanceCreateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceCreateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   type: z.lazy(() => ServiceTypeSchema),
   name: z.string().min(1).max(100),
@@ -3030,10 +3008,10 @@ export const ServiceInstanceCreateWithoutUserInstanceTokenInputSchema: z.ZodType
   url: z.string().optional().nullable(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogCreateNestedManyWithoutInstanceInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutInstanceInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   type: z.lazy(() => ServiceTypeSchema),
   name: z.string().min(1).max(100),
@@ -3041,26 +3019,26 @@ export const ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInputSchema: 
   url: z.string().optional().nullable(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedCreateNestedManyWithoutInstanceInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutInstanceInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceCreateOrConnectWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUserInstanceTokenInput> = z.object({
+export const ServiceInstanceCreateOrConnectWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUserInstanceTokensInput> = z.object({
   where: z.lazy(() => ServiceInstanceWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInputSchema) ]),
-}).strict() as z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUserInstanceTokenInput>;
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInputSchema) ]),
+}).strict() as z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUserInstanceTokensInput>;
 
-export const UserUpsertWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.UserUpsertWithoutUserInstanceTokenInput> = z.object({
-  update: z.union([ z.lazy(() => UserUpdateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserInstanceTokenInputSchema) ]),
-  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokenInputSchema) ]),
+export const UserUpsertWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.UserUpsertWithoutUserInstanceTokensInput> = z.object({
+  update: z.union([ z.lazy(() => UserUpdateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserInstanceTokensInputSchema) ]),
+  create: z.union([ z.lazy(() => UserCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserInstanceTokensInputSchema) ]),
   where: z.lazy(() => UserWhereInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserUpsertWithoutUserInstanceTokenInput>;
+}).strict() as z.ZodType<Prisma.UserUpsertWithoutUserInstanceTokensInput>;
 
-export const UserUpdateToOneWithWhereWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUserInstanceTokenInput> = z.object({
+export const UserUpdateToOneWithWhereWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUserInstanceTokensInput> = z.object({
   where: z.lazy(() => UserWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => UserUpdateWithoutUserInstanceTokenInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserInstanceTokenInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUserInstanceTokenInput>;
+  data: z.union([ z.lazy(() => UserUpdateWithoutUserInstanceTokensInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserInstanceTokensInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUserInstanceTokensInput>;
 
-export const UserUpdateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.UserUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const UserUpdateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.UserUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(50),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   username: z.union([ z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3075,10 +3053,10 @@ export const UserUpdateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prism
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUpdateManyWithoutUserNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const UserUncheckedUpdateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const UserUncheckedUpdateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(50),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   username: z.union([ z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3093,21 +3071,21 @@ export const UserUncheckedUpdateWithoutUserInstanceTokenInputSchema: z.ZodType<O
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceUpsertWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.ServiceInstanceUpsertWithoutUserInstanceTokenInput> = z.object({
-  update: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInputSchema) ]),
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokenInputSchema) ]),
+export const ServiceInstanceUpsertWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.ServiceInstanceUpsertWithoutUserInstanceTokensInput> = z.object({
+  update: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserInstanceTokensInputSchema) ]),
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserInstanceTokensInputSchema) ]),
   where: z.lazy(() => ServiceInstanceWhereInputSchema).optional()
-}).strict() as z.ZodType<Prisma.ServiceInstanceUpsertWithoutUserInstanceTokenInput>;
+}).strict() as z.ZodType<Prisma.ServiceInstanceUpsertWithoutUserInstanceTokensInput>;
 
-export const ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokenInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokenInput> = z.object({
+export const ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokensInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokensInput> = z.object({
   where: z.lazy(() => ServiceInstanceWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUserInstanceTokenInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInputSchema) ]),
-}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokenInput>;
+  data: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUserInstanceTokensInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserInstanceTokensInputSchema) ]),
+}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUserInstanceTokensInput>;
 
-export const ServiceInstanceUpdateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceUpdateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => ServiceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(100),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3115,10 +3093,10 @@ export const ServiceInstanceUpdateWithoutUserInstanceTokenInputSchema: z.ZodType
   url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUpdateManyWithoutInstanceNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutInstanceNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceUncheckedUpdateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => ServiceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(100),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3126,8 +3104,8 @@ export const ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInputSchema: 
   url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUserInstanceTokenInput, "createdAt" | "updatedAt">>;
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUserInstanceTokensInput, "createdAt" | "updatedAt">>;
 
 export const UserCreateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.UserCreateWithoutLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
@@ -3143,8 +3121,8 @@ export const UserCreateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.UserCreateW
   // omitted: updatedAt: z.coerce.date().optional(),
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserCreateWithoutLogsInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedCreateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutLogsInput, "createdAt" | "updatedAt">> = z.object({
@@ -3161,8 +3139,8 @@ export const UserUncheckedCreateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.Us
   // omitted: updatedAt: z.coerce.date().optional(),
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutLogsInput, "createdAt" | "updatedAt">>;
 
 export const UserCreateOrConnectWithoutLogsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutLogsInput> = z.object({
@@ -3195,8 +3173,8 @@ export const UserUpdateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.UserUpdateW
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUpdateWithoutLogsInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedUpdateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutLogsInput, "createdAt" | "updatedAt">> = z.object({
@@ -3213,11 +3191,11 @@ export const UserUncheckedUpdateWithoutLogsInputSchema: z.ZodType<Omit<Prisma.Us
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserResourceEventLog: z.lazy(() => UserResourceEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutLogsInput, "createdAt" | "updatedAt">>;
 
-export const UserCreateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.UserCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const UserCreateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.UserCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   name: z.string().min(1).max(50),
   username: z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),
@@ -3232,10 +3210,10 @@ export const UserCreateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Pr
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const UserUncheckedCreateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const UserUncheckedCreateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   name: z.string().min(1).max(50),
   username: z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),
@@ -3250,15 +3228,15 @@ export const UserUncheckedCreateWithoutUserResourceEventLogInputSchema: z.ZodTyp
   hashedPassword: z.string(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserUncheckedCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const UserCreateOrConnectWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutUserResourceEventLogInput> = z.object({
+export const UserCreateOrConnectWithoutUsageLogsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutUsageLogsInput> = z.object({
   where: z.lazy(() => UserWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => UserCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserResourceEventLogInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserCreateOrConnectWithoutUserResourceEventLogInput>;
+  create: z.union([ z.lazy(() => UserCreateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedCreateWithoutUsageLogsInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserCreateOrConnectWithoutUsageLogsInput>;
 
-export const ServiceInstanceCreateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceCreateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   type: z.lazy(() => ServiceTypeSchema),
   name: z.string().min(1).max(100),
@@ -3266,10 +3244,10 @@ export const ServiceInstanceCreateWithoutUserResourceEventLogInputSchema: z.ZodT
   url: z.string().optional().nullable(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutInstanceInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutInstanceInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceUncheckedCreateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   type: z.lazy(() => ServiceTypeSchema),
   name: z.string().min(1).max(100),
@@ -3277,26 +3255,26 @@ export const ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInputSchem
   url: z.string().optional().nullable(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutInstanceInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedCreateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceCreateOrConnectWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUserResourceEventLogInput> = z.object({
+export const ServiceInstanceCreateOrConnectWithoutUsageLogsInputSchema: z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUsageLogsInput> = z.object({
   where: z.lazy(() => ServiceInstanceWhereUniqueInputSchema),
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInputSchema) ]),
-}).strict() as z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUserResourceEventLogInput>;
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUsageLogsInputSchema) ]),
+}).strict() as z.ZodType<Prisma.ServiceInstanceCreateOrConnectWithoutUsageLogsInput>;
 
-export const UserUpsertWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.UserUpsertWithoutUserResourceEventLogInput> = z.object({
-  update: z.union([ z.lazy(() => UserUpdateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserResourceEventLogInputSchema) ]),
-  create: z.union([ z.lazy(() => UserCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedCreateWithoutUserResourceEventLogInputSchema) ]),
+export const UserUpsertWithoutUsageLogsInputSchema: z.ZodType<Prisma.UserUpsertWithoutUsageLogsInput> = z.object({
+  update: z.union([ z.lazy(() => UserUpdateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUsageLogsInputSchema) ]),
+  create: z.union([ z.lazy(() => UserCreateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedCreateWithoutUsageLogsInputSchema) ]),
   where: z.lazy(() => UserWhereInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserUpsertWithoutUserResourceEventLogInput>;
+}).strict() as z.ZodType<Prisma.UserUpsertWithoutUsageLogsInput>;
 
-export const UserUpdateToOneWithWhereWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUserResourceEventLogInput> = z.object({
+export const UserUpdateToOneWithWhereWithoutUsageLogsInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUsageLogsInput> = z.object({
   where: z.lazy(() => UserWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => UserUpdateWithoutUserResourceEventLogInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUserResourceEventLogInputSchema) ]),
-}).strict() as z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUserResourceEventLogInput>;
+  data: z.union([ z.lazy(() => UserUpdateWithoutUsageLogsInputSchema),z.lazy(() => UserUncheckedUpdateWithoutUsageLogsInputSchema) ]),
+}).strict() as z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutUsageLogsInput>;
 
-export const UserUpdateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.UserUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const UserUpdateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.UserUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(50),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   username: z.union([ z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3311,10 +3289,10 @@ export const UserUpdateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Pr
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const UserUncheckedUpdateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const UserUncheckedUpdateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(50),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   username: z.union([ z.string().min(4).max(20).regex(/^[a-zA-Z0-9_]+$/),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3329,21 +3307,21 @@ export const UserUncheckedUpdateWithoutUserResourceEventLogInputSchema: z.ZodTyp
   hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   logs: z.lazy(() => UserSystemLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceUpsertWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.ServiceInstanceUpsertWithoutUserResourceEventLogInput> = z.object({
-  update: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInputSchema) ]),
-  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUserResourceEventLogInputSchema) ]),
+export const ServiceInstanceUpsertWithoutUsageLogsInputSchema: z.ZodType<Prisma.ServiceInstanceUpsertWithoutUsageLogsInput> = z.object({
+  update: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUsageLogsInputSchema) ]),
+  create: z.union([ z.lazy(() => ServiceInstanceCreateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedCreateWithoutUsageLogsInputSchema) ]),
   where: z.lazy(() => ServiceInstanceWhereInputSchema).optional()
-}).strict() as z.ZodType<Prisma.ServiceInstanceUpsertWithoutUserResourceEventLogInput>;
+}).strict() as z.ZodType<Prisma.ServiceInstanceUpsertWithoutUsageLogsInput>;
 
-export const ServiceInstanceUpdateToOneWithWhereWithoutUserResourceEventLogInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUserResourceEventLogInput> = z.object({
+export const ServiceInstanceUpdateToOneWithWhereWithoutUsageLogsInputSchema: z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUsageLogsInput> = z.object({
   where: z.lazy(() => ServiceInstanceWhereInputSchema).optional(),
-  data: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUserResourceEventLogInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInputSchema) ]),
-}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUserResourceEventLogInput>;
+  data: z.union([ z.lazy(() => ServiceInstanceUpdateWithoutUsageLogsInputSchema),z.lazy(() => ServiceInstanceUncheckedUpdateWithoutUsageLogsInputSchema) ]),
+}).strict() as z.ZodType<Prisma.ServiceInstanceUpdateToOneWithWhereWithoutUsageLogsInput>;
 
-export const ServiceInstanceUpdateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceUpdateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => ServiceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(100),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3351,10 +3329,10 @@ export const ServiceInstanceUpdateWithoutUserResourceEventLogInputSchema: z.ZodT
   url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUpdateManyWithoutInstanceNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutInstanceNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
-export const ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">> = z.object({
+export const ServiceInstanceUncheckedUpdateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => ServiceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string().min(1).max(100),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3362,8 +3340,8 @@ export const ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInputSchem
   url: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  UserInstanceToken: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional()
-}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUserResourceEventLogInput, "createdAt" | "updatedAt">>;
+  userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutInstanceNestedInputSchema).optional()
+}).strict() as z.ZodType<Omit<Prisma.ServiceInstanceUncheckedUpdateWithoutUsageLogsInput, "createdAt" | "updatedAt">>;
 
 export const SessionCreateManyUserInputSchema: z.ZodType<Omit<Prisma.SessionCreateManyUserInput, "createdAt">> = z.object({
   id: z.string().cuid().optional(),
@@ -3380,20 +3358,19 @@ export const UserSystemLogCreateManyUserInputSchema: z.ZodType<Prisma.UserSystem
   timestamp: z.coerce.date().optional()
 }).strict() as z.ZodType<Prisma.UserSystemLogCreateManyUserInput>;
 
-export const UserResourceEventLogCreateManyUserInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateManyUserInput> = z.object({
+export const UserResourceUsageLogCreateManyUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateManyUserInput> = z.object({
   id: z.string().cuid().optional(),
   instanceId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateManyUserInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateManyUserInput>;
 
 export const UserInstanceTokenCreateManyUserInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenCreateManyUserInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   instanceId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional()
@@ -3444,48 +3421,46 @@ export const UserSystemLogUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<P
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogUncheckedUpdateManyWithoutUserInput>;
 
-export const UserResourceEventLogUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateWithoutUserInput> = z.object({
+export const UserResourceUsageLogUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateWithoutUserInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  instance: z.lazy(() => ServiceInstanceUpdateOneWithoutUserResourceEventLogNestedInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateWithoutUserInput>;
+  instance: z.lazy(() => ServiceInstanceUpdateOneWithoutUsageLogsNestedInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateWithoutUserInput>;
 
-export const UserResourceEventLogUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateWithoutUserInput> = z.object({
+export const UserResourceUsageLogUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateWithoutUserInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateWithoutUserInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateWithoutUserInput>;
 
-export const UserResourceEventLogUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutUserInput> = z.object({
+export const UserResourceUsageLogUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutUserInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutUserInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutUserInput>;
 
 export const UserInstanceTokenUpdateWithoutUserInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUpdateWithoutUserInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  instance: z.lazy(() => ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokenNestedInputSchema).optional()
+  instance: z.lazy(() => ServiceInstanceUpdateOneRequiredWithoutUserInstanceTokensNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenUpdateWithoutUserInput, "createdAt" | "updatedAt">>;
 
 export const UserInstanceTokenUncheckedUpdateWithoutUserInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedUpdateWithoutUserInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3495,73 +3470,69 @@ export const UserInstanceTokenUncheckedUpdateManyWithoutUserInputSchema: z.ZodTy
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedUpdateManyWithoutUserInput, "createdAt" | "updatedAt">>;
 
-export const UserResourceEventLogCreateManyInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogCreateManyInstanceInput> = z.object({
+export const UserResourceUsageLogCreateManyInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateManyInstanceInput> = z.object({
   id: z.string().cuid().optional(),
   userId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateManyInstanceInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateManyInstanceInput>;
 
 export const UserInstanceTokenCreateManyInstanceInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenCreateManyInstanceInput, "createdAt" | "updatedAt">> = z.object({
   id: z.string().cuid().optional(),
   userId: z.string(),
   token: z.string(),
-  validUntil: z.coerce.date(),
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional()
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenCreateManyInstanceInput, "createdAt" | "updatedAt">>;
 
-export const UserResourceEventLogUpdateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUpdateWithoutInstanceInput> = z.object({
+export const UserResourceUsageLogUpdateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateWithoutInstanceInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  user: z.lazy(() => UserUpdateOneWithoutUserResourceEventLogNestedInputSchema).optional()
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateWithoutInstanceInput>;
+  user: z.lazy(() => UserUpdateOneWithoutUsageLogsNestedInputSchema).optional()
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateWithoutInstanceInput>;
 
-export const UserResourceEventLogUncheckedUpdateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateWithoutInstanceInput> = z.object({
+export const UserResourceUsageLogUncheckedUpdateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateWithoutInstanceInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateWithoutInstanceInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateWithoutInstanceInput>;
 
-export const UserResourceEventLogUncheckedUpdateManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutInstanceInput> = z.object({
+export const UserResourceUsageLogUncheckedUpdateManyWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutInstanceInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUncheckedUpdateManyWithoutInstanceInput>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUncheckedUpdateManyWithoutInstanceInput>;
 
 export const UserInstanceTokenUpdateWithoutInstanceInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUpdateWithoutInstanceInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  user: z.lazy(() => UserUpdateOneRequiredWithoutUserInstanceTokenNestedInputSchema).optional()
+  user: z.lazy(() => UserUpdateOneRequiredWithoutUserInstanceTokensNestedInputSchema).optional()
 }).strict() as z.ZodType<Omit<Prisma.UserInstanceTokenUpdateWithoutInstanceInput, "createdAt" | "updatedAt">>;
 
 export const UserInstanceTokenUncheckedUpdateWithoutInstanceInputSchema: z.ZodType<Omit<Prisma.UserInstanceTokenUncheckedUpdateWithoutInstanceInput, "createdAt" | "updatedAt">> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3571,7 +3542,6 @@ export const UserInstanceTokenUncheckedUpdateManyWithoutInstanceInputSchema: z.Z
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   token: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  validUntil: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3891,67 +3861,67 @@ export const UserSystemLogFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.UserSyst
   where: UserSystemLogWhereUniqueInputSchema,
 }).strict() as z.ZodType<Prisma.UserSystemLogFindUniqueOrThrowArgs>;
 
-export const UserResourceEventLogFindFirstArgsSchema: z.ZodType<Prisma.UserResourceEventLogFindFirstArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereInputSchema.optional(),
-  orderBy: z.union([ UserResourceEventLogOrderByWithRelationInputSchema.array(),UserResourceEventLogOrderByWithRelationInputSchema ]).optional(),
-  cursor: UserResourceEventLogWhereUniqueInputSchema.optional(),
+export const UserResourceUsageLogFindFirstArgsSchema: z.ZodType<Prisma.UserResourceUsageLogFindFirstArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+  orderBy: z.union([ UserResourceUsageLogOrderByWithRelationInputSchema.array(),UserResourceUsageLogOrderByWithRelationInputSchema ]).optional(),
+  cursor: UserResourceUsageLogWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ UserResourceEventLogScalarFieldEnumSchema,UserResourceEventLogScalarFieldEnumSchema.array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogFindFirstArgs>;
+  distinct: z.union([ UserResourceUsageLogScalarFieldEnumSchema,UserResourceUsageLogScalarFieldEnumSchema.array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogFindFirstArgs>;
 
-export const UserResourceEventLogFindFirstOrThrowArgsSchema: z.ZodType<Prisma.UserResourceEventLogFindFirstOrThrowArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereInputSchema.optional(),
-  orderBy: z.union([ UserResourceEventLogOrderByWithRelationInputSchema.array(),UserResourceEventLogOrderByWithRelationInputSchema ]).optional(),
-  cursor: UserResourceEventLogWhereUniqueInputSchema.optional(),
+export const UserResourceUsageLogFindFirstOrThrowArgsSchema: z.ZodType<Prisma.UserResourceUsageLogFindFirstOrThrowArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+  orderBy: z.union([ UserResourceUsageLogOrderByWithRelationInputSchema.array(),UserResourceUsageLogOrderByWithRelationInputSchema ]).optional(),
+  cursor: UserResourceUsageLogWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ UserResourceEventLogScalarFieldEnumSchema,UserResourceEventLogScalarFieldEnumSchema.array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogFindFirstOrThrowArgs>;
+  distinct: z.union([ UserResourceUsageLogScalarFieldEnumSchema,UserResourceUsageLogScalarFieldEnumSchema.array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogFindFirstOrThrowArgs>;
 
-export const UserResourceEventLogFindManyArgsSchema: z.ZodType<Prisma.UserResourceEventLogFindManyArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereInputSchema.optional(),
-  orderBy: z.union([ UserResourceEventLogOrderByWithRelationInputSchema.array(),UserResourceEventLogOrderByWithRelationInputSchema ]).optional(),
-  cursor: UserResourceEventLogWhereUniqueInputSchema.optional(),
+export const UserResourceUsageLogFindManyArgsSchema: z.ZodType<Prisma.UserResourceUsageLogFindManyArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+  orderBy: z.union([ UserResourceUsageLogOrderByWithRelationInputSchema.array(),UserResourceUsageLogOrderByWithRelationInputSchema ]).optional(),
+  cursor: UserResourceUsageLogWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-  distinct: z.union([ UserResourceEventLogScalarFieldEnumSchema,UserResourceEventLogScalarFieldEnumSchema.array() ]).optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogFindManyArgs>;
+  distinct: z.union([ UserResourceUsageLogScalarFieldEnumSchema,UserResourceUsageLogScalarFieldEnumSchema.array() ]).optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogFindManyArgs>;
 
-export const UserResourceEventLogAggregateArgsSchema: z.ZodType<Prisma.UserResourceEventLogAggregateArgs> = z.object({
-  where: UserResourceEventLogWhereInputSchema.optional(),
-  orderBy: z.union([ UserResourceEventLogOrderByWithRelationInputSchema.array(),UserResourceEventLogOrderByWithRelationInputSchema ]).optional(),
-  cursor: UserResourceEventLogWhereUniqueInputSchema.optional(),
+export const UserResourceUsageLogAggregateArgsSchema: z.ZodType<Prisma.UserResourceUsageLogAggregateArgs> = z.object({
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+  orderBy: z.union([ UserResourceUsageLogOrderByWithRelationInputSchema.array(),UserResourceUsageLogOrderByWithRelationInputSchema ]).optional(),
+  cursor: UserResourceUsageLogWhereUniqueInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogAggregateArgs>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogAggregateArgs>;
 
-export const UserResourceEventLogGroupByArgsSchema: z.ZodType<Prisma.UserResourceEventLogGroupByArgs> = z.object({
-  where: UserResourceEventLogWhereInputSchema.optional(),
-  orderBy: z.union([ UserResourceEventLogOrderByWithAggregationInputSchema.array(),UserResourceEventLogOrderByWithAggregationInputSchema ]).optional(),
-  by: UserResourceEventLogScalarFieldEnumSchema.array(),
-  having: UserResourceEventLogScalarWhereWithAggregatesInputSchema.optional(),
+export const UserResourceUsageLogGroupByArgsSchema: z.ZodType<Prisma.UserResourceUsageLogGroupByArgs> = z.object({
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+  orderBy: z.union([ UserResourceUsageLogOrderByWithAggregationInputSchema.array(),UserResourceUsageLogOrderByWithAggregationInputSchema ]).optional(),
+  by: UserResourceUsageLogScalarFieldEnumSchema.array(),
+  having: UserResourceUsageLogScalarWhereWithAggregatesInputSchema.optional(),
   take: z.number().optional(),
   skip: z.number().optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogGroupByArgs>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogGroupByArgs>;
 
-export const UserResourceEventLogFindUniqueArgsSchema: z.ZodType<Prisma.UserResourceEventLogFindUniqueArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereUniqueInputSchema,
-}).strict() as z.ZodType<Prisma.UserResourceEventLogFindUniqueArgs>;
+export const UserResourceUsageLogFindUniqueArgsSchema: z.ZodType<Prisma.UserResourceUsageLogFindUniqueArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereUniqueInputSchema,
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogFindUniqueArgs>;
 
-export const UserResourceEventLogFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.UserResourceEventLogFindUniqueOrThrowArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereUniqueInputSchema,
-}).strict() as z.ZodType<Prisma.UserResourceEventLogFindUniqueOrThrowArgs>;
+export const UserResourceUsageLogFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.UserResourceUsageLogFindUniqueOrThrowArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereUniqueInputSchema,
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogFindUniqueOrThrowArgs>;
 
 export const UserCreateArgsSchema: z.ZodType<Omit<Prisma.UserCreateArgs, "data"> & { data: z.infer<typeof UserCreateInputSchema> | z.infer<typeof UserUncheckedCreateInputSchema> }> = z.object({
   select: UserSelectSchema.optional(),
@@ -4158,43 +4128,43 @@ export const UserSystemLogDeleteManyArgsSchema: z.ZodType<Prisma.UserSystemLogDe
   where: UserSystemLogWhereInputSchema.optional(),
 }).strict() as z.ZodType<Prisma.UserSystemLogDeleteManyArgs>;
 
-export const UserResourceEventLogCreateArgsSchema: z.ZodType<Prisma.UserResourceEventLogCreateArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  data: z.union([ UserResourceEventLogCreateInputSchema,UserResourceEventLogUncheckedCreateInputSchema ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateArgs>;
+export const UserResourceUsageLogCreateArgsSchema: z.ZodType<Prisma.UserResourceUsageLogCreateArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  data: z.union([ UserResourceUsageLogCreateInputSchema,UserResourceUsageLogUncheckedCreateInputSchema ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateArgs>;
 
-export const UserResourceEventLogUpsertArgsSchema: z.ZodType<Prisma.UserResourceEventLogUpsertArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereUniqueInputSchema,
-  create: z.union([ UserResourceEventLogCreateInputSchema,UserResourceEventLogUncheckedCreateInputSchema ]),
-  update: z.union([ UserResourceEventLogUpdateInputSchema,UserResourceEventLogUncheckedUpdateInputSchema ]),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpsertArgs>;
+export const UserResourceUsageLogUpsertArgsSchema: z.ZodType<Prisma.UserResourceUsageLogUpsertArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereUniqueInputSchema,
+  create: z.union([ UserResourceUsageLogCreateInputSchema,UserResourceUsageLogUncheckedCreateInputSchema ]),
+  update: z.union([ UserResourceUsageLogUpdateInputSchema,UserResourceUsageLogUncheckedUpdateInputSchema ]),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpsertArgs>;
 
-export const UserResourceEventLogCreateManyArgsSchema: z.ZodType<Prisma.UserResourceEventLogCreateManyArgs> = z.object({
-  data: z.union([ UserResourceEventLogCreateManyInputSchema,UserResourceEventLogCreateManyInputSchema.array() ]),
+export const UserResourceUsageLogCreateManyArgsSchema: z.ZodType<Prisma.UserResourceUsageLogCreateManyArgs> = z.object({
+  data: z.union([ UserResourceUsageLogCreateManyInputSchema,UserResourceUsageLogCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogCreateManyArgs>;
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogCreateManyArgs>;
 
-export const UserResourceEventLogDeleteArgsSchema: z.ZodType<Prisma.UserResourceEventLogDeleteArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  where: UserResourceEventLogWhereUniqueInputSchema,
-}).strict() as z.ZodType<Prisma.UserResourceEventLogDeleteArgs>;
+export const UserResourceUsageLogDeleteArgsSchema: z.ZodType<Prisma.UserResourceUsageLogDeleteArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  where: UserResourceUsageLogWhereUniqueInputSchema,
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogDeleteArgs>;
 
-export const UserResourceEventLogUpdateArgsSchema: z.ZodType<Prisma.UserResourceEventLogUpdateArgs> = z.object({
-  select: UserResourceEventLogSelectSchema.optional(),
-  include: UserResourceEventLogIncludeSchema.optional(),
-  data: z.union([ UserResourceEventLogUpdateInputSchema,UserResourceEventLogUncheckedUpdateInputSchema ]),
-  where: UserResourceEventLogWhereUniqueInputSchema,
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateArgs>;
+export const UserResourceUsageLogUpdateArgsSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateArgs> = z.object({
+  select: UserResourceUsageLogSelectSchema.optional(),
+  include: UserResourceUsageLogIncludeSchema.optional(),
+  data: z.union([ UserResourceUsageLogUpdateInputSchema,UserResourceUsageLogUncheckedUpdateInputSchema ]),
+  where: UserResourceUsageLogWhereUniqueInputSchema,
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateArgs>;
 
-export const UserResourceEventLogUpdateManyArgsSchema: z.ZodType<Prisma.UserResourceEventLogUpdateManyArgs> = z.object({
-  data: z.union([ UserResourceEventLogUpdateManyMutationInputSchema,UserResourceEventLogUncheckedUpdateManyInputSchema ]),
-  where: UserResourceEventLogWhereInputSchema.optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogUpdateManyArgs>;
+export const UserResourceUsageLogUpdateManyArgsSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyArgs> = z.object({
+  data: z.union([ UserResourceUsageLogUpdateManyMutationInputSchema,UserResourceUsageLogUncheckedUpdateManyInputSchema ]),
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogUpdateManyArgs>;
 
-export const UserResourceEventLogDeleteManyArgsSchema: z.ZodType<Prisma.UserResourceEventLogDeleteManyArgs> = z.object({
-  where: UserResourceEventLogWhereInputSchema.optional(),
-}).strict() as z.ZodType<Prisma.UserResourceEventLogDeleteManyArgs>;
+export const UserResourceUsageLogDeleteManyArgsSchema: z.ZodType<Prisma.UserResourceUsageLogDeleteManyArgs> = z.object({
+  where: UserResourceUsageLogWhereInputSchema.optional(),
+}).strict() as z.ZodType<Prisma.UserResourceUsageLogDeleteManyArgs>;

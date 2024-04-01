@@ -4,7 +4,7 @@ import {
   ServiceInstanceCreateInputSchema,
   UserCreateInputSchema,
   UserInstanceTokenCreateInputSchema,
-  UserResourceEventLogCreateInputSchema,
+  UserResourceUsageLogCreateInputSchema,
 } from "@/schema/generated/zod";
 import { type z } from "zod";
 import { hashPassword } from "@/lib/password";
@@ -61,8 +61,7 @@ async function main() {
     for (const instance of instances) {
       await prisma.userInstanceToken.create({
         data: UserInstanceTokenCreateInputSchema.parse({
-          token: faker.string.uuid(),
-          validUntil: faker.date.future(),
+          token: faker.string.alphanumeric(16),
           user: { connect: { id: user.id } },
           instance: { connect: { id: instance.id } },
         }),
@@ -76,8 +75,8 @@ async function main() {
       const randomMinutes = faker.number.int(60 * 24 * LOG_DAY_SPAN);
       const randomDate = new Date(Date.now() - randomMinutes * 60 * 1000);
 
-      await prisma.userResourceEventLog.create({
-        data: UserResourceEventLogCreateInputSchema.parse({
+      await prisma.userResourceUsageLog.create({
+        data: UserResourceUsageLogCreateInputSchema.parse({
           user: {
             connect: {
               id: user.id,
@@ -89,10 +88,10 @@ async function main() {
             },
           },
           resourceType: faker.helpers.arrayElement(["CHATGPT_SHARED_GPT_3.5", "CHATGPT_SHARED_GPT_4"]),
-          unit: ResourceUnit.COUNT,
-          amount: 1,
+          unit: ResourceUnit.INPUT_CHAR,
+          amount: faker.number.int(1000),
           timestamp: randomDate,
-        } as z.infer<typeof UserResourceEventLogCreateInputSchema>),
+        } as z.infer<typeof UserResourceUsageLogCreateInputSchema>),
       });
     }
     console.log(`Created ${LOGS_TO_CREATE_PER_USER} logs`);
