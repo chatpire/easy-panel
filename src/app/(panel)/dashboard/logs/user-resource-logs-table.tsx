@@ -8,8 +8,9 @@ const UserResourceUsageLogDisplaySchema = UserResourceUsageLogSchema.pick({
   timestamp: true,
   instanceId: true,
   openaiTeamId: true,
-  unit: true,
-  amount: true,
+  utf8Length: true,
+  // tokensLength: true,
+  conversationId: true,
 });
 
 export function UserResourceLogsTable({ fetchData }: { fetchData: (input: PaginationInput) => Promise<any> }) {

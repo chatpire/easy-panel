@@ -34,7 +34,7 @@ enum UserRole {
     ADMIN
 }
 
-/// @zod.import(["import { ServiceTypeSchema, ResourceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventContentSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/definition.schema'"])
+/// @zod.import(["import { ServiceTypeSchema, DurationWindowSchema, ServiceInstanceAttributesSchema, EventTypeSchema, EventContentSchema, EventResultTypeSchema, ResourceEventTypeSchema } from '@/schema/definition.schema'"])
 model User {
     id                 String                 @id @default(cuid())
     name               String /// @zod.string.min(1).max(50)
@@ -86,12 +86,12 @@ model UserInstanceToken {
     isActive   Boolean         @default(true)
     createdAt  DateTime        @default(now()) /// @zod.custom.omit("input")
     updatedAt  DateTime        @updatedAt /// @zod.custom.omit("input")
+
+    @@unique([userId, instanceId])
 }
 
 enum ResourceUnit {
-    TOKEN
-    INPUT_CHAR
-    CREDITS
+    CHAR
 }
 
 enum RefreshPeriod {
@@ -107,7 +107,6 @@ model UserEventLog {
     userId     String?
     /// [EventType]
     type       String /// @zod.custom.use(z.lazy(() => EventTypeSchema))
-    detail     String? /// @zod.string.max(1000)
     /// [EventResultType]
     resultType String /// @zod.custom.use(z.lazy(() => EventResultTypeSchema))
     /// [EventContent]
@@ -116,15 +115,16 @@ model UserEventLog {
 }
 
 model UserResourceUsageLog {
-    id           String           @id @default(cuid())
-    userId       String?
-    user         User?            @relation(fields: [userId], references: [id])
-    instanceId   String?
-    instance     ServiceInstance? @relation(fields: [instanceId], references: [id])
-    /// [ResourceType]
-    resourceType String /// @zod.custom.use(z.lazy(() => ResourceTypeSchema))
-    openaiTeamId String?
-    unit         ResourceUnit
-    amount       Int
-    timestamp    DateTime         @default(now())
+    id             String           @id @default(cuid())
+    userId         String?
+    user           User?            @relation(fields: [userId], references: [id])
+    instanceId     String?
+    instance       ServiceInstance? @relation(fields: [instanceId], references: [id])
+    model          String
+    openaiTeamId   String?
+    text           String?
+    utf8Length     Int?
+    tokensLength   Int?
+    conversationId String?
+    timestamp      DateTime         @default(now())
 }

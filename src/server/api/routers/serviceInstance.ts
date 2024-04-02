@@ -1,7 +1,8 @@
 import { TRPCError } from "@trpc/server";
 
-import { createTRPCRouter, adminProcedure, protectedProcedure } from "@/server/trpc";
+import { createTRPCRouter, adminProcedure, protectedProcedure, publicProcedure } from "@/server/trpc";
 import { ServiceInstanceOptionalDefaultsSchema, ServiceInstanceSchema } from "@/schema/generated/zod";
+import { z } from "zod";
 
 export const serviceInstanceRouter = createTRPCRouter({
   create: adminProcedure
@@ -41,4 +42,28 @@ export const serviceInstanceRouter = createTRPCRouter({
     });
     return ServiceInstanceSchema.parse(result);
   }),
+
+  verifyToken: publicProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+        userToken: z.string(),
+        requestIp: z.string().ip().nullable(),
+        userIp: z.string().ip().nullable(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const instanceToken = await ctx.db.userInstanceToken.findUnique({
+        where: {
+          token: input.userToken,
+        },
+      });
+      if (!instanceToken) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid token" });
+      }
+      if (instanceToken.instanceId !== input.instanceId) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid instanceId" });
+      }
+      return instanceToken.userId;
+    }),
 });

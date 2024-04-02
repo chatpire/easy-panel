@@ -1,9 +1,8 @@
-import { PrismaClient, ResourceUnit, UserRole } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import {
   ServiceInstanceCreateInputSchema,
   UserCreateInputSchema,
-  UserInstanceTokenCreateInputSchema,
   UserResourceUsageLogCreateInputSchema,
 } from "@/schema/generated/zod";
 import { type z } from "zod";
@@ -31,7 +30,7 @@ async function main() {
     const user = await prisma.user.create({
       data: UserCreateInputSchema.parse({
         name: faker.person.fullName(),
-        username: faker.internet.userName().substring(0, 16).replace(".", ""),
+        username: faker.string.alphanumeric(8),
         email: faker.internet.email(),
         hashedPassword: await hashPassword(password),
         role: UserRole.USER,
@@ -74,6 +73,7 @@ async function main() {
     for (let i = 0; i < LOGS_TO_CREATE_PER_USER; i++) {
       const randomMinutes = faker.number.int(60 * 24 * LOG_DAY_SPAN);
       const randomDate = new Date(Date.now() - randomMinutes * 60 * 1000);
+      const randomText = faker.lorem.sentence();
 
       await prisma.userResourceUsageLog.create({
         data: UserResourceUsageLogCreateInputSchema.parse({
@@ -87,9 +87,10 @@ async function main() {
               id: faker.helpers.arrayElement(instances).id,
             },
           },
-          resourceType: faker.helpers.arrayElement(["CHATGPT_SHARED_GPT_3.5", "CHATGPT_SHARED_GPT_4"]),
-          unit: ResourceUnit.TOKEN,
-          amount: faker.number.int(1000),
+          model: faker.helpers.arrayElement(["gpt-2", "gpt-3"]),
+          text: randomText,
+          utf8Length: Buffer.byteLength(randomText, "utf8"),
+          conversationId: faker.string.alphanumeric(16),
           openaiTeamId: null,
           timestamp: randomDate,
         } as z.infer<typeof UserResourceUsageLogCreateInputSchema>),

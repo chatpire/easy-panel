@@ -10,23 +10,21 @@ import {
   UserResourceUsageLogSchema,
   UserResourceUsageLogWhereInputSchema,
 } from "@/schema/generated/zod";
-import { getPaginatedDataSchema, PaginationInputSchema } from "@/schema/pagination.schema";
-import { computeSkip } from "@/lib/utils";
+import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { type ResourceUnit, UserRole } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 import { DURATION_WINDOWS, DurationWindowSchema } from "@/schema/definition.schema";
 import { type ResourceLogSumResults } from "@/schema/resourceLog.schema";
+import { paginateQuery } from "../pagination";
 
 const sumLogsInDurationWindows = async ({
   ctx,
-  unit,
   durationWindows,
   userId,
   instanceId,
 }: {
   ctx: TRPCContext;
-  unit: ResourceUnit;
   durationWindows: DurationWindow[];
   userId?: string;
   instanceId?: string;
@@ -37,21 +35,20 @@ const sumLogsInDurationWindows = async ({
     const durationWindowSeconds = DURATION_WINDOWS[durationWindow as keyof typeof DURATION_WINDOWS];
     const aggResult = await ctx.db.userResourceUsageLog.aggregate({
       where: {
-        unit,
         timestamp: {
           gte: new Date(new Date().getTime() - durationWindowSeconds * 1000),
         },
         userId,
         instanceId,
       },
-      _sum: { amount: true },
+      _sum: { utf8Length: true, tokensLength: true },
       _count: true,
     });
     results.push({
-      unit,
       durationWindow,
-      value: aggResult._sum?.amount ?? 0,
-      count: aggResult._count ?? 0,
+      utf8LengthSum: aggResult._sum?.utf8Length,
+      tokensLengthSum: aggResult._sum?.tokensLength,
+      count: aggResult._count,
     });
   }
 
@@ -59,12 +56,31 @@ const sumLogsInDurationWindows = async ({
 };
 
 export const resourceLogRouter = createTRPCRouter({
-  getMany: adminProcedure.input(UserResourceUsageLogWhereInputSchema).query(async ({ input, ctx }) => {
-    const result = await ctx.db.userResourceUsageLog.findMany({
-      where: input,
-    });
-    return UserResourceUsageLogSchema.array().parse(result);
-  }),
+  getMany: adminProcedure
+    .input(
+      z.object({
+        where: UserResourceUsageLogWhereInputSchema,
+        pagination: PaginationInputSchema,
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return paginateQuery({
+        pagination: input.pagination,
+        ctx,
+        responseItemSchema: UserResourceUsageLogSchema,
+        handle: async ({ skip, take, ctx }) => {
+          const result = await ctx.db.userResourceUsageLog.findMany({
+            where: input.where,
+            skip,
+            take,
+          });
+          const total = await ctx.db.userResourceUsageLog.count({
+            where: input.where,
+          });
+          return { result, total };
+        },
+      });
+    }),
 
   getAllByUser: protectedWithUserProcedure
     .input(
@@ -74,31 +90,24 @@ export const resourceLogRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      const { userId, pagination } = input;
+      const userId = input.userId ?? ctx.user.id;
       if (ctx.user.role !== UserRole.ADMIN && ctx.user.id !== userId) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to access this data" });
       }
-      const result = await ctx.db.userResourceUsageLog.findMany({
-        where: {
-          userId,
-        },
-        skip: computeSkip(pagination),
-        take: pagination.pageSize,
-      });
-      const total = await ctx.db.userResourceUsageLog.count({
-        where: {
-          userId,
-        },
-      });
-      const totalPages = Math.ceil(total / pagination.pageSize);
-      return getPaginatedDataSchema(UserResourceUsageLogSchema).parse({
-        data: result,
-        pagination: {
-          total,
-          currentPage: pagination.currentPage,
-          totalPages,
-          nextPage: pagination.currentPage + 1 <= totalPages ? pagination.currentPage + 1 : null,
-          prevPage: pagination.currentPage - 1 > 0 ? pagination.currentPage - 1 : null,
+      return paginateQuery({
+        pagination: input.pagination,
+        ctx,
+        responseItemSchema: UserResourceUsageLogSchema.omit({ text: true }),
+        handle: async ({ skip, take, ctx }) => {
+          const result = await ctx.db.userResourceUsageLog.findMany({
+            where: { userId },
+            skip,
+            take,
+          });
+          const total = await ctx.db.userResourceUsageLog.count({
+            where: { userId },
+          });
+          return { result, total };
         },
       });
     }),
@@ -107,7 +116,6 @@ export const resourceLogRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string().optional(),
-        unit: ResourceUnitSchema,
         durationWindows: DurationWindowSchema.array(),
       }),
     )
@@ -118,7 +126,6 @@ export const resourceLogRouter = createTRPCRouter({
       }
       return sumLogsInDurationWindows({
         ctx,
-        unit: input.unit,
         durationWindows: input.durationWindows,
         userId,
       });
@@ -128,7 +135,6 @@ export const resourceLogRouter = createTRPCRouter({
     .input(
       z.object({
         instanceId: z.string(),
-        unit: ResourceUnitSchema,
         durationWindows: DurationWindowSchema.array(),
       }),
     )
@@ -136,7 +142,6 @@ export const resourceLogRouter = createTRPCRouter({
       // TODO: Check if the user has access to the instance
       return sumLogsInDurationWindows({
         ctx,
-        unit: input.unit,
         durationWindows: input.durationWindows,
         instanceId: input.instanceId,
       });
@@ -150,6 +155,6 @@ export const resourceLogRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      return sumLogsInDurationWindows({ ctx, unit: input.unit, durationWindows: input.durationWindows });
+      return sumLogsInDurationWindows({ ctx, durationWindows: input.durationWindows });
     }),
 });

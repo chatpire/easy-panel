@@ -9,4 +9,6 @@ export const ChatGPTSharedInstanceAttributesSchema = z.object({
 export const ChatGPTSharedOAuthEventContentSchema = z.object({
   type: z.literal("chatgpt_shared.oauth"),
   intanceId: z.string().optional(),
+  requestIp: z.string().ip().nullable(),
+  userIp: z.string().ip().nullable(),
 });

@@ -1,6 +1,5 @@
 import {
   type ServiceTypeSchema,
-  type ResourceTypeSchema,
   type DurationWindowSchema,
   type ServiceInstanceAttributesSchema,
   type EventTypeSchema,
@@ -10,8 +9,6 @@ import {
 
 declare global {
   type ServiceType = z.infer<typeof ServiceTypeSchema>;
-
-  type ResourceType = z.infer<typeof ResourceTypeSchema>;
 
   type ServiceInstanceAttributes = z.infer<typeof ServiceInstanceAttributesSchema>;
 

@@ -1,15 +1,17 @@
-import { StatisticsGroup, StatisticsItem } from "@/components/custom/statistics";
-import { api } from "@/trpc/server";
+"use client";
 
-export async function UserUsageStatistics({ userId }: { userId?: string }) {
-  const result = await api.resourceLog.sumLogsInDurationWindowsByUserId({
+import { StatisticsGroup, StatisticsItem } from "@/components/custom/statistics";
+import { api } from "@/trpc/react";
+
+export function InstanceUsageStatistics({ instanceId }: { instanceId: string }) {
+  const result = api.resourceLog.sumLogsInDurationWindowsByInstance.useQuery({
     durationWindows: ["3h", "1d", "7d", "30d"],
-    userId, // by default is the current user
+    instanceId,
   });
 
   return (
     <StatisticsGroup className="md:grid-cols-4">
-      {result.map((item) => (
+      {result.data?.map((item) => (
         <StatisticsItem
           key={item.durationWindow}
           label={`Last ${item.durationWindow}`}

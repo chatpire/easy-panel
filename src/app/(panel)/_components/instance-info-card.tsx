@@ -12,6 +12,8 @@ import { FunctionButton } from "@/components/loading-button";
 import { type ServiceInstance } from "@prisma/client";
 import { api } from "@/trpc/react";
 import StatusLabel from "@/components/custom/status-label";
+import { copyToClipBoard } from "@/app/_helpers/copy-to-clipboard";
+import { InstanceUsageStatistics } from "./instance-resource-usage-statistics";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -20,11 +22,12 @@ interface Props extends React.HTMLAttributes<HTMLFormElement> {
 
 export function UserInstanceInfoCard({ instance, className }: Props) {
   const instanceTokenQuery = api.user.getInstanceToken.useQuery({ instanceId: instance.id });
-  const token = instanceTokenQuery.data?.token;
+  const token = instanceTokenQuery.data?.token ?? null;
   const generateTokenMutation = api.user.generateToken.useMutation();
 
   const generateToken = async (instanceId: string) => {
     await generateTokenMutation.mutateAsync({ instanceId });
+    await instanceTokenQuery.refetch();
   };
 
   return (
@@ -35,7 +38,9 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
         </CardTitle>
         {instance?.description && <CardDescription>{instance.description}</CardDescription>}
       </CardHeader>
-      <CardContent></CardContent>
+      <CardContent className="py-3">
+        <InstanceUsageStatistics instanceId={instance.id} />
+      </CardContent>
       <CardFooter className="border-t py-3">
         <div className="flex w-full flex-row items-center justify-between">
           <div className="flex flex-row items-center space-x-3">
@@ -43,7 +48,15 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
             <Label>Token</Label>
             <span className="rounded-md border px-3 py-1 text-sm">
               {token ?? "无"}
-              <Button className="ml-2 rounded p-1" variant={"ghost"} size={"sm"} disabled={!token}>
+              <Button
+                className="ml-2 rounded p-1"
+                variant={"ghost"}
+                size={"sm"}
+                disabled={!token}
+                onClick={async () => {
+                  await copyToClipBoard(token);
+                }}
+              >
                 <Icons.copy className="h-3 w-3" />
               </Button>
             </span>

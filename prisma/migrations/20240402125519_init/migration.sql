@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('USER', 'ADMIN');
 
 -- CreateEnum
-CREATE TYPE "ResourceUnit" AS ENUM ('TOKEN', 'INPUT_CHAR', 'CREDITS');
+CREATE TYPE "ResourceUnit" AS ENUM ('CHAR');
 
 -- CreateEnum
 CREATE TYPE "RefreshPeriod" AS ENUM ('DAILY', 'MONTHLY', 'YEARLY', 'NEVER');
@@ -67,7 +67,6 @@ CREATE TABLE "UserEventLog" (
     "id" TEXT NOT NULL,
     "userId" TEXT,
     "type" TEXT NOT NULL,
-    "detail" TEXT,
     "resultType" TEXT NOT NULL,
     "content" JSONB NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -80,10 +79,12 @@ CREATE TABLE "UserResourceUsageLog" (
     "id" TEXT NOT NULL,
     "userId" TEXT,
     "instanceId" TEXT,
-    "resourceType" TEXT NOT NULL,
+    "model" TEXT NOT NULL,
     "openaiTeamId" TEXT,
-    "unit" "ResourceUnit" NOT NULL,
-    "amount" INTEGER NOT NULL,
+    "text" TEXT,
+    "utf8Length" INTEGER,
+    "tokensLength" INTEGER,
+    "conversationId" TEXT,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "UserResourceUsageLog_pkey" PRIMARY KEY ("id")
@@ -100,6 +101,9 @@ CREATE UNIQUE INDEX "ServiceInstance_name_key" ON "ServiceInstance"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "UserInstanceToken_token_key" ON "UserInstanceToken"("token");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "UserInstanceToken_userId_instanceId_key" ON "UserInstanceToken"("userId", "instanceId");
 
 -- AddForeignKey
 ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

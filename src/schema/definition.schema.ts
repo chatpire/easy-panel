@@ -6,13 +6,6 @@ import {
 
 export const ServiceTypeSchema = z.enum(["CHATGPT_SHARED"]);
 
-export const ResourceTypeSchema = z.enum([
-  "CHATGPT_SHARED_GPT_3.5",
-  "CHATGPT_SHARED_GPT_4",
-  "CHATGPT_SHARED_GPT_4_GIZMO",
-  "CHATGPT_SHARED_GPT_4_CREATOR",
-]);
-
 export const DURATION_WINDOWS = {
   "10m": 10 * 60,
   "30m": 30 * 60,

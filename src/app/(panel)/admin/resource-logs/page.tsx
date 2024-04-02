@@ -7,7 +7,7 @@ import { api } from "@/trpc/server";
 
 async function fetchData(pagination: PaginationInput) {
   "use server";
-  return await api.resourceLog.getAllByUser({ pagination });
+  return await api.resourceLog.getMany({ pagination, where: {} });
 }
 
 export default async function UsersPage({}) {

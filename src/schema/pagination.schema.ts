@@ -13,6 +13,17 @@ export const PaginationOutputSchema = z.object({
   prevPage: z.number().int().nullable(),
 });
 
+export const createPaginatedOutputSchema = <T extends z.ZodType<any>>(dataSchema: T) =>
+  z.object({
+    data: z.array(dataSchema),
+    pagination: PaginationOutputSchema,
+  });
+
+export type PaginatedOutput<T> = {
+  data: T[];
+  pagination: PaginationOutput;
+};
+
 export const getPaginatedDataSchema = <T extends z.ZodType<any>>(dataSchema: T) =>
   z.object({
     data: z.array(dataSchema),
