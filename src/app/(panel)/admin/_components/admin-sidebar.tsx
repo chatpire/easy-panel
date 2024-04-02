@@ -5,7 +5,7 @@ import { Layout, LayoutHeader } from "@/components/custom/layout";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
-import { type NavLink } from "types";
+import { type NavItem } from "types";
 import { useUserAttr } from "@/components/session-provider";
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
@@ -15,7 +15,7 @@ import { ThemeToggle } from "@/components/mode-toggle";
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
   isCollapsed: boolean;
   setIsCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
-  items: NavLink[];
+  items: NavItem[];
 }
 
 export default function AdminSidebar({ className, isCollapsed, setIsCollapsed, items }: SidebarProps) {

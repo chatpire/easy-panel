@@ -2,9 +2,9 @@
 
 import { popup } from "@/components/popup";
 import { Button } from "@/components/ui/button";
-import { type UserSchemaWithAdmin } from "@/schema/user.schema";
+import { type UserReadAdmin } from "@/schema/user.schema";
 
-export function banUser(user: Pick<UserSchemaWithAdmin, "id" | "username">) {
+export function banUser(user: Pick<UserReadAdmin, "id" | "username">) {
   popup({
     title: `Ban User`,
     description:
@@ -17,7 +17,7 @@ export function banUser(user: Pick<UserSchemaWithAdmin, "id" | "username">) {
   });
 }
 
-export function deleteUser(user: Pick<UserSchemaWithAdmin, "id" | "username">) {
+export function deleteUser(user: Pick<UserReadAdmin, "id" | "username">) {
   popup({
     title: `Delete User`,
     description: "Delete user from database. This action cannot be undone.",

@@ -17,17 +17,17 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import useCheckActiveNav from "@/hooks/use-check-active-nav";
-import { NavLink, type SideLink } from "types";
+import { type NavItem, type SideItem } from "types";
 import { Icons } from "../icons";
 
 interface NavProps extends React.HTMLAttributes<HTMLDivElement> {
   isCollapsed: boolean;
-  items: NavLink[];
+  items: NavItem[];
   closeNav: () => void;
 }
 
 export default function SidebarNav({ items, isCollapsed, className, closeNav }: NavProps) {
-  const renderLink = (item: SideLink) => {
+  const renderLink = (item: SideItem) => {
     const key = `${item.title}-${item.href}`;
     if (isCollapsed && item.sub) return <NavLinkIconDropdown item={item} key={key} closeNav={closeNav} />;
 
@@ -55,7 +55,7 @@ export default function SidebarNav({ items, isCollapsed, className, closeNav }: 
 }
 
 interface NavLinkProps {
-  item: SideLink;
+  item: SideItem;
   subLink?: boolean;
   closeNav: () => void;
 }

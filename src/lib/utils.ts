@@ -1,4 +1,4 @@
-import { PaginationInput } from "@/schema/pagination.schema";
+import { type PaginationInput } from "@/schema/pagination.schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";

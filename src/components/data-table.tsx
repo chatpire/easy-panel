@@ -45,9 +45,9 @@ import { DataTableColumnHeader, getDataTableCheckboxColumn } from "@/app/_helper
 import { camelCaseToTitleCase, formatUserDataTableCellValue } from "@/app/_helpers/data-table-cell-formatter";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { extractKeysFromSchema } from "@/lib/utils";
-import { z } from "zod";
+import { type z } from "zod";
 import { Icons } from "./icons";
-import { PaginatedData, PaginationInput } from "@/schema/pagination.schema";
+import { type PaginatedData, type PaginationInput } from "@/schema/pagination.schema";
 
 export interface DataTableIconAction<T> {
   key: string;

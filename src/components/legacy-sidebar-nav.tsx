@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { type NavLink } from "types";
+import { type NavItem } from "types";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
 
 interface Props {
-  items: NavLink[];
+  items: NavItem[];
   className?: string;
 }
 

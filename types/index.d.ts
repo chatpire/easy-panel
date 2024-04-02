@@ -8,7 +8,7 @@ export type HeaderNavItem = {
   role?: UserRole;
 };
 
-export type NavLink = {
+export type NavItem = {
   title: string;
   label?: string;
   disabled?: boolean;
@@ -18,8 +18,8 @@ export type NavLink = {
   icon?: keyof typeof Icons;
 };
 
-export interface SideLink extends NavLink {
-  sub?: NavLink[];
+export interface SideItem extends NavItem {
+  sub?: NavItem[];
 }
 
 export type SiteConfig = {

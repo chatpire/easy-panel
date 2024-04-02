@@ -1,6 +1,6 @@
-import { type SideLink, type NavLink } from "types";
+import { type SideItem, type NavItem } from "types";
 
-export const userNavConfig: NavLink[] = [
+export const userNavConfig: NavItem[] = [
   // {
   //   title: "ChatGPT",
   //   href: "https://chat.openai.com/",
@@ -24,7 +24,7 @@ export const userNavConfig: NavLink[] = [
   },
 ];
 
-export const adminNavConfig: SideLink[] = [
+export const adminNavConfig: SideItem[] = [
   {
     title: "Dashboard",
     href: "/admin/dashboard",
