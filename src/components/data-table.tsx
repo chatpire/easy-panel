@@ -43,7 +43,6 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DataTableColumnHeader, getDataTableCheckboxColumn } from "@/app/_helpers/data-table-helper";
 import { camelCaseToTitleCase, formatUserDataTableCellValue } from "@/app/_helpers/data-table-cell-formatter";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { extractKeysFromSchema } from "@/lib/utils";
 import { type z } from "zod";
 import { Icons } from "./icons";
@@ -315,8 +314,8 @@ export function DataTable<T>({
         filterSearchField={filterSearchField}
         enableColumnSelector={enableColumnSelector}
       />
-      <ScrollArea className="max-h-[600px] w-full rounded-md border">
-        <Table className="relative">
+      <div className="max-h-full overflow-auto w-full rounded-md border">
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -350,8 +349,7 @@ export function DataTable<T>({
             )}
           </TableBody>
         </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
       <div className="flex flex-row items-center justify-between space-x-2 py-4">
         <div className="text-sm text-muted-foreground">
           <div className="">
