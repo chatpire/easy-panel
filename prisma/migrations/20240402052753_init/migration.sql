@@ -81,6 +81,7 @@ CREATE TABLE "UserResourceUsageLog" (
     "userId" TEXT,
     "instanceId" TEXT,
     "resourceType" TEXT NOT NULL,
+    "openaiTeamId" TEXT,
     "unit" "ResourceUnit" NOT NULL,
     "amount" INTEGER NOT NULL,
     "timestamp" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

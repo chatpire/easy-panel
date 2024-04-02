@@ -123,6 +123,7 @@ model UserResourceUsageLog {
     instance     ServiceInstance? @relation(fields: [instanceId], references: [id])
     /// [ResourceType]
     resourceType String /// @zod.custom.use(z.lazy(() => ResourceTypeSchema))
+    openaiTeamId String?
     unit         ResourceUnit
     amount       Int
     timestamp    DateTime         @default(now())

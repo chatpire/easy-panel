@@ -67,7 +67,7 @@ export const UserInstanceTokenScalarFieldEnumSchema = z.enum(['id','userId','ins
 
 export const UserEventLogScalarFieldEnumSchema = z.enum(['id','userId','type','detail','resultType','content','timestamp']);
 
-export const UserResourceUsageLogScalarFieldEnumSchema = z.enum(['id','userId','instanceId','resourceType','unit','amount','timestamp']);
+export const UserResourceUsageLogScalarFieldEnumSchema = z.enum(['id','userId','instanceId','resourceType','openaiTeamId','unit','amount','timestamp']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -417,6 +417,7 @@ export const UserResourceUsageLogSchema = z.object({
    * [ResourceType]
    */
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().nullable(),
   amount: z.number().int(),
   timestamp: z.coerce.date(),
 })
@@ -637,6 +638,7 @@ export const UserResourceUsageLogSelectSchema: z.ZodType<Prisma.UserResourceUsag
   userId: z.boolean().optional(),
   instanceId: z.boolean().optional(),
   resourceType: z.boolean().optional(),
+  openaiTeamId: z.boolean().optional(),
   unit: z.boolean().optional(),
   amount: z.boolean().optional(),
   timestamp: z.boolean().optional(),
@@ -1070,6 +1072,7 @@ export const UserResourceUsageLogWhereInputSchema: z.ZodType<Prisma.UserResource
   userId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  openaiTeamId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   unit: z.union([ z.lazy(() => EnumResourceUnitFilterSchema),z.lazy(() => ResourceUnitSchema) ]).optional(),
   amount: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
@@ -1082,6 +1085,7 @@ export const UserResourceUsageLogOrderByWithRelationInputSchema: z.ZodType<Prism
   userId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   instanceId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   resourceType: z.lazy(() => SortOrderSchema).optional(),
+  openaiTeamId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional(),
@@ -1100,6 +1104,7 @@ export const UserResourceUsageLogWhereUniqueInputSchema: z.ZodType<Prisma.UserRe
   userId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => StringFilterSchema),z.lazy(() => ResourceTypeSchema) ]).optional(),
+  openaiTeamId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   unit: z.union([ z.lazy(() => EnumResourceUnitFilterSchema),z.lazy(() => ResourceUnitSchema) ]).optional(),
   amount: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
@@ -1112,6 +1117,7 @@ export const UserResourceUsageLogOrderByWithAggregationInputSchema: z.ZodType<Pr
   userId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   instanceId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   resourceType: z.lazy(() => SortOrderSchema).optional(),
+  openaiTeamId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional(),
@@ -1130,6 +1136,7 @@ export const UserResourceUsageLogScalarWhereWithAggregatesInputSchema: z.ZodType
   userId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  openaiTeamId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   unit: z.union([ z.lazy(() => EnumResourceUnitWithAggregatesFilterSchema),z.lazy(() => ResourceUnitSchema) ]).optional(),
   amount: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   timestamp: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
@@ -1529,6 +1536,7 @@ export const UserEventLogUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserEv
 export const UserResourceUsageLogCreateInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateInput> = z.object({
   id: z.string().cuid().optional(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional(),
@@ -1541,6 +1549,7 @@ export const UserResourceUsageLogUncheckedCreateInputSchema: z.ZodType<Prisma.Us
   userId: z.string().optional().nullable(),
   instanceId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
@@ -1549,6 +1558,7 @@ export const UserResourceUsageLogUncheckedCreateInputSchema: z.ZodType<Prisma.Us
 export const UserResourceUsageLogUpdateInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1561,6 +1571,7 @@ export const UserResourceUsageLogUncheckedUpdateInputSchema: z.ZodType<Prisma.Us
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1571,6 +1582,7 @@ export const UserResourceUsageLogCreateManyInputSchema: z.ZodType<Prisma.UserRes
   userId: z.string().optional().nullable(),
   instanceId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
@@ -1579,6 +1591,7 @@ export const UserResourceUsageLogCreateManyInputSchema: z.ZodType<Prisma.UserRes
 export const UserResourceUsageLogUpdateManyMutationInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateManyMutationInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1589,6 +1602,7 @@ export const UserResourceUsageLogUncheckedUpdateManyInputSchema: z.ZodType<Prism
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -2020,6 +2034,7 @@ export const UserResourceUsageLogCountOrderByAggregateInputSchema: z.ZodType<Pri
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   resourceType: z.lazy(() => SortOrderSchema).optional(),
+  openaiTeamId: z.lazy(() => SortOrderSchema).optional(),
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional()
@@ -2034,6 +2049,7 @@ export const UserResourceUsageLogMaxOrderByAggregateInputSchema: z.ZodType<Prism
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   resourceType: z.lazy(() => SortOrderSchema).optional(),
+  openaiTeamId: z.lazy(() => SortOrderSchema).optional(),
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional()
@@ -2044,6 +2060,7 @@ export const UserResourceUsageLogMinOrderByAggregateInputSchema: z.ZodType<Prism
   userId: z.lazy(() => SortOrderSchema).optional(),
   instanceId: z.lazy(() => SortOrderSchema).optional(),
   resourceType: z.lazy(() => SortOrderSchema).optional(),
+  openaiTeamId: z.lazy(() => SortOrderSchema).optional(),
   unit: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   timestamp: z.lazy(() => SortOrderSchema).optional()
@@ -2736,6 +2753,7 @@ export const UserEventLogCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.Use
 export const UserResourceUsageLogCreateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateWithoutUserInput> = z.object({
   id: z.string().cuid().optional(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional(),
@@ -2746,6 +2764,7 @@ export const UserResourceUsageLogUncheckedCreateWithoutUserInputSchema: z.ZodTyp
   id: z.string().cuid().optional(),
   instanceId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
@@ -2869,6 +2888,7 @@ export const UserResourceUsageLogScalarWhereInputSchema: z.ZodType<Prisma.UserRe
   userId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   instanceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  openaiTeamId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   unit: z.union([ z.lazy(() => EnumResourceUnitFilterSchema),z.lazy(() => ResourceUnitSchema) ]).optional(),
   amount: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   timestamp: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
@@ -2994,6 +3014,7 @@ export const UserUncheckedUpdateWithoutSessionsInputSchema: z.ZodType<Omit<Prism
 export const UserResourceUsageLogCreateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogCreateWithoutInstanceInput> = z.object({
   id: z.string().cuid().optional(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional(),
@@ -3004,6 +3025,7 @@ export const UserResourceUsageLogUncheckedCreateWithoutInstanceInputSchema: z.Zo
   id: z.string().cuid().optional(),
   userId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
@@ -3483,6 +3505,7 @@ export const UserResourceUsageLogCreateManyUserInputSchema: z.ZodType<Prisma.Use
   id: z.string().cuid().optional(),
   instanceId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
@@ -3548,6 +3571,7 @@ export const UserEventLogUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Pr
 export const UserResourceUsageLogUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateWithoutUserInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3558,6 +3582,7 @@ export const UserResourceUsageLogUncheckedUpdateWithoutUserInputSchema: z.ZodTyp
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3567,6 +3592,7 @@ export const UserResourceUsageLogUncheckedUpdateManyWithoutUserInputSchema: z.Zo
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   instanceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3603,6 +3629,7 @@ export const UserResourceUsageLogCreateManyInstanceInputSchema: z.ZodType<Prisma
   id: z.string().cuid().optional(),
   userId: z.string().optional().nullable(),
   resourceType: z.lazy(() => ResourceTypeSchema),
+  openaiTeamId: z.string().optional().nullable(),
   unit: z.lazy(() => ResourceUnitSchema),
   amount: z.number().int(),
   timestamp: z.coerce.date().optional()
@@ -3620,6 +3647,7 @@ export const UserInstanceTokenCreateManyInstanceInputSchema: z.ZodType<Omit<Pris
 export const UserResourceUsageLogUpdateWithoutInstanceInputSchema: z.ZodType<Prisma.UserResourceUsageLogUpdateWithoutInstanceInput> = z.object({
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3630,6 +3658,7 @@ export const UserResourceUsageLogUncheckedUpdateWithoutInstanceInputSchema: z.Zo
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3639,6 +3668,7 @@ export const UserResourceUsageLogUncheckedUpdateManyWithoutInstanceInputSchema: 
   id: z.union([ z.string().cuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   userId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   resourceType: z.union([ z.lazy(() => ResourceTypeSchema),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  openaiTeamId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   unit: z.union([ z.lazy(() => ResourceUnitSchema),z.lazy(() => EnumResourceUnitFieldUpdateOperationsInputSchema) ]).optional(),
   amount: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   timestamp: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
