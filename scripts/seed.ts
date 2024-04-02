@@ -90,6 +90,7 @@ async function main() {
           resourceType: faker.helpers.arrayElement(["CHATGPT_SHARED_GPT_3.5", "CHATGPT_SHARED_GPT_4"]),
           unit: ResourceUnit.INPUT_CHAR,
           amount: faker.number.int(1000),
+          openaiTeamId: null,
           timestamp: randomDate,
         } as z.infer<typeof UserResourceUsageLogCreateInputSchema>),
       });

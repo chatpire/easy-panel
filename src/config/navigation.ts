@@ -17,6 +17,11 @@ export const userNavConfig: NavLink[] = [
     href: "/dashboard/settings",
     icon: "settings",
   },
+  {
+    title: "Logs",
+    href: "/dashboard/logs",
+    icon: "settings",
+  },
 ];
 
 export const adminNavConfig: SideLink[] = [

@@ -7,7 +7,7 @@ interface DashboardShellProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function PageShell({ children, className, ...props }: DashboardShellProps) {
   return (
-    <div className={cn("grid max-w-full items-start gap-8", className)} {...props}>
+    <div className={cn("grid max-w-full items-start gap-4", className)} {...props}>
       {children}
     </div>
   );

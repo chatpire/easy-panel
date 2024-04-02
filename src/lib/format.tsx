@@ -5,7 +5,7 @@ export function formatValueToNode(value: unknown): React.ReactNode {
     return <span className="text-gray-400"> null </span>;
   }
   if (value instanceof Date) {
-    return <span className="text-xs">{value.toLocaleString()}</span>;
+    return <span className="text-sm">{value.toLocaleString()}</span>;
   }
   return formatValueToString(value);
 }

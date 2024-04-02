@@ -97,7 +97,15 @@ export function DataTableColumnSelector<T>({ table }: { table: ReactTable<T> }) 
   );
 }
 
-export function DataTableHeader<T>({ table, filterSearchField }: { table: ReactTable<T>; filterSearchField?: string }) {
+export function DataTableHeader<T>({
+  table,
+  filterSearchField,
+  enableColumnSelector,
+}: {
+  table: ReactTable<T>;
+  filterSearchField?: string;
+  enableColumnSelector?: boolean;
+}) {
   return (
     <div className="flex flex-col items-center space-y-4 py-4 md:flex-row md:space-y-0">
       {filterSearchField && (
@@ -108,7 +116,7 @@ export function DataTableHeader<T>({ table, filterSearchField }: { table: ReactT
           className="max-w-sm"
         />
       )}
-      <DataTableColumnSelector table={table} />
+      {enableColumnSelector && <DataTableColumnSelector table={table} />}
     </div>
   );
 }
@@ -196,6 +204,7 @@ interface DataTableProps<T> {
   className?: string;
   schema: z.ZodObject<z.ZodRawShape>;
   filterSearchField?: string;
+  enableColumnSelector?: boolean;
   rowIconActions?: DataTableIconAction<T>[];
   rowDropdownActions?: DataTableDropdownAction<T>[];
   allowSelection?: boolean; // todo
@@ -209,6 +218,7 @@ export function DataTable<T>({
   data,
   schema,
   filterSearchField,
+  enableColumnSelector,
   rowIconActions,
   rowDropdownActions,
   className,
@@ -297,7 +307,11 @@ export function DataTable<T>({
 
   return (
     <div className={className}>
-      <DataTableHeader table={table} filterSearchField={filterSearchField} />
+      <DataTableHeader
+        table={table}
+        filterSearchField={filterSearchField}
+        enableColumnSelector={enableColumnSelector}
+      />
       <ScrollArea className="max-h-[600px] w-full rounded-md border">
         <Table className="relative">
           <TableHeader>
