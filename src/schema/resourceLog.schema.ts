@@ -6,6 +6,7 @@ export const ResourceLogSumResultSchema = z.object({
   unit: ResourceUnitSchema,
   durationWindow: DurationWindowSchema,
   value: z.number().int(),
+  count: z.number().int(),
 });
 
 

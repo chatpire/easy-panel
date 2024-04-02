@@ -29,6 +29,7 @@ import {
   ChevronDown,
   Copy,
   Rocket,
+  FileClock,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -61,6 +62,7 @@ export const Icons = {
   laptop: Laptop,
   externalLink: ExternalLink,
   info: Info,
+  fileClock: FileClock,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

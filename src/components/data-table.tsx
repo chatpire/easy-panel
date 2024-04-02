@@ -106,6 +106,9 @@ export function DataTableHeader<T>({
   filterSearchField?: string;
   enableColumnSelector?: boolean;
 }) {
+  if (!filterSearchField && !enableColumnSelector) {
+    return null;
+  }
   return (
     <div className="flex flex-col items-center space-y-4 py-4 md:flex-row md:space-y-0">
       {filterSearchField && (

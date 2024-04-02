@@ -7,12 +7,12 @@ import { UserResourceUsageLogSchema } from "@/schema/generated/zod";
 const UserResourceUsageLogDisplaySchema = UserResourceUsageLogSchema.pick({
   timestamp: true,
   instanceId: true,
+  openaiTeamId: true,
   unit: true,
   amount: true,
-  openaiTeamId: true,
 });
 
-export function ResourceLogsTable({ fetchData }: { fetchData: (input: PaginationInput) => Promise<any> }) {
+export function UserResourceLogsTable({ fetchData }: { fetchData: (input: PaginationInput) => Promise<any> }) {
   return (
     <div className="w-full">
       <DataTable schema={UserResourceUsageLogDisplaySchema} lazyPagination={true} fetchData={fetchData} />

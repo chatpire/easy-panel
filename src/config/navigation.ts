@@ -1,4 +1,4 @@
-import { SideLink, type NavLink } from "types";
+import { type SideLink, type NavLink } from "types";
 
 export const userNavConfig: NavLink[] = [
   // {
@@ -20,7 +20,7 @@ export const userNavConfig: NavLink[] = [
   {
     title: "Logs",
     href: "/dashboard/logs",
-    icon: "settings",
+    icon: "fileClock",
   },
 ];
 
