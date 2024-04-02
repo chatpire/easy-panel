@@ -8,7 +8,7 @@ export const env = createEnv({
    */
   server: {
     DATABASE_TYPE: z.enum(["postgres", "neon"]),
-    DATABASE_URL: z
+    POSTGRES_URL: z
       .string()
       .url()
       .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
@@ -40,7 +40,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_TYPE: process.env.DATABASE_TYPE,
-    DATABASE_URL: process.env.DATABASE_URL,
+    POSTGRES_URL: process.env.POSTGRES_URL,
     NODE_ENV: process.env.NODE_ENV,
     LUCIA_ID_LENGTH: process.env.LUCIA_ID_LENGTH,
   },
