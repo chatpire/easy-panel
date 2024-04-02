@@ -7,7 +7,7 @@ export const PaginationInputSchema = z.object({
 
 export const PaginationOutputSchema = z.object({
   total: z.number().int(),
-  currentPage: z.number().int(),  // 1-based
+  currentPage: z.number().int(), // 1-based
   totalPages: z.number().int(),
   nextPage: z.number().int().nullable(),
   prevPage: z.number().int().nullable(),

@@ -1,7 +1,5 @@
-
 // Modified from shadcn-admin/src/components/nav.tsx
-'use client';
-
+"use client";
 
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";

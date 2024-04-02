@@ -10,7 +10,7 @@ const createPrismaClient = () => {
       log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
     });
   } else if (env.DATABASE_TYPE === "neon") {
-    console.debug("Using Neon database adapter");
+    // console.debug("Using Neon database adapter");
     const neon = new Pool({ connectionString: env.POSTGRES_URL });
     const adapter = new PrismaNeon(neon);
     return new PrismaClient({ adapter, log: env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"] });

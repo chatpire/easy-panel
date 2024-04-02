@@ -1,11 +1,11 @@
+"use client";
+
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCurrentUserOrRedirect } from "@/lib/session";
 import { PageShell } from "../../_components/dashboard-shell";
 import { PageHeader } from "../../_components/page-header";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export default async function DashboardPage({}) {
+export default function DashboardPage({}) {
   return (
     <PageShell>
       <PageHeader heading="System Info" text="系统概览" />

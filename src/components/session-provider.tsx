@@ -19,7 +19,7 @@ export const useSession = () => {
 export const useUserAttr = () => {
   const session = useSession();
   return session?.userAttr;
-}
+};
 
 export default function SessionProvider({ children, value }: { children: React.ReactNode; value: ContextType }) {
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

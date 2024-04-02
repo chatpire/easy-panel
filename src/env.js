@@ -13,16 +13,20 @@ export const env = createEnv({
       .url()
       .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    LUCIA_ID_LENGTH: z.string().optional().default("16").transform((val) => {
-      const parsed = parseInt(val, 10);
-      if (isNaN(parsed)) {
-        throw new Error("LUCIA_ID_LENGTH must be a number");
-      }
-      if (parsed <= 6 || parsed >= 32) {
-        throw new Error("LUCIA_ID_LENGTH must be between 6 and 32");
-      }
-      return parsed;
-    }),
+    LUCIA_ID_LENGTH: z
+      .string()
+      .optional()
+      .default("16")
+      .transform((val) => {
+        const parsed = parseInt(val, 10);
+        if (isNaN(parsed)) {
+          throw new Error("LUCIA_ID_LENGTH must be a number");
+        }
+        if (parsed <= 6 || parsed >= 32) {
+          throw new Error("LUCIA_ID_LENGTH must be between 6 and 32");
+        }
+        return parsed;
+      }),
   },
 
   /**

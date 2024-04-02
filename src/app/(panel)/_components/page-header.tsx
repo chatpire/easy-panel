@@ -1,3 +1,5 @@
+"use client";
+
 interface DashboardHeaderProps {
   heading: string;
   text?: string;

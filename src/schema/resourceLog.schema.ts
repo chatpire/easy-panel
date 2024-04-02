@@ -9,5 +9,4 @@ export const ResourceLogSumResultSchema = z.object({
   count: z.number().int(),
 });
 
-
 export type ResourceLogSumResults = z.infer<typeof ResourceLogSumResultSchema>[];

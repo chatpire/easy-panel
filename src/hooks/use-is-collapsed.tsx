@@ -4,7 +4,9 @@ import { useEffect } from "react";
 import { useLocalStorage } from "usehooks-ts";
 
 export default function useIsCollapsed() {
-  const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>("collapsed-sidebar", false, {initializeWithValue: true});
+  const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>("collapsed-sidebar", false, {
+    initializeWithValue: true,
+  });
 
   useEffect(() => {
     const handleResize = () => {

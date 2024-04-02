@@ -38,7 +38,7 @@ export const StatisticsItem: FC<StatisticsItemProps> = ({ value, label, suffix, 
       {values.map((val, idx) => (
         <div key={idx} className="text-2xl font-semibold">
           {val}
-          {suffixes[idx] && <span className="ml-1 font-medium text-xl">{suffixes[idx]}</span>}
+          {suffixes[idx] && <span className="ml-1 text-xl font-medium">{suffixes[idx]}</span>}
         </div>
       ))}
     </div>
@@ -58,9 +58,7 @@ interface StatisticsGroupProps extends HTMLAttributes<HTMLDivElement> {
 export const StatisticsGroup: FC<StatisticsGroupProps> = ({ data, className, children, ...props }) => {
   return (
     <div className={cn("grid grid-cols-2 gap-4", className)} {...props}>
-      {data
-        ? data.map((item, idx) => <StatisticsItem key={idx} {...item} />)
-        : children}
+      {data ? data.map((item, idx) => <StatisticsItem key={idx} {...item} />) : children}
     </div>
   );
 };

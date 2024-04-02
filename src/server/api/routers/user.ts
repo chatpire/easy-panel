@@ -161,7 +161,7 @@ export const userRouter = createTRPCRouter({
         },
       });
       if (!token) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "Token not found" });
+        return null;
       }
       return UserInstanceTokenSchema.parse(token);
     }),

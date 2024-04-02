@@ -51,7 +51,7 @@ export default function AdminSidebar({ className, isCollapsed, setIsCollapsed, i
           <div className="flex w-full flex-row justify-between">
             <div className={`flex items-center ${!isCollapsed ? "gap-2" : ""}`}>
               <Link href="/">
-                <Icons.logo className={cn("transition-all", isCollapsed ? "w-6 h-6" : "w-6 h-6")} />
+                <Icons.logo className={cn("transition-all", isCollapsed ? "h-6 w-6" : "h-6 w-6")} />
               </Link>
               <div className={`flex flex-col justify-end truncate ${isCollapsed ? "invisible w-0" : "visible w-auto"}`}>
                 <span className="font-medium">{siteConfig.name} Admin</span>
