@@ -12,7 +12,7 @@ export function formatUserDataTableCellValue<T>(key: string, value: any): React.
     // return <Badge variant="default">{(value as string).toLowerCase()}</Badge>;
     return (value as string).toLowerCase();
   }
-  return formatValueToNode(value);
+  return formatValueToNode(key, value);
 }
 
 export function camelCaseToTitleCase(input: string): string {

@@ -1,11 +1,36 @@
 "use client";
 
-export function formatValueToNode(value: unknown): React.ReactNode {
+import { popup } from "@/components/popup";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+export function formatValueToNode(key: string, value: unknown): React.ReactNode {
   if (value === null) {
     return <span className="text-gray-400"> null </span>;
   }
   if (value instanceof Date) {
     return <span className="text-sm">{value.toLocaleString()}</span>;
+  }
+  if (value instanceof Object) {
+    return (
+      <Button
+        variant="ghost"
+        className="p-2 text-xs"
+        onClick={() => {
+          popup({
+            title: key,
+            description: "JSON",
+            content: () => (
+              <ScrollArea className="max-h-[300px]">
+                <pre className="text-sm">{JSON.stringify(value, null, 2)}</pre>
+              </ScrollArea>
+            ),
+          });
+        }}
+      >
+        {JSON.stringify(value).substring(0, 100)}
+      </Button>
+    );
   }
   return formatValueToString(value);
 }
