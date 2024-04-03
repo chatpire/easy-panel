@@ -1,8 +1,7 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
-
-const booleanEnv = z.preprocess((val) => { 
+const booleanEnv = z.preprocess((val) => {
   val = String(val).toLowerCase();
   if (val === "true") return true;
   if (val === "false") return false;
@@ -22,6 +21,10 @@ export const env = createEnv({
       .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     LUCIA_ID_LENGTH: z.coerce.number().min(1).max(64).optional().default(16),
+
+    ADMIN_USERNAME: z.string().optional().default("admin"),
+    ADMIN_EMAIL: z.string().email().optional().default("admin@example.com"),
+    ADMIN_PASSWORD: z.string().optional().default("adminadmin"),
 
     COOKIE_PREFIX: z.string().optional().default("easy_cock"),
     ENABLE_PASSWORD_LOGIN: booleanEnv.default(true),
@@ -62,6 +65,10 @@ export const env = createEnv({
     POSTGRES_URL: process.env.POSTGRES_URL,
     NODE_ENV: process.env.NODE_ENV,
     LUCIA_ID_LENGTH: process.env.LUCIA_ID_LENGTH,
+
+    ADMIN_USERNAME: process.env.ADMIN_USERNAME,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
 
     COOKIE_PREFIX: process.env.COOKIE_PREFIX,
     BASE_URL: process.env.BASE_URL,
