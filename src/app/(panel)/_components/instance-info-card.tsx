@@ -20,16 +20,7 @@ interface Props extends React.HTMLAttributes<HTMLFormElement> {
   className?: string;
 }
 
-export function UserInstanceInfoCard({ instance, className }: Props) {
-  const instanceTokenQuery = api.user.getInstanceToken.useQuery({ instanceId: instance.id });
-  const token = instanceTokenQuery.data?.token ?? null;
-  const generateTokenMutation = api.user.generateToken.useMutation();
-
-  const generateToken = async (instanceId: string) => {
-    await generateTokenMutation.mutateAsync({ instanceId });
-    await instanceTokenQuery.refetch();
-  };
-
+export function InstanceInfoCard({ instance, className, children }: Props) {
   return (
     <Card className={cn("w-full", className)}>
       <CardHeader className="border-b">
@@ -41,39 +32,7 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
       <CardContent className="py-3">
         <InstanceUsageStatistics instanceId={instance.id} />
       </CardContent>
-      <CardFooter className="border-t py-3">
-        <div className="flex w-full flex-row items-center justify-between">
-          <div className="flex flex-row items-center space-x-3">
-            {/* <Input id="name" className="w-[400px]" defaultValue={token} placeholder="你还没有任何 UserToken" size={32} /> */}
-            <Label>Token</Label>
-            <span className="rounded-md border px-3 py-1 text-sm">
-              {token ?? "无"}
-              <Button
-                className="ml-2 rounded p-1"
-                variant={"ghost"}
-                size={"sm"}
-                disabled={!token}
-                onClick={async () => {
-                  await copyToClipBoard(token);
-                }}
-              >
-                <Icons.copy className="h-3 w-3" />
-              </Button>
-            </span>
-          </div>
-          <div className="flex flex-row items-center space-x-3">
-            <FunctionButton variant={"outline"} disabled={!!token} onClick={() => generateToken(instance.id)}>
-              生成 Token
-            </FunctionButton>
-            <Button>
-              <Icons.externalLink className="mr-2 h-4 w-4" />
-              <Link href={`${instance.url}?access_token=${token}`} target="_blank">
-                跳转到 ChatGPT
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </CardFooter>
+      <CardFooter className="border-t py-3">{children}</CardFooter>
     </Card>
   );
 }

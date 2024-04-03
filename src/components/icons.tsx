@@ -30,6 +30,7 @@ import {
   Copy,
   Rocket,
   FileClock,
+  Server,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -57,6 +58,7 @@ export const Icons = {
   help: HelpCircle,
   pizza: Pizza,
   rocket: Rocket,
+  server: Server,
   sun: SunMedium,
   moon: Moon,
   laptop: Laptop,

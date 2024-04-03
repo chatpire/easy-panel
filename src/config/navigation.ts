@@ -59,6 +59,20 @@ export const adminNavConfig: SideItem[] = [
       },
     ],
   },
+  {
+    title: "Instances",
+    icon: "server",
+    sub: [
+      {
+        title: "All Instances",
+        href: "/admin/instances",
+      },
+      {
+        title: "Create Instance",
+        href: "/admin/instances/create",
+      },
+    ],
+  }
 ];
 
 // const filterRole = (role: UserRole | null, item: { access?: UserRole }) => {
