@@ -16,6 +16,7 @@ import {
   UserWhereUniqueInputSchema,
 } from "@/schema/generated/zod";
 import { generateId } from "lucia";
+import { writeUserCreateEventLog } from "@/server/actions/write-log";
 
 export const UserCreateSchema = UserOptionalDefaultsSchema.omit({
   hashedPassword: true,
@@ -27,7 +28,7 @@ export const UserCreateSchema = UserOptionalDefaultsSchema.omit({
   }),
 );
 
-export async function createUser(db: PrismaClient, input: z.infer<typeof UserCreateSchema>, instanceIds: string[]) {
+export async function createUser(db: PrismaClient, input: z.infer<typeof UserCreateSchema>, instanceIds: string[], by: "admin" | "oidc") {
   const user = await db.user.create({
     data: {
       ...input,
@@ -43,6 +44,8 @@ export async function createUser(db: PrismaClient, input: z.infer<typeof UserCre
       userInstanceTokens: true,
     },
   });
+
+  await writeUserCreateEventLog(db, user, by);
   return user;
 }
 
@@ -55,7 +58,7 @@ export const userRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await createUser(ctx.db, input.user, input.instanceIds);
+      const user = await createUser(ctx.db, input.user, input.instanceIds, "admin");
       return UserReadAdminSchema.parse(user);
     }),
 

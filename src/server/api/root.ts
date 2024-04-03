@@ -3,6 +3,7 @@ import { userRouter } from "./routers/user";
 import { serviceInstanceRouter } from "./routers/serviceInstance";
 import { resourceLogRouter } from "./routers/resourceLog";
 import { authRouter } from "./routers/auth";
+import { eventLogRouter } from "./routers/eventLog";
 
 /**
  * This is the primary router for your server.
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   auth: authRouter,
   user: userRouter,
   resourceLog: resourceLogRouter,
+  eventLog: eventLogRouter,
   serviceInstance: serviceInstanceRouter,
 });
 

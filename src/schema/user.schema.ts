@@ -1,4 +1,4 @@
-import { ServiceInstanceSchema, UserInstanceTokenSchema, UserSchema } from "@/schema/generated/zod";
+import { UserSchema } from "@/schema/generated/zod";
 import { z } from "zod";
 
 export const UserReadAdminSchema = UserSchema.omit({
@@ -32,3 +32,4 @@ export const UserUpdateAdminSchema = UserReadAdminSchema.omit({
 export const UserUpdateSelfSchema = UserUpdateAdminSchema.omit({
   id: true,
 });
+

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getOAuth2Client } from "@/server/oidc";
 import { cookies } from "next/headers";
 import { env } from "@/env";
@@ -8,6 +8,7 @@ import { db } from "@/server/db";
 import { UserCreateSchema, createUser } from "@/server/api/routers/user";
 import { UserRole } from "@prisma/client";
 import { lucia } from "@/server/auth";
+import { writeUserLoginEventLog } from "@/server/actions/write-log";
 
 const OIDCUserInfoSchema = z.object({
   sub: z.string(),
@@ -78,7 +79,10 @@ export async function GET(request: NextRequest) {
           role: UserRole.USER,
         }),
         instancesIds,
+        "oidc",
       );
+    } else {
+      await writeUserLoginEventLog(db, user.id, "success", "oidc");
     }
 
     const session = await lucia.createSession(user.id, {

@@ -1,7 +1,6 @@
 import { userNavConfig } from "@/config/navigation";
 import { getSessionUserAttrOrRedirect } from "@/lib/session";
 import { HeaderNav } from "@/app/(panel)/_components/dashboard-header-nav";
-import { SiteFooter } from "@/components/site-footer";
 import { UserAccountNav } from "@/app/(panel)/_components/user-account-nav";
 import { LegacySidebarNav } from "../../../components/legacy-sidebar-nav";
 import { Button } from "@/components/ui/button";

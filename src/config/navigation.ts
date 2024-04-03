@@ -47,10 +47,15 @@ export const adminNavConfig: SideItem[] = [
   },
   {
     title: "Logs",
+    icon: "fileClock",
     sub: [
       {
         title: "Resource Usage",
-        href: "/admin/resource-logs",
+        href: "/admin/logs/resource",
+      },
+      {
+        title: "Event Usage",
+        href: "/admin/logs/events",
       },
     ],
   },

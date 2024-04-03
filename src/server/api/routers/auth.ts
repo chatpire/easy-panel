@@ -6,6 +6,7 @@ import { verifyPassword } from "@/lib/password";
 import { lucia } from "@/server/auth";
 import { cookies } from "next/headers";
 import { env } from "@/env";
+import { writeUserLoginEventLog } from "@/server/actions/write-log";
 
 export const authRouter = createTRPCRouter({
   loginByPassword: publicProcedure.input(UserLoginFormSchema).mutation(async ({ ctx, input }) => {
@@ -25,6 +26,9 @@ export const authRouter = createTRPCRouter({
     if (!validPassword) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: "Wrong username or password" });
     }
+
+    await writeUserLoginEventLog(ctx.db, user.id, "success", "password");
+
     const session = await lucia.createSession(user.id, {
       currentIp: undefined, // todo
     });

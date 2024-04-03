@@ -22,17 +22,31 @@ export type DurationWindow = z.infer<typeof DurationWindowSchema>;
 
 export const ServiceInstanceAttributesSchema = z.discriminatedUnion("type", [ChatGPTSharedInstanceAttributesSchema]);
 
-export const EventTypeSchema = z.enum([
-  "user.login",
-  "user.logout",
-  "user.create",
-  "user.update",
-  "user.delete",
-  "user.password_change",
-  "chatgpt_shared.oauth",
-]);
+export const EventTypeSchema = z.enum(["user.login", "user.create", "chatgpt_shared.oauth"]);
 
-export const EventContentSchema = z.discriminatedUnion("type", [ChatGPTSharedOAuthEventContentSchema]);
+export const UserLoginEventContentSchema = z.object({
+  type: z.literal("user.login"),
+  method: z.enum(["password", "oidc"]),
+  ip: z.string().ip().optional(),
+});
+
+export const UserCreateEventContentSchema = z.object({
+  type: z.literal("user.create"),
+  userId: z.string(),
+  username: z.string(),
+  email: z.string().email(),
+  by: z.enum(["admin", "oidc"]),
+  ip: z.string().ip().optional(),
+});
+
+
+export const EventContentSchema = z
+  .discriminatedUnion("type", [
+    ChatGPTSharedOAuthEventContentSchema,
+    UserLoginEventContentSchema,
+    UserCreateEventContentSchema,
+  ])
+  .nullable();
 
 export const EventResultTypeSchema = z.enum(["success", "failure"]);
 

@@ -1,7 +1,6 @@
-import { UserEventLogSchema } from "@/schema/generated/zod";
+import { writeChatgptSharedOAuthLog } from "@/server/actions/write-log";
 import { db } from "@/server/db";
 import { api } from "@/trpc/server";
-import { type UserEventLog } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -33,21 +32,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       requestIp,
       userIp,
     });
-    // create log
-    const result = await db.userEventLog.create({
-      data: UserEventLogSchema.omit({ id: true, timestamp: true }).parse({
-        userId,
-        type: "chatgpt_shared.oauth",
-        resultType: "success",
-        content: {
-          type: "chatgpt_shared.oauth",
-          instanceId,
-          requestIp,
-          userIp,
-        },
-      } as UserEventLog),
-    });
-    console.debug("Created event log:", result);
+    await writeChatgptSharedOAuthLog(db, userId, instanceId, userIp, requestIp);
 
     return NextResponse.json({ code: 1 }, { status: 200 });
   } catch (e) {
