@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { api } from "@/trpc/react";
 
 export function useLogout() {
-  const logoutMutation = api.user.logout.useMutation();
+  const logoutMutation = api.auth.logout.useMutation();
   const router = useRouter();
 
   async function logout() {

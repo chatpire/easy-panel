@@ -111,7 +111,7 @@ export const UserSchema = z.object({
   isActive: z.boolean(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().nullable(),
 })
 
 export type User = z.infer<typeof UserSchema>
@@ -665,7 +665,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  hashedPassword: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  hashedPassword: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   sessions: z.lazy(() => SessionListRelationFilterSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogListRelationFilterSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogListRelationFilterSchema).optional(),
@@ -684,7 +684,7 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  hashedPassword: z.lazy(() => SortOrderSchema).optional(),
+  hashedPassword: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   sessions: z.lazy(() => SessionOrderByRelationAggregateInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogOrderByRelationAggregateInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogOrderByRelationAggregateInputSchema).optional(),
@@ -734,7 +734,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Omit<Prisma.UserWhereUniqueIn
   isActive: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   // omitted: createdAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   // omitted: updatedAt: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  hashedPassword: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  hashedPassword: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   sessions: z.lazy(() => SessionListRelationFilterSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogListRelationFilterSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogListRelationFilterSchema).optional(),
@@ -753,7 +753,7 @@ export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderBy
   isActive: z.lazy(() => SortOrderSchema).optional(),
   createdAt: z.lazy(() => SortOrderSchema).optional(),
   updatedAt: z.lazy(() => SortOrderSchema).optional(),
-  hashedPassword: z.lazy(() => SortOrderSchema).optional(),
+  hashedPassword: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => UserCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => UserMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => UserMinOrderByAggregateInputSchema).optional()
@@ -774,7 +774,7 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   isActive: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
   createdAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   updatedAt: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
-  hashedPassword: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  hashedPassword: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict() as z.ZodType<Prisma.UserScalarWhereWithAggregatesInput>;
 
 export const SessionWhereInputSchema: z.ZodType<Prisma.SessionWhereInput> = z.object({
@@ -1175,7 +1175,7 @@ export const UserCreateInputSchema: z.ZodType<Omit<Prisma.UserCreateInput, "crea
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional(),
@@ -1194,7 +1194,7 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Omit<Prisma.UserUnchecked
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -1213,7 +1213,7 @@ export const UserUpdateInputSchema: z.ZodType<Omit<Prisma.UserUpdateInput, "crea
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -1232,7 +1232,7 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Omit<Prisma.UserUnchecked
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -1251,7 +1251,7 @@ export const UserCreateManyInputSchema: z.ZodType<Omit<Prisma.UserCreateManyInpu
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string()
+  hashedPassword: z.string().optional().nullable()
 }).strict() as z.ZodType<Omit<Prisma.UserCreateManyInput, "createdAt" | "updatedAt">>;
 
 export const UserUpdateManyMutationInputSchema: z.ZodType<Omit<Prisma.UserUpdateManyMutationInput, "createdAt" | "updatedAt">> = z.object({
@@ -1266,7 +1266,7 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Omit<Prisma.UserUpdate
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict() as z.ZodType<Omit<Prisma.UserUpdateManyMutationInput, "createdAt" | "updatedAt">>;
 
 export const UserUncheckedUpdateManyInputSchema: z.ZodType<Omit<Prisma.UserUncheckedUpdateManyInput, "createdAt" | "updatedAt">> = z.object({
@@ -1281,7 +1281,7 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Omit<Prisma.UserUnche
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict() as z.ZodType<Omit<Prisma.UserUncheckedUpdateManyInput, "createdAt" | "updatedAt">>;
 
 export const SessionCreateInputSchema: z.ZodType<Omit<Prisma.SessionCreateInput, "createdAt">> = z.object({
@@ -2938,7 +2938,7 @@ export const UserCreateWithoutSessionsInputSchema: z.ZodType<Omit<Prisma.UserCre
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   eventLogs: z.lazy(() => UserEventLogCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
@@ -2956,7 +2956,7 @@ export const UserUncheckedCreateWithoutSessionsInputSchema: z.ZodType<Omit<Prism
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   eventLogs: z.lazy(() => UserEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -2990,7 +2990,7 @@ export const UserUpdateWithoutSessionsInputSchema: z.ZodType<Omit<Prisma.UserUpd
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   eventLogs: z.lazy(() => UserEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3008,7 +3008,7 @@ export const UserUncheckedUpdateWithoutSessionsInputSchema: z.ZodType<Omit<Prism
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   eventLogs: z.lazy(() => UserEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3120,7 +3120,7 @@ export const UserCreateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Pris
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional()
@@ -3138,7 +3138,7 @@ export const UserUncheckedCreateWithoutUserInstanceTokensInputSchema: z.ZodType<
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -3199,7 +3199,7 @@ export const UserUpdateWithoutUserInstanceTokensInputSchema: z.ZodType<Omit<Pris
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3217,7 +3217,7 @@ export const UserUncheckedUpdateWithoutUserInstanceTokensInputSchema: z.ZodType<
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3268,7 +3268,7 @@ export const UserCreateWithoutEventLogsInputSchema: z.ZodType<Omit<Prisma.UserCr
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogCreateNestedManyWithoutUserInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
@@ -3286,7 +3286,7 @@ export const UserUncheckedCreateWithoutEventLogsInputSchema: z.ZodType<Omit<Pris
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -3320,7 +3320,7 @@ export const UserUpdateWithoutEventLogsInputSchema: z.ZodType<Omit<Prisma.UserUp
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUpdateManyWithoutUserNestedInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3338,7 +3338,7 @@ export const UserUncheckedUpdateWithoutEventLogsInputSchema: z.ZodType<Omit<Pris
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   usageLogs: z.lazy(() => UserResourceUsageLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3356,7 +3356,7 @@ export const UserCreateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.UserCr
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionCreateNestedManyWithoutUserInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogCreateNestedManyWithoutUserInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenCreateNestedManyWithoutUserInputSchema).optional()
@@ -3374,7 +3374,7 @@ export const UserUncheckedCreateWithoutUsageLogsInputSchema: z.ZodType<Omit<Pris
   isActive: z.boolean().optional(),
   // omitted: createdAt: z.coerce.date().optional(),
   // omitted: updatedAt: z.coerce.date().optional(),
-  hashedPassword: z.string(),
+  hashedPassword: z.string().optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -3435,7 +3435,7 @@ export const UserUpdateWithoutUsageLogsInputSchema: z.ZodType<Omit<Prisma.UserUp
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUpdateManyWithoutUserNestedInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUpdateManyWithoutUserNestedInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUpdateManyWithoutUserNestedInputSchema).optional()
@@ -3453,7 +3453,7 @@ export const UserUncheckedUpdateWithoutUsageLogsInputSchema: z.ZodType<Omit<Pris
   isActive: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: createdAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   // omitted: updatedAt: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  hashedPassword: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  hashedPassword: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   sessions: z.lazy(() => SessionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   eventLogs: z.lazy(() => UserEventLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   userInstanceTokens: z.lazy(() => UserInstanceTokenUncheckedUpdateManyWithoutUserNestedInputSchema).optional()

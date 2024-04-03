@@ -1,24 +1,15 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createTRPCRouter, adminProcedure, protectedWithUserProcedure } from "@/server/trpc";
 import {
-  createTRPCRouter,
-  adminProcedure,
-  publicProcedure,
-  protectedWithUserProcedure,
-  protectedProcedure,
-} from "@/server/trpc";
-import {
-  UserLoginFormSchema,
   UserReadAdminSchema,
   UserReadSchema,
   UserUpdateSelfSchema,
   UserUpdatePasswordSchema,
 } from "@/schema/user.schema";
-import { hashPassword, verifyPassword } from "@/lib/password";
-import { lucia } from "@/server/auth";
-import { cookies } from "next/headers";
-import { UserRole } from "@prisma/client";
+import { hashPassword } from "@/lib/password";
+import { type PrismaClient, UserRole } from "@prisma/client";
 import {
   UserInstanceTokenSchema,
   UserOptionalDefaultsSchema,
@@ -26,46 +17,46 @@ import {
 } from "@/schema/generated/zod";
 import { generateId } from "lucia";
 
+export const UserCreateSchema = UserOptionalDefaultsSchema.omit({
+  hashedPassword: true,
+  createdAt: true,
+  updatedAt: true,
+}).merge(
+  z.object({
+    password: z.string().min(6).optional(),
+  }),
+);
+
+export async function createUser(db: PrismaClient, input: z.infer<typeof UserCreateSchema>, instanceIds: string[]) {
+  const user = await db.user.create({
+    data: {
+      ...input,
+      hashedPassword: input.password ? await hashPassword(input.password) : undefined,
+      userInstanceTokens: {
+        create: instanceIds.map((instanceId) => ({
+          instanceId,
+          token: input.username + "__" + generateId(16),
+        })),
+      },
+    },
+    include: {
+      userInstanceTokens: true,
+    },
+  });
+  return user;
+}
+
 export const userRouter = createTRPCRouter({
-  login: publicProcedure.input(UserLoginFormSchema).mutation(async ({ ctx, input }) => {
-    const user = await ctx.db.user.findUnique({ where: { username: input.username } });
-    if (!user) {
-      // Hash the password to prevent timing attacks
-      // const _ = hashPassword(password);
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Wrong username or password" });
-    }
-    const validPassword = await verifyPassword(input.password, user.hashedPassword);
-    if (!validPassword) {
-      throw new TRPCError({ code: "UNAUTHORIZED", message: "Wrong username or password" });
-    }
-    const session = await lucia.createSession(user.id, {
-      currentIp: undefined, // todo
-    });
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(sessionCookie);
-  }),
-
-  logout: protectedProcedure.mutation(async ({ ctx }) => {
-    const session = ctx.session;
-    await lucia.invalidateSession(session.id);
-    cookies().delete(lucia.sessionCookieName);
-  }),
-
   create: adminProcedure
     .input(
       z.object({
-        user: UserOptionalDefaultsSchema.omit({
-          hashedPassword: true,
-        }),
-        password: z.string().min(6),
+        user: UserCreateSchema,
+        instanceIds: z.array(z.string()),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const hashedPassword = await hashPassword(input.password);
-      const result = await ctx.db.user.create({
-        data: { ...input.user, hashedPassword: hashedPassword },
-      });
-      return UserReadAdminSchema.parse(result);
+      const user = await createUser(ctx.db, input.user, input.instanceIds);
+      return UserReadAdminSchema.parse(user);
     }),
 
   getSelf: protectedWithUserProcedure.query(async ({ ctx }) => {

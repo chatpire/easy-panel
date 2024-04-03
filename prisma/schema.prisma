@@ -47,7 +47,7 @@ model User {
     isActive           Boolean                @default(true)
     createdAt          DateTime               @default(now()) /// @zod.custom.omit("input")
     updatedAt          DateTime               @updatedAt /// @zod.custom.omit("input")
-    hashedPassword     String
+    hashedPassword     String?
     sessions           Session[]
     eventLogs          UserEventLog[]
     usageLogs          UserResourceUsageLog[]

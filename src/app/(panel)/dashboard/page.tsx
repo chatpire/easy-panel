@@ -12,7 +12,7 @@ export default async function DashboardPage({}) {
 
   return (
     <PageShell>
-      <PageHeader heading="Dashboard" text="" />
+      <PageHeader heading="Dashboard" text="使用共享服务" />
       <Alert>
         <Icons.rocket className="h-4 w-4" />
         <AlertTitle className="mt-1">使用说明</AlertTitle>
@@ -33,6 +33,15 @@ export default async function DashboardPage({}) {
           <UserInstanceInfoCard key={instance.id} instance={instance} />
         ))}
       </div>
+      {instances.length === 0 && (
+        <Alert>
+          <Icons.warning className="h-4 w-4" />
+          <AlertTitle className="mt-1">无可用 ChatGPT 账号</AlertTitle>
+          <AlertDescription className="mt-3">
+            <p>当前您没有可用的 ChatGPT 账号，请联系管理员。</p>
+          </AlertDescription>
+        </Alert>
+      )}
     </PageShell>
   );
 }

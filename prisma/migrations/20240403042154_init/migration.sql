@@ -20,7 +20,7 @@ CREATE TABLE "User" (
     "isActive" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "hashedPassword" TEXT NOT NULL,
+    "hashedPassword" TEXT,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );

@@ -1,6 +1,14 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
+
+const booleanEnv = z.preprocess((val) => { 
+  val = String(val).toLowerCase();
+  if (val === "true") return true;
+  if (val === "false") return false;
+  return undefined;
+}, z.boolean().optional());
+
 export const env = createEnv({
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app
@@ -13,20 +21,27 @@ export const env = createEnv({
       .url()
       .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    LUCIA_ID_LENGTH: z
-      .string()
-      .optional()
-      .default("16")
-      .transform((val) => {
-        const parsed = parseInt(val, 10);
-        if (isNaN(parsed)) {
-          throw new Error("LUCIA_ID_LENGTH must be a number");
-        }
-        if (parsed <= 6 || parsed >= 32) {
-          throw new Error("LUCIA_ID_LENGTH must be between 6 and 32");
-        }
-        return parsed;
-      }),
+    LUCIA_ID_LENGTH: z.coerce.number().min(1).max(64).optional().default(16),
+
+    COOKIE_PREFIX: z.string().optional().default("easy_cock"),
+    ENABLE_PASSWORD_LOGIN: booleanEnv.default(true),
+
+    SECRET_KEY: z.string().length(64), // run: openssl rand -hex 32
+
+    BASE_URL: z.string().optional().default("http://localhost:3001"),
+    ENABLE_OIDC_LOGIN: booleanEnv.default(false),
+
+    GRANT_ALL_INSTANCES_FOR_OIDC_USER: booleanEnv.default(true),
+
+    OIDC_CLIENT_ID: z.string().optional(),
+    OIDC_CLIENT_SECRET: z.string().optional(),
+    OIDC_AUTH_URI: z.string().optional(),
+    OIDC_TOKEN_URI: z.string().optional(),
+    OIDC_USERINFO_URI: z.string().optional(),
+    OIDC_LOGOUT_URI: z.string().optional(),
+    OIDC_USERNAME_CLAIM: z.string().optional().default("preferred_username"),
+    OIDC_DISPLAY_NAME: z.string().optional().default("OIDC Connect"),
+    OIDC_SCOPES: z.string().optional().default("openid profile email"),
   },
 
   /**
@@ -47,6 +62,24 @@ export const env = createEnv({
     POSTGRES_URL: process.env.POSTGRES_URL,
     NODE_ENV: process.env.NODE_ENV,
     LUCIA_ID_LENGTH: process.env.LUCIA_ID_LENGTH,
+
+    COOKIE_PREFIX: process.env.COOKIE_PREFIX,
+    BASE_URL: process.env.BASE_URL,
+    ENABLE_PASSWORD_LOGIN: process.env.ENABLE_PASSWORD_LOGIN,
+    SECRET_KEY: process.env.SECRET_KEY,
+
+    ENABLE_OIDC_LOGIN: process.env.ENABLE_OIDC_LOGIN,
+    GRANT_ALL_INSTANCES_FOR_OIDC_USER: process.env.GRANT_ALL_INSTANCES_FOR_OIDC_USER,
+
+    OIDC_CLIENT_ID: process.env.OIDC_CLIENT_ID,
+    OIDC_CLIENT_SECRET: process.env.OIDC_CLIENT_SECRET,
+    OIDC_AUTH_URI: process.env.OIDC_AUTH_URI,
+    OIDC_TOKEN_URI: process.env.OIDC_TOKEN_URI,
+    OIDC_USERINFO_URI: process.env.OIDC_USERINFO_URI,
+    OIDC_LOGOUT_URI: process.env.OIDC_LOGOUT_URI,
+    OIDC_USERNAME_CLAIM: process.env.OIDC_USERNAME_CLAIM,
+    OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,
+    OIDC_SCOPES: process.env.OIDC_SCOPES,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

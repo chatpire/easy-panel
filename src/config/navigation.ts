@@ -13,14 +13,14 @@ export const userNavConfig: NavItem[] = [
     icon: "gauge",
   },
   {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: "settings",
-  },
-  {
     title: "Logs",
     href: "/dashboard/logs",
     icon: "fileClock",
+  },
+  {
+    title: "Settings",
+    href: "/dashboard/settings",
+    icon: "settings",
   },
 ];
 
