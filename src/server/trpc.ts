@@ -1,10 +1,12 @@
-import { UserRole } from "@prisma/client";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { getSessionData, type SessionData } from "@/server/auth";
 import { db } from "@/server/db";
+import { eq } from "drizzle-orm";
+import { users } from "./db/schema";
+import { UserRoles } from "@/schema/user.schema";
 
 /**
  * Defines your inner context shape.
@@ -128,7 +130,7 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
 });
 
 export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.session.userAttr.role !== UserRole.ADMIN) {
+  if (ctx.session.userAttr.role !== UserRoles.ADMIN) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
   return next();
@@ -136,9 +138,10 @@ export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 const withUserSchema = t.middleware(async ({ ctx, next }) => {
   if (!ctx.session?.userAttr) throw new TRPCError({ code: "UNAUTHORIZED" });
-  const user = await ctx.db.user.findUnique({
-    where: { id: ctx.session.userAttr.id },
+  const user = await ctx.db.query.users.findFirst({
+    where: eq(users.id, ctx.session.userAttr.id),
   });
+    
   if (!user) throw new TRPCError({ code: "NOT_FOUND" });
   return next({
     ctx: {

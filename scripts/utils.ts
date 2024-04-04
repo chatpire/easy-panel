@@ -1,22 +1,26 @@
 import { env } from "@/env";
+import { createCUID } from "@/lib/cuid";
 import { hashPassword } from "@/lib/password";
-import { UserCreateInputSchema } from "@/schema/generated/zod";
-import { type PrismaClient, UserRole } from "@prisma/client";
+import { UserCreateSchema, UserRoles } from "@/schema/user.schema";
+import { Db } from "@/server/db";
+import { users } from "@/server/db/schema";
 
-export async function createAdminUser(prisma: PrismaClient) {
+export async function createAdminUser(db: Db) {
   const name = "Admin";
   const username = env.ADMIN_USERNAME;
   const password = env.ADMIN_PASSWORD;
   const email = env.ADMIN_EMAIL;
 
-  const admin = await prisma.user.create({
-    data: UserCreateInputSchema.parse({
+  const result = await db
+    .insert(users)
+    .values({
+      id: createCUID(),
       name,
       username,
       hashedPassword: await hashPassword(password),
       email,
-      role: UserRole.ADMIN,
-    }),
-  });
-  return admin;
+      role: UserRoles.ADMIN,
+    })
+    .returning();
+  return result[0]!;
 }

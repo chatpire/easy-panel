@@ -5,10 +5,12 @@ import { env } from "@/env";
 import { z } from "zod";
 import { OAuth2RequestError } from "oslo/oauth2";
 import { db } from "@/server/db";
-import { UserCreateSchema, createUser } from "@/server/api/routers/user";
-import { UserRole } from "@prisma/client";
+import { createUser } from "@/server/api/routers/user";
 import { lucia } from "@/server/auth";
-import { writeUserLoginEventLog } from "@/server/actions/write-log";
+import { writeUserLoginEventLog } from "@/server/actions/write-event-log";
+import { eq } from "drizzle-orm";
+import { users } from "@/server/db/schema";
+import { UserCreateSchema, UserRoles } from "@/schema/user.schema";
 
 const OIDCUserInfoSchema = z.object({
   sub: z.string(),
@@ -38,6 +40,7 @@ export async function GET(request: NextRequest) {
       authenticateWith: "http_basic_auth",
     });
 
+    // eslint-disable-next-line drizzle/enforce-delete-with-where
     cookies().delete(env.COOKIE_PREFIX + "_oidc_state");
 
     console.debug("OIDC Token Response:", tokenResponse);
@@ -51,16 +54,17 @@ export async function GET(request: NextRequest) {
     console.debug("OIDC UserInfo:", userInfo);
 
     const email = userInfo.email;
-    let user = await db.user.findUnique({
-      where: { email },
-    });
+    if (!email) {
+      return NextResponse.json({ error: "Email not found in OIDC userinfo" }, { status: 400 });
+    }
+    let user = await db.query.users.findFirst({ where: eq(users.email, email) });
 
     if (!user) {
       const username = userInfo[env.OIDC_USERNAME_CLAIM];
 
       const instancesIds = [];
       if (env.GRANT_ALL_INSTANCES_FOR_OIDC_USER) {
-        const instances = await db.serviceInstance.findMany();
+        const instances = await db.query.serviceInstances.findMany();
         for (const instance of instances) {
           instancesIds.push(instance.id);
         }
@@ -76,7 +80,7 @@ export async function GET(request: NextRequest) {
           validUntil: null,
           name: userInfo.name ?? username,
           email,
-          role: UserRole.USER,
+          role: UserRoles.USER,
         }),
         instancesIds,
         "oidc",

@@ -1,4 +1,4 @@
-import { writeChatgptSharedOAuthLog } from "@/server/actions/write-log";
+import { writeChatgptSharedOAuthLog } from "@/server/actions/write-event-log";
 import { db } from "@/server/db";
 import { api } from "@/trpc/server";
 import { TRPCError } from "@trpc/server";

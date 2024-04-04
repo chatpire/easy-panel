@@ -1,15 +1,10 @@
-import { PrismaClient, UserRole } from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import {
-  ServiceInstanceCreateInputSchema,
-  UserCreateInputSchema,
-  UserResourceUsageLogCreateInputSchema,
-} from "@/schema/generated/zod";
 import { type z } from "zod";
-import { hashPassword } from "@/lib/password";
 import { createAdminUser } from "./utils";
-
-const prisma = new PrismaClient();
+import { db } from "@/server/db";
+import { createUser } from "@/server/api/routers/user";
+import { serviceInstances } from "@/server/db/schema";
+import { createCUID } from "@/lib/cuid";
 
 const USERS_TO_CREATE = 10;
 const INSTANCES_TO_CREATE = 2;
@@ -21,21 +16,18 @@ async function main() {
 
   // Create users
   const users = [];
-  const admin = await createAdminUser(prisma);
+  const admin = await createAdminUser(db);
   console.log(`Created admin user ${admin.name}, id: ${admin.id}`);
   users.push(admin);
 
   for (let i = 0; i < USERS_TO_CREATE; i++) {
     const password = "password";
-    const user = await prisma.user.create({
-      data: UserCreateInputSchema.parse({
-        name: faker.person.fullName(),
-        username: faker.string.alphanumeric(8),
-        email: faker.internet.email(),
-        hashedPassword: await hashPassword(password),
-        role: UserRole.USER,
-      } as z.infer<typeof UserCreateInputSchema>),
-    });
+    const user = await createUser(db, {
+      name: faker.person.firstName(),
+      username: faker.string.alphanumeric(8),
+      email: faker.internet.email(),
+      password,
+    }, [], "admin");
     users.push(user);
     console.log(`Created user ${user.name}, id: ${user.id}`);
   }
@@ -44,29 +36,17 @@ async function main() {
   // Create service instances
   const instances = [];
   for (let i = 0; i < INSTANCES_TO_CREATE; i++) {
-    const instance = await prisma.serviceInstance.create({
-      data: ServiceInstanceCreateInputSchema.parse({
+    const instance = await db.insert(serviceInstances).values({
+        id: createCUID(),
         name: `Instance-${i}`,
         type: "CHATGPT_SHARED",
         url: faker.internet.url(),
-      } as z.infer<typeof ServiceInstanceCreateInputSchema>),
-    });
+      }
+    )
     instances.push(instance);
     console.log(`Created instance with id: ${instance.id}`);
   }
 
-  // Create instance tokens for users
-  // for (const user of users) {
-  //   for (const instance of instances) {
-  //     await prisma.userInstanceToken.create({
-  //       data: UserInstanceTokenCreateInputSchema.parse({
-  //         token: faker.string.alphanumeric(16),
-  //         user: { connect: { id: user.id } },
-  //         instance: { connect: { id: instance.id } },
-  //       }),
-  //     });
-  //   }
-  // }
 
   // Create logs over the past LOG_DAY_SPAN days
   for (const user of users) {

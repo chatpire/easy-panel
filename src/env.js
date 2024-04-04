@@ -19,6 +19,7 @@ export const env = createEnv({
       .string()
       .url()
       .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
+    DATABASE_TABLE_PREFIX: z.string().optional().default("easy-cock"),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     LUCIA_ID_LENGTH: z.coerce.number().min(1).max(64).optional().default(16),
 
@@ -63,6 +64,7 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_TYPE: process.env.DATABASE_TYPE,
     POSTGRES_URL: process.env.POSTGRES_URL,
+    DATABASE_TABLE_PREFIX: process.env.DATABASE_TABLE_PREFIX,
     NODE_ENV: process.env.NODE_ENV,
     LUCIA_ID_LENGTH: process.env.LUCIA_ID_LENGTH,
 

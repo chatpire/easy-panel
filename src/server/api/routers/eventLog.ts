@@ -1,65 +1,68 @@
-import { createTRPCRouter, adminProcedure, protectedWithUserProcedure } from "@/server/trpc";
-import { UserEventLogSchema, UserEventLogWhereInputSchema } from "@/schema/generated/zod";
+import { createTRPCRouter, adminProcedure, protectedWithUserProcedure, TRPCContext } from "@/server/trpc";
 import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { paginateQuery } from "../pagination";
-import { UserRole } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { EventLogSchema, EventLogWhereInputSchema } from "@/schema/eventLog.schema";
+import { SQL, and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { eventLogs } from "@/server/db/schema";
+
+const PaginationEventLogsInputSchema = z.object({
+  where: EventLogWhereInputSchema,
+  pagination: PaginationInputSchema,
+});
+
+const getPaginatedResourceLogs = async ({
+  input,
+  ctx,
+}: {
+  input: z.infer<typeof PaginationEventLogsInputSchema>;
+  ctx: TRPCContext;
+}) => {
+  return paginateQuery({
+    pagination: input.pagination,
+    ctx,
+    responseItemSchema: EventLogSchema,
+    handle: async ({ skip, take, ctx }) => {
+      const where = input.where;
+      const andParams = [] as SQL[];
+      if (where.userId) {
+        andParams.push(eq(eventLogs.userId, where.userId));
+      }
+      if (where.type) {
+        andParams.push(eq(eventLogs.type, where.type));
+      }
+      if (where.timestampStart) {
+        andParams.push(gte(eventLogs.timestamp, where.timestampStart));
+      }
+      if (where.timestampEnd) {
+        andParams.push(lte(eventLogs.timestamp, where.timestampEnd));
+      }
+      const filter = and(...andParams);
+      const { total, result } = await ctx.db.transaction(async (tx) => {
+        const total = await tx
+          .select({
+            value: count(),
+          })
+          .from(eventLogs)
+          .where(and(...andParams));
+        const result = await tx.select().from(eventLogs).where(filter).limit(take).offset(skip);
+        return { result, total: total[0]!.value };
+      });
+      return { result, total };
+    },
+  });
+};
 
 export const eventLogRouter = createTRPCRouter({
   getMany: adminProcedure
     .input(
       z.object({
-        where: UserEventLogWhereInputSchema,
+        where: EventLogWhereInputSchema,
         pagination: PaginationInputSchema,
       }),
     )
     .query(async ({ input, ctx }) => {
-      return paginateQuery({
-        pagination: input.pagination,
-        ctx,
-        responseItemSchema: UserEventLogSchema,
-        handle: async ({ skip, take, ctx }) => {
-          const result = await ctx.db.userEventLog.findMany({
-            where: input.where,
-            skip,
-            take,
-          });
-          const total = await ctx.db.userEventLog.count({
-            where: input.where,
-          });
-          return { result, total };
-        },
-      });
-    }),
-
-  getAllByUser: protectedWithUserProcedure
-    .input(
-      z.object({
-        userId: z.string().optional(),
-        pagination: PaginationInputSchema,
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      const userId = input.userId ?? ctx.user.id;
-      if (ctx.user.role !== UserRole.ADMIN && ctx.user.id !== userId) {
-        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to access this data" });
-      }
-      return paginateQuery({
-        pagination: input.pagination,
-        ctx,
-        responseItemSchema: UserEventLogSchema,
-        handle: async ({ skip, take, ctx }) => {
-          const result = await ctx.db.userEventLog.findMany({
-            where: { userId },
-            skip,
-            take,
-          });
-          const total = await ctx.db.userEventLog.count({
-            where: { userId },
-          });
-          return { result, total };
-        },
-      });
+      return getPaginatedResourceLogs({ input, ctx });
     }),
 });

@@ -7,12 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
-import { type ServiceInstance } from "@prisma/client";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/app/_helpers/copy-to-clipboard";
 import { InstanceInfoCard } from "./instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
+import { ServiceInstance } from "@/schema/serviceInstance.schema";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;

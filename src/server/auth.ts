@@ -1,11 +1,12 @@
 import { Lucia, type Session as LuciaSession, TimeSpan, type User } from "lucia";
-import { PrismaAdapter } from "@lucia-auth/adapter-prisma";
 import { db } from "@/server/db";
 import { cookies } from "next/headers";
+import { DrizzlePostgreSQLAdapter } from "@lucia-auth/adapter-drizzle";
 import { cache } from "react";
-import { type UserRole } from "@prisma/client";
+import { sessions, users } from "./db/schema";
+import { type UserRole } from "@/schema/user.schema";
 
-const adapter = new PrismaAdapter(db.session, db.user);
+const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
 
 export const lucia = new Lucia(adapter, {
   sessionExpiresIn: new TimeSpan(2, "w"),

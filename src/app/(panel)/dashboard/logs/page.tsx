@@ -11,7 +11,7 @@ async function fetchData(pagination: PaginationInput) {
 
   const user = await getCurrentUserOrRedirect();
 
-  return await api.resourceLog.getAllByUser({ pagination, userId: user.id });
+  return await api.resourceLog.getMany({ pagination, where: { userId: user.id }});
 }
 
 export default async function UsersPage({}) {

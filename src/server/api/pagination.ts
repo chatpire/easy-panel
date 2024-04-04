@@ -43,8 +43,9 @@ export const paginateQuery = async <T extends z.AnyZodObject>({
   console.log("total", total);
 
   const totalPages = Math.ceil(total / pageSize);
-  return getPaginatedDataSchema(responseItemSchema).parse({
-    data: result as z.infer<typeof responseItemSchema>[],
+  const strictResponseItemSchema = responseItemSchema.strict();
+  return {
+    data: result as z.infer<typeof strictResponseItemSchema>[],
     pagination: {
       total,
       currentPage,
@@ -52,5 +53,5 @@ export const paginateQuery = async <T extends z.AnyZodObject>({
       nextPage: currentPage + 1 <= totalPages ? currentPage + 1 : null,
       prevPage: currentPage - 1 > 0 ? currentPage - 1 : null,
     },
-  }) as PaginatedData<T>;
+  } as PaginatedData<T>;
 };

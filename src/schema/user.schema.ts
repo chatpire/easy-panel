@@ -1,24 +1,29 @@
-import { UserSchema } from "@/schema/generated/zod";
 import { z } from "zod";
+
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { users } from "@/server/db/schema";
+
+export const UserSchema = createSelectSchema(users);
+export type User = z.infer<typeof UserSchema>;
+
+export const UserRoleSchema = UserSchema.shape.role;
+export const UserRoles = UserRoleSchema.Values;
+export type UserRole = z.infer<typeof UserRoleSchema>;
 
 export const UserReadAdminSchema = UserSchema.omit({
   hashedPassword: true,
 });
-
 export type UserReadAdmin = z.infer<typeof UserReadAdminSchema>;
-
 export const UserReadSchema = UserReadAdminSchema.omit({
   comment: true,
 });
 
-export const UserPasswordSchema = z.object({
+const UserPasswordSchema = z.object({
   password: z.string().min(6),
 });
-
 export const UserLoginFormSchema = UserSchema.pick({
   username: true,
 }).merge(UserPasswordSchema);
-
 export const UserUpdatePasswordSchema = UserSchema.pick({
   id: true,
 }).merge(UserPasswordSchema);
@@ -29,7 +34,20 @@ export const UserUpdateAdminSchema = UserReadAdminSchema.omit({
   updatedAt: true,
 });
 
-export const UserUpdateSelfSchema = UserUpdateAdminSchema.omit({
-  id: true,
+export const UserUpdateSelfSchema = UserUpdateAdminSchema.pick({
+  name: true,
 });
 
+const UserInsertSchema = createInsertSchema(users);
+export const UserCreateSchema = UserInsertSchema.omit({
+  id: true,
+  hashedPassword: true,
+  createdAt: true,
+  updatedAt: true,
+}).merge(
+  z.object({
+    password: z.string().min(6).optional(),
+  }),
+);
+
+export type UserCreate = z.infer<typeof UserCreateSchema>;

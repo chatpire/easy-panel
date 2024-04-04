@@ -1,8 +1,8 @@
-import { UserEventLogSchema } from "@/schema/generated/zod";
 import { db } from "@/server/db";
+import { userInstanceTokens } from "@/server/db/schema";
 import { api } from "@/trpc/server";
-import { UserEventLog } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -71,8 +71,8 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
   }
 
   try {
-    const userTokenData = await db.userInstanceToken.findUnique({
-      where: { token: userToken, instanceId },
+    const userTokenData = await db.query.userInstanceTokens.findFirst({
+      where: and(eq(userInstanceTokens.token, userToken), eq(userInstanceTokens.instanceId, instanceId))
     });
     if (!userTokenData) {
       return NextResponse.json({ detail: "invalid token" }, { status: 401 });

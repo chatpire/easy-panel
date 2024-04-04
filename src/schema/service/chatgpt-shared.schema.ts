@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ServiceTypeSchema } from "../definition.schema";
 
 export const ChatGPTSharedInstanceAttributesSchema = z.object({
   type: z.literal("CHATGPT_SHARED"),
@@ -11,4 +12,12 @@ export const ChatGPTSharedOAuthEventContentSchema = z.object({
   intanceId: z.string().optional(),
   requestIp: z.string().ip().nullable(),
   userIp: z.string().ip().nullable(),
+});
+
+export const ChatGPTSharedResourceUsageLogDetailsSchema = z.object({
+  type: z.literal(ServiceTypeSchema.Values.CHATGPT_SHARED),
+  model: z.string().optional(),
+  chatgptAccountId: z.string().optional(),
+  inputTokens: z.number().int().optional(),
+  conversationId: z.string().optional(),
 });

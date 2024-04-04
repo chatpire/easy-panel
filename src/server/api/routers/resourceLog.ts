@@ -5,60 +5,58 @@ import {
   type TRPCContext,
   protectedProcedure,
 } from "@/server/trpc";
-import {
-  ResourceUnitSchema,
-  UserResourceUsageLogSchema,
-  UserResourceUsageLogWhereInputSchema,
-} from "@/schema/generated/zod";
 import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { UserRole } from "@prisma/client";
-import { DURATION_WINDOWS, DurationWindowSchema } from "@/schema/definition.schema";
-import { type GPT4LogGroupbyAccountResult, type ResourceLogSumResult } from "@/schema/resourceLog.schema";
+import { DURATION_WINDOWS, DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/schema/definition.schema";
+import {
+  ResourceUsageLogWhereInputSchema,
+  type GPT4LogGroupbyAccountResult,
+  type ResourceLogSumResult,
+  ResourceUsageLogSchema,
+} from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
+import { SQL, and, count, eq, gte, lte, sql, sum } from "drizzle-orm";
+import { resourceUsageLogs } from "@/server/db/schema";
+import { UserRoles } from "@/schema/user.schema";
 
-const sumLogsInDurationWindows = async ({
+const sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,
   durationWindows,
   userId,
   instanceId,
-  countUser
 }: {
   ctx: TRPCContext;
   durationWindows: DurationWindow[];
   userId?: string;
   instanceId?: string;
-  countUser?: boolean;
 }): Promise<ResourceLogSumResult[]> => {
-  if (countUser && userId === undefined) {
-    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "userId is required when countUser is true" });
-  }
-
   const results = [] as ResourceLogSumResult[];
 
   for (const durationWindow of durationWindows) {
-    const durationWindowSeconds = DURATION_WINDOWS[durationWindow as keyof typeof DURATION_WINDOWS];
-    const aggResult = await ctx.db.userResourceUsageLog.groupBy({
-      where: {
-        timestamp: {
-          gte: new Date(new Date().getTime() - durationWindowSeconds * 1000),
-        },
-        userId,
-        instanceId,
-      },
-      by: ["userId"],
-      _sum: { utf8Length: true, tokensLength: true },
-      _count: true,
-    });
+    const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+    const aggResult = await ctx.db
+      .select({
+        userId: resourceUsageLogs.userId,
+        count: count(),
+        sumUtf8Length: sql<number>`sum(${resourceUsageLogs.textBytes})`.mapWith(Number),
+        // sumTokensLength: sum(resourceUsageLogs.tokensLength).mapWith(Number),
+        sumTokensLength: sql<number>`0`.mapWith(Number), // todo
+      })
+      .from(resourceUsageLogs)
+      .where(
+        and(
+          gte(resourceUsageLogs.timestamp, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
+          eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
+          userId ? eq(resourceUsageLogs.userId, userId) : sql`1`,
+          instanceId ?eq(resourceUsageLogs.instanceId, instanceId) : sql`1`,
+        ),
+      )
+      .groupBy(resourceUsageLogs.userId);
+
     results.push({
       durationWindow,
-      stats: aggResult.map((item) => ({
-        userId: item.userId,
-        count: item._count,
-        utf8LengthSum: item._sum?.utf8Length ?? null,
-        tokensLengthSum: item._sum?.tokensLength ?? null,
-      })),
+      stats: aggResult,
     });
   }
 
@@ -74,85 +72,93 @@ const groupGPT4LogsInDurationWindow = async ({
   durationWindow: DurationWindow;
   instanceId?: string;
 }): Promise<GPT4LogGroupbyAccountResult> => {
-  const durationWindowSeconds = DURATION_WINDOWS[durationWindow as keyof typeof DURATION_WINDOWS];
-  const groupByResult = await ctx.db.userResourceUsageLog.groupBy({
-    where: {
-      timestamp: {
-        gte: new Date(new Date().getTime() - durationWindowSeconds * 1000),
-      },
-      instanceId,
-      model: {
-        startsWith: "gpt-4",
-      },
-    },
-    by: ["openaiTeamId"],
-    _count: true,
-  });
+  const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+  const groupByResult = await ctx.db
+    .select({
+      chatgptAccountId: sql<string | null>`${resourceUsageLogs.details} ->> 'chatgptAccountId'`,
+      _count: count(),
+    })
+    .from(resourceUsageLogs)
+    .where(
+      and(
+        eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
+        sql`${resourceUsageLogs.timestamp} >= ${new Date(new Date().getTime() - durationWindowSeconds * 1000)}`,
+        instanceId ? sql`${resourceUsageLogs.instanceId} = ${instanceId}` : sql`1`,
+        sql`${resourceUsageLogs.details} ->> 'model' LIKE 'gpt-4%'`,
+      ),
+    )
+    .groupBy(sql`${resourceUsageLogs.details} ->> 'chatgptAccountId'`);
   const result = {
     durationWindow,
     counts: groupByResult.map((item) => ({
-      openaiTeamId: item.openaiTeamId,
+      chatgptAccountId: item.chatgptAccountId,
       count: item._count,
     })),
   };
   return result;
 };
 
-export const resourceLogRouter = createTRPCRouter({
-  getMany: adminProcedure
-    .input(
-      z.object({
-        where: UserResourceUsageLogWhereInputSchema,
-        pagination: PaginationInputSchema,
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      return paginateQuery({
-        pagination: input.pagination,
-        ctx,
-        responseItemSchema: UserResourceUsageLogSchema,
-        handle: async ({ skip, take, ctx }) => {
-          const result = await ctx.db.userResourceUsageLog.findMany({
-            where: input.where,
-            skip,
-            take,
-          });
-          const total = await ctx.db.userResourceUsageLog.count({
-            where: input.where,
-          });
-          return { result, total };
-        },
-      });
-    }),
+const PaginationResourceLogsInputSchema = z.object({
+  where: ResourceUsageLogWhereInputSchema,
+  pagination: PaginationInputSchema,
+});
 
-  getAllByUser: protectedWithUserProcedure
+const getPaginatedResourceLogs = async ({
+  input,
+  ctx,
+}: {
+  input: z.infer<typeof PaginationResourceLogsInputSchema>;
+  ctx: TRPCContext;
+}) => {
+  return paginateQuery({
+    pagination: input.pagination,
+    ctx,
+    responseItemSchema: ResourceUsageLogSchema,
+    handle: async ({ skip, take, ctx }) => {
+      const where = input.where;
+      const andParams = [] as SQL[];
+      if (where.userId) {
+        andParams.push(eq(resourceUsageLogs.userId, where.userId));
+      }
+      if (where.instanceId) {
+        andParams.push(eq(resourceUsageLogs.instanceId, where.instanceId));
+      }
+      if (where.timestampStart) {
+        andParams.push(gte(resourceUsageLogs.timestamp, where.timestampStart));
+      }
+      if (where.timestampEnd) {
+        andParams.push(lte(resourceUsageLogs.timestamp, where.timestampEnd));
+      }
+      const filter = and(...andParams);
+      const { total, result } = await ctx.db.transaction(async (tx) => {
+        const total = await tx
+          .select({
+            value: count(),
+          })
+          .from(resourceUsageLogs)
+          .where(and(...andParams));
+        const result = await tx.select().from(resourceUsageLogs).where(filter).limit(take).offset(skip);
+        return { result, total: total[0]!.value };
+      });
+      return { result, total };
+    },
+  });
+};
+
+export const resourceLogRouter = createTRPCRouter({
+  getMany: protectedWithUserProcedure
     .input(
       z.object({
-        userId: z.string().optional(),
+        where: ResourceUsageLogWhereInputSchema,
         pagination: PaginationInputSchema,
       }),
     )
     .query(async ({ input, ctx }) => {
-      const userId = input.userId ?? ctx.user.id;
-      if (ctx.user.role !== UserRole.ADMIN && ctx.user.id !== userId) {
+      const user = ctx.user;
+      if (user.role !== UserRoles.ADMIN && user.id !== input.where.userId) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to access this data" });
       }
-      return paginateQuery({
-        pagination: input.pagination,
-        ctx,
-        responseItemSchema: UserResourceUsageLogSchema.omit({ text: true }),
-        handle: async ({ skip, take, ctx }) => {
-          const result = await ctx.db.userResourceUsageLog.findMany({
-            where: { userId },
-            skip,
-            take,
-          });
-          const total = await ctx.db.userResourceUsageLog.count({
-            where: { userId },
-          });
-          return { result, total };
-        },
-      });
+      return getPaginatedResourceLogs({ input, ctx });
     }),
 
   sumLogsInDurationWindowsByUserId: protectedWithUserProcedure
@@ -164,10 +170,10 @@ export const resourceLogRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       const userId = input.userId ?? ctx.user.id;
-      if (ctx.user.role !== UserRole.ADMIN && ctx.user.id !== userId) {
+      if (ctx.user.role !== UserRoles.ADMIN && ctx.user.id !== userId) {
         throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to access this data" });
       }
-      return sumLogsInDurationWindows({
+      return sumChatGPTSharedLogsInDurationWindows({
         ctx,
         durationWindows: input.durationWindows,
         userId,
@@ -183,7 +189,7 @@ export const resourceLogRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       // TODO: Check if the user has access to the instance
-      return sumLogsInDurationWindows({
+      return sumChatGPTSharedLogsInDurationWindows({
         ctx,
         durationWindows: input.durationWindows,
         instanceId: input.instanceId,
@@ -193,12 +199,11 @@ export const resourceLogRouter = createTRPCRouter({
   sumLogsInDurationWindowsGlobal: protectedProcedure
     .input(
       z.object({
-        unit: ResourceUnitSchema,
         durationWindows: DurationWindowSchema.array(),
       }),
     )
     .query(async ({ input, ctx }) => {
-      return sumLogsInDurationWindows({ ctx, durationWindows: input.durationWindows });
+      return sumChatGPTSharedLogsInDurationWindows({ ctx, durationWindows: input.durationWindows });
     }),
 
   groupGPT4LogsInDurationWindowByInstance: protectedProcedure

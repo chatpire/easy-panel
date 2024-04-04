@@ -12,7 +12,7 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
   });
 
   const totalCount = gpt4GroupResults.data?.counts.reduce((acc, item) => acc + item.count, 0) ?? 0;
-  const personalCount = gpt4GroupResults.data?.counts.find((item) => item.openaiTeamId === "personal")?.count ?? 0;
+  const personalCount = gpt4GroupResults.data?.counts.find((item) => item.chatgptAccountId === "personal")?.count ?? 0;
   const teamCount = totalCount - personalCount;
 
   const items = [

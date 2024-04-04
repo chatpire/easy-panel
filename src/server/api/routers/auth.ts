@@ -6,14 +6,16 @@ import { verifyPassword } from "@/lib/password";
 import { lucia } from "@/server/auth";
 import { cookies } from "next/headers";
 import { env } from "@/env";
-import { writeUserLoginEventLog } from "@/server/actions/write-log";
+import { writeUserLoginEventLog } from "@/server/actions/write-event-log";
+import { eq } from "drizzle-orm";
+import { users } from "@/server/db/schema";
 
 export const authRouter = createTRPCRouter({
   loginByPassword: publicProcedure.input(UserLoginFormSchema).mutation(async ({ ctx, input }) => {
     if (env.ENABLE_PASSWORD_LOGIN === false) {
       throw new TRPCError({ code: "UNAUTHORIZED", message: "Password login is disabled" });
     }
-    const user = await ctx.db.user.findUnique({ where: { username: input.username } });
+    const user = await ctx.db.query.users.findFirst({ where: eq(users.username, input.username) });
     if (!user) {
       // Hash the password to prevent timing attacks
       // const _ = hashPassword(password);
