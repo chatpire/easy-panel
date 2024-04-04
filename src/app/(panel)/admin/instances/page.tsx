@@ -1,6 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { PageShell } from "../../_components/dashboard-shell";
-import { InstanceInfoCard } from "../../_components/instance-info-card";
 import { PageHeader } from "../../_components/page-header";
 import { Icons } from "@/components/icons";
 import { api } from "@/trpc/server";
@@ -13,7 +12,7 @@ export default async function InstancesPage({}) {
     <PageShell>
       <PageHeader heading="Instances" text="实例管理" />
       <div className="max-w-full overflow-hidden">
-        <div className="grid gap-10">
+        <div className="grid gap-4 ">
           {instances.map((instance) => (
             <AdminInstanceInfoCard key={instance.id} instance={instance} />
           ))}

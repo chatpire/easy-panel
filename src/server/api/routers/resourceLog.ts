@@ -15,7 +15,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { UserRole } from "@prisma/client";
 import { DURATION_WINDOWS, DurationWindowSchema } from "@/schema/definition.schema";
-import { type ResourceLogSumResults } from "@/schema/resourceLog.schema";
+import { type GPT4LogGroupbyAccountResult, type ResourceLogSumResult } from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
 
 const sumLogsInDurationWindows = async ({
@@ -23,17 +23,23 @@ const sumLogsInDurationWindows = async ({
   durationWindows,
   userId,
   instanceId,
+  countUser
 }: {
   ctx: TRPCContext;
   durationWindows: DurationWindow[];
   userId?: string;
   instanceId?: string;
-}): Promise<ResourceLogSumResults> => {
-  const results = [] as ResourceLogSumResults;
+  countUser?: boolean;
+}): Promise<ResourceLogSumResult[]> => {
+  if (countUser && userId === undefined) {
+    throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "userId is required when countUser is true" });
+  }
+
+  const results = [] as ResourceLogSumResult[];
 
   for (const durationWindow of durationWindows) {
     const durationWindowSeconds = DURATION_WINDOWS[durationWindow as keyof typeof DURATION_WINDOWS];
-    const aggResult = await ctx.db.userResourceUsageLog.aggregate({
+    const aggResult = await ctx.db.userResourceUsageLog.groupBy({
       where: {
         timestamp: {
           gte: new Date(new Date().getTime() - durationWindowSeconds * 1000),
@@ -41,18 +47,55 @@ const sumLogsInDurationWindows = async ({
         userId,
         instanceId,
       },
+      by: ["userId"],
       _sum: { utf8Length: true, tokensLength: true },
       _count: true,
     });
     results.push({
       durationWindow,
-      utf8LengthSum: aggResult._sum?.utf8Length,
-      tokensLengthSum: aggResult._sum?.tokensLength,
-      count: aggResult._count,
+      stats: aggResult.map((item) => ({
+        userId: item.userId,
+        count: item._count,
+        utf8LengthSum: item._sum?.utf8Length ?? null,
+        tokensLengthSum: item._sum?.tokensLength ?? null,
+      })),
     });
   }
 
   return results;
+};
+
+const groupGPT4LogsInDurationWindow = async ({
+  ctx,
+  durationWindow,
+  instanceId,
+}: {
+  ctx: TRPCContext;
+  durationWindow: DurationWindow;
+  instanceId?: string;
+}): Promise<GPT4LogGroupbyAccountResult> => {
+  const durationWindowSeconds = DURATION_WINDOWS[durationWindow as keyof typeof DURATION_WINDOWS];
+  const groupByResult = await ctx.db.userResourceUsageLog.groupBy({
+    where: {
+      timestamp: {
+        gte: new Date(new Date().getTime() - durationWindowSeconds * 1000),
+      },
+      instanceId,
+      model: {
+        startsWith: "gpt-4",
+      },
+    },
+    by: ["openaiTeamId"],
+    _count: true,
+  });
+  const result = {
+    durationWindow,
+    counts: groupByResult.map((item) => ({
+      openaiTeamId: item.openaiTeamId,
+      count: item._count,
+    })),
+  };
+  return result;
 };
 
 export const resourceLogRouter = createTRPCRouter({
@@ -156,5 +199,20 @@ export const resourceLogRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       return sumLogsInDurationWindows({ ctx, durationWindows: input.durationWindows });
+    }),
+
+  groupGPT4LogsInDurationWindowByInstance: protectedProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+        durationWindow: DurationWindowSchema,
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return groupGPT4LogsInDurationWindow({
+        ctx,
+        durationWindow: input.durationWindow,
+        instanceId: input.instanceId,
+      });
     }),
 });

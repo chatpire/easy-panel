@@ -38,7 +38,7 @@ export default async function UserDashboardLayout({ children }: DashboardLayoutP
         <aside className="hidden w-[200px] flex-col md:flex">
           <LegacySidebarNav items={userNavConfig} />
         </aside>
-        <main className="flex w-full flex-1 flex-col overflow-hidden">{children}</main>
+        <main className="flex w-full flex-1 flex-col overflow-hidden pb-6">{children}</main>
       </div>
     </>
   );

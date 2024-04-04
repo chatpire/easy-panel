@@ -2,6 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 const statusVariants = {
+  default: "bg-gray-500",
   success: "bg-green-500",
   info: "bg-blue-500",
   warning: "bg-yellow-500",
@@ -15,16 +16,23 @@ const sizeVariants = {
 };
 
 interface StatusLabelProps {
-  status: keyof typeof statusVariants;
+  status?: keyof typeof statusVariants;
   size?: keyof typeof sizeVariants;
   className?: string;
   children?: React.ReactNode;
+  pointColor?: string;
 }
 
-const StatusLabel: React.FC<StatusLabelProps> = ({ status, size = "sm", children, className }) => {
+const StatusLabel: React.FC<StatusLabelProps> = ({
+  status,
+  size = "sm",
+  children,
+  className,
+  pointColor,
+}) => {
   return (
     <div className={cn("flex items-center space-x-2", className)}>
-      <div className={cn("rounded-full", statusVariants[status], sizeVariants[size])} />
+      <div className={cn("rounded-full", statusVariants[status ?? "default"], sizeVariants[size], pointColor)} />
       <div className="ml-2">{children}</div>
     </div>
   );
