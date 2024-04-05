@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/trpc";
 import { UserLoginFormSchema } from "@/schema/user.schema";
 import { verifyPassword } from "@/lib/password";
-import { lucia } from "@/server/auth";
+import { lucia } from "@/server/lucia";
 import { cookies } from "next/headers";
 import { env } from "@/env";
 import { writeUserLoginEventLog } from "@/server/actions/write-event-log";

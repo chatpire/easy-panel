@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { type EventContent, type ResourceUsageLogDetails } from "@/schema/definition.schema";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   pgEnum,
   pgTable,
@@ -144,8 +144,7 @@ export const eventLogs = pgTable(
       columns: [table.userId],
       foreignColumns: [users.id],
     }),
-    indexType: index().on(table.type),
-    indexCreatedAt: index().on(table.createdAt),
+    indexCreatedAtUserId: index().on(table.createdAt, table.userId),
   }),
 );
 
@@ -178,8 +177,9 @@ export const resourceUsageLogs = pgTable(
       columns: [table.instanceId],
       foreignColumns: [serviceInstances.id],
     }),
-    indexType: index().on(table.type),
-    indexCreatedAt: index().on(table.createdAt),
+    indexTypeCreatedAt: index().on(table.type, table.createdAt),
+    indexUserId: index().on(table.userId),
+    indexInstanceId: index().on(table.instanceId),
   }),
 );
 

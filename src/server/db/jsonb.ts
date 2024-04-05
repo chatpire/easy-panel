@@ -1,3 +1,5 @@
+// see https://github.com/drizzle-team/drizzle-orm/pull/666
+
 import { customType } from "drizzle-orm/pg-core";
 
 export function createJsonbType<T>(name: string) {

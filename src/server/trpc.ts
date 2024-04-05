@@ -2,11 +2,12 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { getSessionData, type SessionData } from "@/server/auth";
+import { type SessionData } from "@/server/lucia";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { users } from "./db/schema";
 import { UserRoles } from "@/schema/user.schema";
+import { getSessionData } from "@/server/auth";
 
 /**
  * Defines your inner context shape.

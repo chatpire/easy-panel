@@ -40,8 +40,8 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
       .from(resourceUsageLogs)
       .where(
         and(
-          gte(resourceUsageLogs.createdAt, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
           eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
+          gte(resourceUsageLogs.createdAt, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
           userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
           instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
         ),

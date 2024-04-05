@@ -4,7 +4,7 @@ import { type AvatarProps } from "@radix-ui/react-avatar";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Icons } from "@/components/icons";
-import { type SessionUser } from "@/server/auth";
+import { type SessionUser } from "@/server/lucia";
 
 interface UserAvatarProps extends AvatarProps {
   user: Pick<SessionUser, "image" | "name">;

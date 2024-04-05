@@ -1,8 +1,8 @@
 import "server-only";
 
-import { getSessionData } from "@/server/auth";
 import { redirect } from "next/navigation";
 import { api } from "@/trpc/server";
+import {getSessionData} from "@/server/auth";
 
 export async function getSessionOrRedirect() {
   const session = await getSessionData();

@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/user-avatar";
-import { type SessionUser } from "@/server/auth";
+import { type SessionUser } from "@/server/lucia";
 import { Badge } from "@/components/ui/badge";
 import { useLogout } from "@/hooks/logout";
 import { popupEditPasswordForm } from "@/app/_helpers/edit-password-popup";

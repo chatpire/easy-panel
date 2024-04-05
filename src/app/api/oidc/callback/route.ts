@@ -6,7 +6,7 @@ import { z } from "zod";
 import { OAuth2RequestError } from "oslo/oauth2";
 import { db } from "@/server/db";
 import { createUser } from "@/server/api/routers/user";
-import { lucia } from "@/server/auth";
+import { lucia } from "@/server/lucia";
 import { writeUserLoginEventLog } from "@/server/actions/write-event-log";
 import { eq } from "drizzle-orm";
 import { users } from "@/server/db/schema";
