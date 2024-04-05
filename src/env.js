@@ -19,7 +19,6 @@ export const env = createEnv({
       .string()
       .url()
       .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
-    DATABASE_TABLE_PREFIX: z.string().optional().default("easy-cock"),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     LUCIA_ID_LENGTH: z.coerce.number().min(1).max(64).optional().default(16),
 
