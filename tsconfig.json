@@ -45,8 +45,9 @@
     "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
-  ],
+, "scripts/build.mjs"  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "scripts-dist"
   ]
 }

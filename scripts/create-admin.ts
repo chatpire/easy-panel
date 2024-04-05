@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { db } from "@/server/db";
+import { conn, db } from "@/server/db";
 import { createAdminUser } from "./utils";
 
 async function main() {
@@ -10,7 +10,9 @@ async function main() {
 }
 
 main()
-  .then()
+  .then(async () => {
+    await conn.end();
+  })
   .catch(async (e) => {
     console.error(e);
     process.exit(1);

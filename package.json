@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "build-scripts": "node scripts/build.mjs",
     "db:push": "drizzle-kit push:pg --config drizzle.config.dev.ts",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate:pg",
@@ -14,7 +15,9 @@
     "lint-fix": "next lint --fix",
     "start": "next start",
     "create-admin": "tsx scripts/create-admin.ts",
-    "seed-test": "pnpm db:push && tsx scripts/seed.ts"
+    "seed-test": "pnpm db:push && tsx scripts/seed.ts",
+    "docker:create-admin": "node scripts-dist/create-admin.cjs",
+    "docker:db-migrate": "node scripts-dist/db-migrate.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -78,6 +81,7 @@
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
     "drizzle-kit": "^0.20.14",
+    "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.1.4",
     "eslint-plugin-drizzle": "^0.2.3",
@@ -85,6 +89,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.13",
     "tailwindcss": "^3.4.3",
+    "tsc-alias": "^1.8.8",
     "tsx": "^4.7.1",
     "typescript": "^5.4.3"
   },
