@@ -9,7 +9,7 @@ import {
   ResourceUsageLogSchema,
 } from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
-import { type SQL, and, count, eq, gte, lte, sql, countDistinct } from "drizzle-orm";
+import { type SQL, and, count, eq, gte, lte, sql, countDistinct, desc } from "drizzle-orm";
 import { resourceUsageLogs } from "@/server/db/schema";
 import { UserRoles } from "@/schema/user.schema";
 import { DURATION_WINDOWS, type DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
@@ -157,7 +157,13 @@ const getPaginatedResourceLogs = async ({
           })
           .from(resourceUsageLogs)
           .where(and(...andParams));
-        const result = await tx.select().from(resourceUsageLogs).where(filter).limit(take).offset(skip);
+        const result = await tx
+          .select()
+          .from(resourceUsageLogs)
+          .where(filter)
+          .orderBy(desc(resourceUsageLogs.createdAt))
+          .limit(take)
+          .offset(skip);
         return { result, total: total[0]!.value };
       });
       return { result, total };

@@ -40,8 +40,6 @@ export const paginateQuery = async <T extends z.AnyZodObject>({
     ctx,
   });
 
-  console.log("total", total);
-
   const totalPages = Math.ceil(total / pageSize);
   const strictResponseItemSchema = responseItemSchema.strict();
   return {

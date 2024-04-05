@@ -89,6 +89,7 @@ export function UsersTable() {
         filterSearchField={"username"}
         schema={UserReadAdminSchema}
         rowDropdownActions={rowDropdownActions}
+        defaultPageSize={15}
       />
     </div>
   );

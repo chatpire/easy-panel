@@ -3,7 +3,7 @@ import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { paginateQuery } from "../pagination";
 import { EventLogSchema, EventLogWhereInputSchema } from "@/schema/eventLog.schema";
-import { type SQL, and, count, eq, gte, lte } from "drizzle-orm";
+import { type SQL, and, count, eq, gte, lte, desc } from "drizzle-orm";
 import { eventLogs } from "@/server/db/schema";
 
 const PaginationEventLogsInputSchema = z.object({
@@ -45,7 +45,13 @@ const getPaginatedResourceLogs = async ({
           })
           .from(eventLogs)
           .where(and(...andParams));
-        const result = await tx.select().from(eventLogs).where(filter).limit(take).offset(skip);
+        const result = await tx
+          .select()
+          .from(eventLogs)
+          .where(filter)
+          .orderBy(desc(eventLogs.createdAt))
+          .limit(take)
+          .offset(skip);
         return { result, total: total[0]!.value };
       });
       return { result, total };

@@ -11,7 +11,30 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
   if (value instanceof Date) {
     return <span className="text-sm">{value.toLocaleString()}</span>;
   }
+  if (key === "text") {
+    const text = value as string;
+    return (
+      <Button
+        variant="ghost"
+        className="p-2 text-xs"
+        onClick={() => {
+          popup({
+            title: key,
+            description: "Text",
+            content: () => (
+              <ScrollArea className="max-h-[300px]">
+                <pre className="text-sm">{text}</pre>
+              </ScrollArea>
+            ),
+          });
+        }}
+      >
+        {text.substring(0, 100) + (text.length > 100 ? "..." : "")}
+      </Button>
+    );
+  }
   if (value instanceof Object) {
+    const jsonStr = JSON.stringify(value);
     return (
       <Button
         variant="ghost"
@@ -28,7 +51,7 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
           });
         }}
       >
-        {JSON.stringify(value).substring(0, 100)}
+        {jsonStr + (jsonStr.length > 100 ? "..." : "")}
       </Button>
     );
   }

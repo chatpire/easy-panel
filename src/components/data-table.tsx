@@ -236,7 +236,7 @@ export function DataTable<T>({
   const [tableData, setTableData] = React.useState<T[]>([]);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [lastPage, setLastPage] = React.useState(1);
-  const [totalPages, setTotalPages] = React.useState(lazyPagination ? 1 : Math.ceil(data?.length ?? 0 / pageSize));
+  const [totalPages, setTotalPages] = React.useState(lazyPagination ? 1 : null);
 
   const columns = React.useMemo(() => createColumns(schema, rowIconActions, rowDropdownActions), []);
 
@@ -249,22 +249,6 @@ export function DataTable<T>({
       throw new Error("fetchData function is required for lazy pagination");
     }
   }
-
-  React.useEffect(() => {
-    if (!lazyPagination || !fetchData) {
-      return;
-    }
-    fetchData({ currentPage, pageSize })
-      .then((response) => {
-        setTableData(response.data);
-        setLastPage(response.pagination.totalPages);
-        setTotalPages(response.pagination.totalPages);
-        console.log("Fetched data", response);
-      })
-      .catch((error) => {
-        console.error("Error fetching data", error);
-      });
-  }, [currentPage]);
 
   const table = useReactTable({
     data: lazyPagination ? tableData : data!,
@@ -287,6 +271,23 @@ export function DataTable<T>({
     },
     enableColumnPinning: true,
   });
+
+  React.useEffect(() => {
+    if (!lazyPagination || !fetchData) {
+      table.setPageSize(pageSize);
+      return;
+    }
+    fetchData({ currentPage, pageSize })
+      .then((response) => {
+        setTableData(response.data);
+        setLastPage(response.pagination.totalPages);
+        setTotalPages(response.pagination.totalPages);
+        console.log("Fetched data", response);
+      })
+      .catch((error) => {
+        console.error("Error fetching data", error);
+      });
+  }, [currentPage, pageSize]);
 
   const toPreviousPage = () => {
     if (lazyPagination) {
@@ -367,7 +368,8 @@ export function DataTable<T>({
             <PaginationItem>
               <PaginationPrevious onClick={toPreviousPage} disabled={isPreviousPageDisabled} />
             </PaginationItem>
-            <PaginationItem>{currentPage}</PaginationItem>/<PaginationItem>{totalPages}</PaginationItem>
+            <PaginationItem>{lazyPagination ? currentPage : table.getState().pagination.pageIndex + 1}</PaginationItem>/
+            <PaginationItem>{lazyPagination ? totalPages : table.getPageCount()}</PaginationItem>
             <PaginationItem>
               <PaginationNext onClick={toNextPage} disabled={isNextPageDisabled} />
             </PaginationItem>
