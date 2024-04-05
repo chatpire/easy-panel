@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { DurationWindowSchema } from "./definition.schema";
 import { createSelectSchema } from "drizzle-zod";
 import { resourceUsageLogs } from "@/server/db/schema";
+import { DurationWindowSchema } from "@/server/db/enum";
 
 export const ResourceUsageLogSchema = createSelectSchema(resourceUsageLogs);
 

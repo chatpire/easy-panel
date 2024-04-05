@@ -12,13 +12,13 @@ import {
 } from "@/schema/user.schema";
 import { hashPassword } from "@/lib/password";
 import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
-import { Db } from "@/server/db";
+import { type Db } from "@/server/db";
 import { userInstanceTokens, users } from "@/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { UserInstanceTokenSchema } from "@/schema/userInstanceToken.schema";
 import { createCUID } from "@/lib/cuid";
 import { generateId } from "lucia";
-import { UserCreateEventContentCreatedBy } from "@/schema/definition.schema";
+import { type UserCreateEventContentCreatedBy } from "@/schema/definition.schema";
 
 export async function createUser(
   db: Db,
@@ -121,7 +121,7 @@ export const userRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const user = ctx.user;
       const token = await ctx.db.query.userInstanceTokens.findFirst({
-        where: sql`"userId" = ${user.id} AND "instanceId" = ${input.instanceId}`,
+        where: and(eq(userInstanceTokens.userId, user.id), eq(userInstanceTokens.instanceId, input.instanceId)),
       });
       if (!token) {
         return null;

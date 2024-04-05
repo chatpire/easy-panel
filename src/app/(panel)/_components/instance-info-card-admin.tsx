@@ -12,7 +12,7 @@ import { copyToClipBoard } from "@/app/_helpers/copy-to-clipboard";
 import { InstanceInfoCard } from "./instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
-import { ServiceInstance } from "@/schema/serviceInstance.schema";
+import { type ServiceInstance } from "@/schema/serviceInstance.schema";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -36,7 +36,7 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
 
   const unpublish = async (instanceId: string) => {
     toast.info("Unpublishing is not implemented yet.");
-  }
+  };
 
   return (
     <InstanceInfoCard instance={instance} className={className}>
@@ -51,7 +51,9 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
           <FunctionButton variant={"outline"} onClick={() => grantToAll(instance.id)}>
             Publish To All Active Users
           </FunctionButton>
-          <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>Unpublish</FunctionButton>
+          <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
+            Unpublish
+          </FunctionButton>
           <Button onClick={() => toast.info("Not implemented")}>Edit</Button>
         </div>
       </div>

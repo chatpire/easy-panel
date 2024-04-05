@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest) {
       state,
       scopes: env.OIDC_SCOPES.split(" "),
     });
-    console.debug("generated OIDC", { state, authorizationUrl });
+    // console.debug("generated OIDC", { state, authorizationUrl });
 
     const response = NextResponse.redirect(authorizationUrl);
     response.cookies.set(env.COOKIE_PREFIX + "_oidc_state", state, {
@@ -29,6 +29,6 @@ export async function GET(_request: NextRequest) {
     return response;
   } catch (error) {
     console.error("Error in OIDC login:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: "Error in OIDC login" }, { status: 500 });
   }
 }

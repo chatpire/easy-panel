@@ -9,7 +9,7 @@ import {
 } from "@/schema/serviceInstance.schema";
 import { serviceInstances, userInstanceTokens, users } from "@/server/db/schema";
 import { createCUID } from "@/lib/cuid";
-import { SQL, and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const serviceInstanceRouter = createTRPCRouter({
   create: adminProcedure.input(ServiceInstanceCreateSchema).mutation(async ({ ctx, input }) => {
@@ -49,8 +49,8 @@ export const serviceInstanceRouter = createTRPCRouter({
   }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    const result = await ctx.db.select().from(serviceInstances);
-    return ServiceInstanceSchema.parse(result);
+    const result = await ctx.db.query.serviceInstances.findMany();
+    return ServiceInstanceSchema.array().parse(result);
   }),
 
   delete: adminProcedure.input(ServiceInstanceSchema.pick({ id: true })).mutation(async ({ ctx, input }) => {

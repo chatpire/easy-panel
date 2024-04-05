@@ -1,14 +1,7 @@
-import {
-  createTRPCRouter,
-  adminProcedure,
-  protectedWithUserProcedure,
-  type TRPCContext,
-  protectedProcedure,
-} from "@/server/trpc";
+import { createTRPCRouter, protectedWithUserProcedure, type TRPCContext, protectedProcedure } from "@/server/trpc";
 import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import { DURATION_WINDOWS, DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/schema/definition.schema";
 import {
   ResourceUsageLogWhereInputSchema,
   type GPT4LogGroupbyAccountResult,
@@ -16,9 +9,10 @@ import {
   ResourceUsageLogSchema,
 } from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
-import { SQL, and, count, eq, gte, lte, sql, sum } from "drizzle-orm";
+import { type SQL, and, count, eq, gte, lte, sql } from "drizzle-orm";
 import { resourceUsageLogs } from "@/server/db/schema";
 import { UserRoles } from "@/schema/user.schema";
+import { DURATION_WINDOWS, DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 
 const sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,
@@ -48,8 +42,8 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
         and(
           gte(resourceUsageLogs.timestamp, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
           eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
-          userId ? eq(resourceUsageLogs.userId, userId) : sql`1`,
-          instanceId ?eq(resourceUsageLogs.instanceId, instanceId) : sql`1`,
+          userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
+          instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
         ),
       )
       .groupBy(resourceUsageLogs.userId);
@@ -83,7 +77,7 @@ const groupGPT4LogsInDurationWindow = async ({
       and(
         eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
         sql`${resourceUsageLogs.timestamp} >= ${new Date(new Date().getTime() - durationWindowSeconds * 1000)}`,
-        instanceId ? sql`${resourceUsageLogs.instanceId} = ${instanceId}` : sql`1`,
+        instanceId ? sql`${resourceUsageLogs.instanceId} = ${instanceId}` : sql`true`,
         sql`${resourceUsageLogs.details} ->> 'model' LIKE 'gpt-4%'`,
       ),
     )

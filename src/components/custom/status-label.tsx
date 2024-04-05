@@ -23,13 +23,7 @@ interface StatusLabelProps {
   pointColor?: string;
 }
 
-const StatusLabel: React.FC<StatusLabelProps> = ({
-  status,
-  size = "sm",
-  children,
-  className,
-  pointColor,
-}) => {
+const StatusLabel: React.FC<StatusLabelProps> = ({ status, size = "sm", children, className, pointColor }) => {
   return (
     <div className={cn("flex items-center space-x-2", className)}>
       <div className={cn("rounded-full", statusVariants[status ?? "default"], sizeVariants[size], pointColor)} />

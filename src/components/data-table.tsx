@@ -314,7 +314,7 @@ export function DataTable<T>({
         filterSearchField={filterSearchField}
         enableColumnSelector={enableColumnSelector}
       />
-      <div className="max-h-full overflow-auto w-full rounded-md border">
+      <div className="max-h-full w-full overflow-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

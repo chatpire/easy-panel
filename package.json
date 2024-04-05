@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "db:push": "drizzle-kit push:pg",
+    "db:push": "drizzle-kit push:pg --config drizzle.config.dev.ts",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate:pg",
     "dev": "next dev",
@@ -14,7 +14,7 @@
     "lint-fix": "next lint --fix",
     "start": "next start",
     "create-admin": "tsx scripts/create-admin.ts",
-    "seed-test": "prisma migrate reset && tsx scripts/seed.ts"
+    "seed-test": "pnpm db:push && tsx scripts/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

@@ -72,7 +72,7 @@ export const adminNavConfig: SideItem[] = [
         href: "/admin/instances/create",
       },
     ],
-  }
+  },
 ];
 
 // const filterRole = (role: UserRole | null, item: { access?: UserRole }) => {

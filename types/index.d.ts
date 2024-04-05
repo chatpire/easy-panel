@@ -1,5 +1,5 @@
 import { type Icons } from "@/components/icons";
-import { type UserRole } from "@prisma/client";
+import { type UserRole } from "@/schema/user.schema";
 
 export type HeaderNavItem = {
   title: string;

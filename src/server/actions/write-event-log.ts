@@ -1,11 +1,15 @@
-import { UserCreateEventContentCreatedBy, type UserCreateEventContentSchema, type UserLoginEventContentSchema } from "@/schema/definition.schema";
+import {
+  type UserCreateEventContentCreatedBy,
+  type UserCreateEventContentSchema,
+  type UserLoginEventContentSchema,
+} from "@/schema/definition.schema";
 import { headers } from "next/headers";
 import { type z } from "zod";
-import { ChatGPTSharedOAuthEventContentSchema } from "@/schema/service/chatgpt-shared.schema";
-import { Db } from "../db";
+import { type ChatGPTSharedOAuthEventContentSchema } from "@/schema/service/chatgpt-shared.schema";
+import { type Db } from "../db";
 import { eventLogs } from "../db/schema";
 import { createCUID } from "@/lib/cuid";
-import { User } from "@/schema/user.schema";
+import { type User } from "@/schema/user.schema";
 
 export async function writeUserLoginEventLog(
   db: Db,

@@ -1,15 +1,24 @@
-import { ResourceUsageLogDetails, ServiceType } from "@/schema/definition.schema";
-import { Db } from "../db";
+import { type ResourceUsageLogDetails } from "@/schema/definition.schema";
+import { type Db } from "../db";
 import { resourceUsageLogs } from "../db/schema";
 import { createCUID } from "@/lib/cuid";
+import { ServiceTypeSchema } from "@/server/db/enum";
 
 export async function writeChatResourceUsageLog(
   db: Db,
-  userId: string,
-  instanceId: string,
-  text: string | null,
-  type: ServiceType,
-  details: ResourceUsageLogDetails,
+  {
+    userId,
+    instanceId,
+    text,
+    details,
+    timestamp,
+  }: {
+    userId: string;
+    instanceId: string;
+    text: string;
+    details: ResourceUsageLogDetails;
+    timestamp?: Date;
+  },
 ) {
   return await db
     .insert(resourceUsageLogs)
@@ -17,9 +26,10 @@ export async function writeChatResourceUsageLog(
       id: createCUID(),
       userId,
       instanceId,
-      type,
+      type: ServiceTypeSchema.Values.CHATGPT_SHARED,
       text,
       details,
+      timestamp: timestamp ?? new Date(),
     })
     .returning();
 }

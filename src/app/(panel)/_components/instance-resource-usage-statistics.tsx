@@ -1,9 +1,7 @@
 "use client";
 
-import { StatisticsGroup, StatisticsItem } from "@/components/custom/statistics";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
-
 
 type StatisticItem = {
   duration: string;
@@ -11,7 +9,6 @@ type StatisticItem = {
   count: number;
   utf8LengthSum: number;
 };
-
 
 export function InstanceUsageStatistics({ instanceId, className }: { instanceId: string; className?: string }) {
   const sumResult = api.resourceLog.sumLogsInDurationWindowsByInstance.useQuery({
@@ -21,12 +18,13 @@ export function InstanceUsageStatistics({ instanceId, className }: { instanceId:
 
   const allLogsAreEmpty = sumResult.data?.every((item) => item.stats.length === 0);
 
-  const statisticsItems: StatisticItem[] = sumResult.data?.map((item) => ({
-    duration: item.durationWindow,
-    userCount: item.stats.length,
-    count: item.stats.reduce((acc, stat) => acc + stat.count, 0),
-    utf8LengthSum: item.stats.reduce((acc, stat) => acc + (stat.utf8LengthSum ?? 0), 0),
-  })) ?? [];
+  const statisticsItems: StatisticItem[] =
+    sumResult.data?.map((item) => ({
+      duration: item.durationWindow,
+      userCount: item.stats.length,
+      count: item.stats.reduce((acc, stat) => acc + stat.count, 0),
+      utf8LengthSum: item.stats.reduce((acc, stat) => acc + (stat.sumUtf8Length ?? 0), 0),
+    })) ?? [];
 
   return (
     <div className={cn("flex flex-col", className)}>
@@ -52,16 +50,9 @@ export function InstanceUsageStatistics({ instanceId, className }: { instanceId:
                 <div key={item.duration} className="flex w-full flex-row justify-between">
                   <div>Last {item.duration}</div>
                   <div className="flex flex-row space-x-2">
-                  <span>
-                      {item.userCount} 用户在线
-                    </span>
-                    <span>
-                      对话 {item.count} 次
-                    </span>
-                    <span>
-                      共 {item.utf8LengthSum} 字符
-                    </span>
-
+                    <span>{item.userCount} 用户在线</span>
+                    <span>对话 {item.count} 次</span>
+                    <span>共 {item.utf8LengthSum} 字符</span>
                   </div>
                 </div>
               ),

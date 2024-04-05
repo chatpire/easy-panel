@@ -4,10 +4,10 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { type ServiceInstance } from "@prisma/client";
 import StatusLabel from "@/components/custom/status-label";
 import { InstanceUsageStatistics } from "./instance-resource-usage-statistics";
 import { InstanceGpt4UsageList } from "./instance-resource-gpt4-usage-list";
+import { type ServiceInstance } from "@/schema/serviceInstance.schema";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;

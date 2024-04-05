@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 import { ThemeToggle } from "@/components/mode-toggle";
-import { UserRole } from "@prisma/client";
+import { UserRoles } from "@/schema/user.schema";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -23,7 +23,7 @@ export default async function UserDashboardLayout({ children }: DashboardLayoutP
           <HeaderNav items={[]} />
 
           <div className="flex flex-row items-center space-x-4">
-            {user.role === UserRole.ADMIN && (
+            {user.role === UserRoles.ADMIN && (
               <Button variant={"outline"}>
                 <Icons.settings className="mr-2 h-4 w-4" />
                 <Link href="/admin">Admin Panel</Link>

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { ServiceTypeSchema } from "../definition.schema";
+
+import { ServiceTypeSchema } from "@/server/db/enum";
 
 export const ChatGPTSharedInstanceAttributesSchema = z.object({
   type: z.literal("CHATGPT_SHARED"),

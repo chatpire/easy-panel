@@ -13,7 +13,7 @@ export async function UserUsageStatistics({ userId }: { userId?: string }) {
         <StatisticsItem
           key={item.durationWindow}
           label={`Last ${item.durationWindow}`}
-          value={[`${item.count}`, `${item.utf8LengthSum}`]}
+          value={[String(item.stats[0]?.count ?? 0), String(item.stats[0]?.sumUtf8Length ?? 0)]}
           suffix={["times", "chars"]}
         />
       ))}

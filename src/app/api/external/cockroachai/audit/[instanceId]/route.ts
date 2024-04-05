@@ -1,3 +1,4 @@
+import { writeChatResourceUsageLog } from "@/server/actions/write-resource-usage-log";
 import { db } from "@/server/db";
 import { userInstanceTokens } from "@/server/db/schema";
 import { api } from "@/trpc/server";
@@ -5,6 +6,7 @@ import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { ServiceTypeSchema } from "@/server/db/enum";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
 
   try {
     const userTokenData = await db.query.userInstanceTokens.findFirst({
-      where: and(eq(userInstanceTokens.token, userToken), eq(userInstanceTokens.instanceId, instanceId))
+      where: and(eq(userInstanceTokens.token, userToken), eq(userInstanceTokens.instanceId, instanceId)),
     });
     if (!userTokenData) {
       return NextResponse.json({ detail: "invalid token" }, { status: 401 });
@@ -82,14 +84,15 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     const data = ChatgptCompletionRequestSchema.parse(content);
     const text = getTextFromCompletionRequest(data);
 
-    const result = await db.userResourceUsageLog.create({
-      data: {
-        user: { connect: { id: userTokenData?.userId } },
-        instance: { connect: { id: instanceId } },
+    const result = await writeChatResourceUsageLog(db, {
+      userId: userTokenData.userId,
+      instanceId,
+      text,
+      details: {
+        type: ServiceTypeSchema.Values.CHATGPT_SHARED,
         model: data.model,
-        utf8Length: Buffer.byteLength(text, "utf8"),
-        text,
-        openaiTeamId: teamId,
+        chatgptAccountId: teamId,
+        inputTokens: undefined,
         conversationId: data.conversation_id,
       },
     });

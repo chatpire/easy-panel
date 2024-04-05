@@ -141,7 +141,7 @@ const withUserSchema = t.middleware(async ({ ctx, next }) => {
   const user = await ctx.db.query.users.findFirst({
     where: eq(users.id, ctx.session.userAttr.id),
   });
-    
+
   if (!user) throw new TRPCError({ code: "NOT_FOUND" });
   return next({
     ctx: {

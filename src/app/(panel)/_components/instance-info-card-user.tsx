@@ -9,7 +9,7 @@ import Link from "next/link";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/app/_helpers/copy-to-clipboard";
 import { InstanceInfoCard } from "./instance-info-card";
-import { ServiceInstance } from "@/schema/serviceInstance.schema";
+import { type ServiceInstance } from "@/schema/serviceInstance.schema";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;

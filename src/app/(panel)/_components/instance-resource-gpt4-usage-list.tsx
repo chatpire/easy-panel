@@ -33,7 +33,7 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
     if (value < 0.3) {
       color = "bg-green-500";
     } else if (value < 0.6) {
-      color = "bg-yellow-500"
+      color = "bg-yellow-500";
     } else {
       color = "bg-red-500";
     }
@@ -45,7 +45,7 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
     if (value < 0.3) {
       color = "text-green-200";
     } else if (value < 0.6) {
-      color = "text-yellow-200"
+      color = "text-yellow-200";
     } else {
       color = "text-red-200";
     }

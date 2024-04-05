@@ -10,4 +10,6 @@ export default {
   },
   tablesFilter: [`${env.DATABASE_TABLE_PREFIX}_*`],
   out: "./drizzle",
+  verbose: true,
+  strict: true,
 } satisfies Config;

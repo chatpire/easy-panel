@@ -1,7 +1,8 @@
 import { serviceInstances } from "@/server/db/schema";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { ServiceTypeSchema } from "./definition.schema";
+
+import { ServiceTypeSchema } from "@/server/db/enum";
 
 export const ServiceInstanceSchema = createSelectSchema(serviceInstances).merge(
   z.object({

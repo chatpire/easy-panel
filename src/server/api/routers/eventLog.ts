@@ -1,10 +1,9 @@
-import { createTRPCRouter, adminProcedure, protectedWithUserProcedure, TRPCContext } from "@/server/trpc";
+import { createTRPCRouter, adminProcedure, type TRPCContext } from "@/server/trpc";
 import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { paginateQuery } from "../pagination";
-import { TRPCError } from "@trpc/server";
 import { EventLogSchema, EventLogWhereInputSchema } from "@/schema/eventLog.schema";
-import { SQL, and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { type SQL, and, count, eq, gte, lte } from "drizzle-orm";
 import { eventLogs } from "@/server/db/schema";
 
 const PaginationEventLogsInputSchema = z.object({

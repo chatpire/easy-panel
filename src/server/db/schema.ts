@@ -1,11 +1,5 @@
 import { env } from "@/env";
-import {
-  type EventContent,
-  type EventResultType,
-  type EventType,
-  type ResourceUsageLogDetails,
-  type ServiceType,
-} from "@/schema/definition.schema";
+import { type EventContent, type ResourceUsageLogDetails } from "@/schema/definition.schema";
 import { relations } from "drizzle-orm";
 import {
   pgEnum,
@@ -20,13 +14,12 @@ import {
   unique,
   pgTableCreator,
 } from "drizzle-orm/pg-core";
+import { type EventResultType, type EventType, type ServiceType } from "@/server/db/enum";
 
 export const createTable = pgTableCreator((name) => `${env.DATABASE_TABLE_PREFIX}_${name}`);
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
-export const resourceUnit = pgEnum("resource_unit", ["CHAR"]);
-export const refreshPeriod = pgEnum("refresh_period", ["DAILY", "MONTHLY", "YEARLY", "NEVER"]);
 
 // Tables
 export const users = pgTable("user", {

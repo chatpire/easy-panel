@@ -2,7 +2,8 @@ import { eventLogs } from "@/server/db/schema";
 import exp from "constants";
 import { createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
-import { EventTypeSchema } from "./definition.schema";
+
+import { EventTypeSchema } from "@/server/db/enum";
 
 export const EventLogSchema = createSelectSchema(eventLogs);
 export type EventLog = z.infer<typeof EventLogSchema>;

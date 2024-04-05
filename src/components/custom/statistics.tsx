@@ -38,7 +38,7 @@ export const StatisticsItem: FC<StatisticsItemProps> = ({ value, label, suffix, 
       {values.map((val, idx) => (
         <div key={idx} className="text-xl font-semibold">
           {val}
-          {suffixes[idx] && <span className="ml-1 text-md font-medium">{suffixes[idx]}</span>}
+          {suffixes[idx] && <span className="text-md ml-1 font-medium">{suffixes[idx]}</span>}
         </div>
       ))}
     </div>

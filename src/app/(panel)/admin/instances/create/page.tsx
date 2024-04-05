@@ -8,20 +8,16 @@ import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ServiceTypeSchema } from "@/schema/definition.schema";
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { LoadingButton } from "@/components/loading-button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ServiceInstanceOptionalDefaultsSchema } from "@/schema/generated/zod";
+import { ServiceInstanceCreateSchema } from "@/schema/serviceInstance.schema";
+import { ServiceTypeSchema } from "@/server/db/enum";
 
-const CreateInstanceFormSchema = ServiceInstanceOptionalDefaultsSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-}).merge(
+const CreateInstanceFormSchema = ServiceInstanceCreateSchema.merge(
   z.object({
     url: z.string().url(),
     description: z.string().optional(),
@@ -31,7 +27,7 @@ const CreateInstanceFormSchema = ServiceInstanceOptionalDefaultsSchema.omit({
 
 type CreateInstanceForm = z.infer<typeof CreateInstanceFormSchema>;
 
-export function InstanceForm() {
+function InstanceForm() {
   const [loading, setLoading] = React.useState(false);
 
   const form = useForm<CreateInstanceForm>({

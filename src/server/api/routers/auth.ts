@@ -41,6 +41,7 @@ export const authRouter = createTRPCRouter({
   logout: protectedProcedure.mutation(async ({ ctx }) => {
     const session = ctx.session;
     await lucia.invalidateSession(session.id);
+    // eslint-disable-next-line drizzle/enforce-delete-with-where
     cookies().delete(lucia.sessionCookieName);
   }),
 });
