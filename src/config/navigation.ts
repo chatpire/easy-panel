@@ -31,6 +31,20 @@ export const adminNavConfig: SideItem[] = [
     icon: "info",
   },
   {
+    title: "Instances",
+    icon: "server",
+    sub: [
+      {
+        title: "All Instances",
+        href: "/admin/instances",
+      },
+      {
+        title: "Create Instance",
+        href: "/admin/instances/create",
+      },
+    ],
+  },
+  {
     title: "Users",
     href: "/admin/users",
     icon: "user",
@@ -40,8 +54,8 @@ export const adminNavConfig: SideItem[] = [
         href: "/admin/users",
       },
       {
-        title: "Add User",
-        href: "/admin/users/add",
+        title: "Create User",
+        href: "/admin/users/create",
       },
     ],
   },
@@ -56,20 +70,6 @@ export const adminNavConfig: SideItem[] = [
       {
         title: "Event Usage",
         href: "/admin/logs/events",
-      },
-    ],
-  },
-  {
-    title: "Instances",
-    icon: "server",
-    sub: [
-      {
-        title: "All Instances",
-        href: "/admin/instances",
-      },
-      {
-        title: "Create Instance",
-        href: "/admin/instances/create",
       },
     ],
   },
