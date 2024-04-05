@@ -3,7 +3,7 @@ import { api } from "@/trpc/server";
 
 export async function UserUsageStatistics({ userId }: { userId?: string }) {
   const result = await api.resourceLog.sumLogsInDurationWindowsByUserId({
-    durationWindows: ["3h", "1d", "7d", "30d"],
+    durationWindows: ["3h", "24h", "7d", "30d"],
     userId, // by default is the current user
   });
 
@@ -13,7 +13,7 @@ export async function UserUsageStatistics({ userId }: { userId?: string }) {
         <StatisticsItem
           key={item.durationWindow}
           label={`Last ${item.durationWindow}`}
-          value={[String(item.stats[0]?.count ?? 0), String(item.stats[0]?.sumUtf8Length ?? 0)]}
+          value={[String(item.stats.count ?? 0), String(item.stats.sumUtf8Length ?? 0)]}
           suffix={["times", "chars"]}
         />
       ))}

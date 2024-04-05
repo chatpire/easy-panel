@@ -39,3 +39,10 @@ export function computeSkip(paginationInput: PaginationInput) {
   const skip = Math.max(0, (currentPage ?? 1) - 1) * pageSize;
   return skip;
 }
+
+export function alignTimeToGranularity(granularitySeconds: number, time?: Date) {
+  if (!time) time = new Date();
+  const timeSeconds = Math.floor(time.getTime() / 1000);
+  const alignedTimeSeconds = Math.floor(timeSeconds / granularitySeconds) * granularitySeconds;
+  return new Date(alignedTimeSeconds * 1000);
+}

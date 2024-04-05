@@ -8,6 +8,7 @@ import { eq } from "drizzle-orm";
 import { users } from "./db/schema";
 import { UserRoles } from "@/schema/user.schema";
 import { getSessionData } from "@/server/auth";
+import { env } from "@/env";
 
 /**
  * Defines your inner context shape.
@@ -115,9 +116,22 @@ export const createTRPCRouter = t.router;
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
-export const publicProcedure = t.procedure;
+export const _publicProcedure = t.procedure;
 
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+export const publicProcedure = _publicProcedure.use(async (opts) => {
+  if (!env.TRPC_TIME_LOGGING) return await opts.next();
+
+  const start = Date.now();
+  const result = await opts.next();
+  const durationMs = Date.now() - start;
+  const meta = { path: opts.path, type: opts.type, durationMs };
+
+  result.ok ? console.log("OK request timing:", meta) : console.error("Non-OK request timing", meta);
+
+  return result;
+});
+
+export const protectedProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.session?.userAttr) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }

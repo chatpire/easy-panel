@@ -13,21 +13,23 @@ import { type SQL, and, count, eq, gte, lte, sql, countDistinct } from "drizzle-
 import { resourceUsageLogs } from "@/server/db/schema";
 import { UserRoles } from "@/schema/user.schema";
 import { DURATION_WINDOWS, type DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
+import { alignTimeToGranularity } from "@/lib/utils";
+import { memoize } from "@/lib/memoize";
 
-const sumChatGPTSharedLogsInDurationWindows = async ({
+const _sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,
   durationWindows,
+  timeEnd,
   userId,
   instanceId,
 }: {
   ctx: TRPCContext;
   durationWindows: DurationWindow[];
+  timeEnd: Date;
   userId?: string;
   instanceId?: string;
 }): Promise<ResourceLogSumResult[]> => {
   const results = [] as ResourceLogSumResult[];
-
-  console.log("sumChatGPTSharedLogsInDurationWindows", { durationWindows, userId, instanceId });
 
   for (const durationWindow of durationWindows) {
     const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
@@ -43,12 +45,12 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
       .where(
         and(
           eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
-          gte(resourceUsageLogs.createdAt, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
+          gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
           userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
           instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
         ),
-      )
-      // .groupBy(resourceUsageLogs.userId);
+      );
+    // .groupBy(resourceUsageLogs.userId);
 
     results.push({
       durationWindow,
@@ -56,19 +58,28 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
     });
   }
 
-  console.log("results", results);
-
   return results;
 };
 
-const groupGPT4LogsInDurationWindow = async ({
+const sumChatGPTSharedLogsInDurationWindows = memoize(_sumChatGPTSharedLogsInDurationWindows, {
+  genKey: ({ durationWindows, timeEnd, userId, instanceId }) => {
+    return JSON.stringify({ durationWindows, timeEnd, userId, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});
+
+const _groupGPT4LogsInDurationWindow = async ({
   ctx,
   durationWindow,
   instanceId,
+  timeEnd,
 }: {
   ctx: TRPCContext;
   durationWindow: DurationWindow;
   instanceId?: string;
+  timeEnd: Date;
 }): Promise<GPT4LogGroupbyAccountResult> => {
   const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
   const groupByResult = await ctx.db
@@ -81,7 +92,7 @@ const groupGPT4LogsInDurationWindow = async ({
       and(
         eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
         // sql`${resourceUsageLogs.createdAt} >= ${new Date(new Date().getTime() - durationWindowSeconds * 1000)}`,
-        gte(resourceUsageLogs.createdAt, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
+        gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
         instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
         sql`${resourceUsageLogs.details}->>'model' LIKE 'gpt-4%'`,
       ),
@@ -97,6 +108,15 @@ const groupGPT4LogsInDurationWindow = async ({
   };
   return result;
 };
+
+const groupGPT4LogsInDurationWindow = memoize(_groupGPT4LogsInDurationWindow, {
+  genKey: ({ durationWindow, instanceId }) => {
+    return JSON.stringify({ durationWindow, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});
 
 const PaginationResourceLogsInputSchema = z.object({
   where: ResourceUsageLogWhereInputSchema,
@@ -176,6 +196,7 @@ export const resourceLogRouter = createTRPCRouter({
       return sumChatGPTSharedLogsInDurationWindows({
         ctx,
         durationWindows: input.durationWindows,
+        timeEnd: alignTimeToGranularity(60),
         userId,
       });
     }),
@@ -192,6 +213,7 @@ export const resourceLogRouter = createTRPCRouter({
       return sumChatGPTSharedLogsInDurationWindows({
         ctx,
         durationWindows: input.durationWindows,
+        timeEnd: alignTimeToGranularity(60),
         instanceId: input.instanceId,
       });
     }),
@@ -203,7 +225,11 @@ export const resourceLogRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx }) => {
-      return sumChatGPTSharedLogsInDurationWindows({ ctx, durationWindows: input.durationWindows });
+      return sumChatGPTSharedLogsInDurationWindows({
+        ctx,
+        durationWindows: input.durationWindows,
+        timeEnd: alignTimeToGranularity(60),
+      });
     }),
 
   groupGPT4LogsInDurationWindowByInstance: protectedProcedure
@@ -218,6 +244,7 @@ export const resourceLogRouter = createTRPCRouter({
         ctx,
         durationWindow: input.durationWindow,
         instanceId: input.instanceId,
+        timeEnd: alignTimeToGranularity(60),
       });
     }),
 });

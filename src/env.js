@@ -46,6 +46,9 @@ export const env = createEnv({
     OIDC_USERNAME_CLAIM: z.string().optional().default("preferred_username"),
     OIDC_DISPLAY_NAME: z.string().optional().default("OIDC Connect"),
     OIDC_SCOPES: z.string().optional().default("openid profile email"),
+
+    // develop
+    TRPC_TIME_LOGGING: z.boolean().optional().default(false),
   },
 
   /**
@@ -89,6 +92,8 @@ export const env = createEnv({
     OIDC_USERNAME_CLAIM: process.env.OIDC_USERNAME_CLAIM,
     OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,
     OIDC_SCOPES: process.env.OIDC_SCOPES,
+
+    TRPC_TIME_LOGGING: process.env.TRPC_TIME_LOGGING,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
