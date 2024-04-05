@@ -5,7 +5,7 @@ import { type PaginationInput } from "@/schema/pagination.schema";
 import { ResourceUsageLogSchema } from "@/schema/resourceLog.schema";
 
 const UserResourceUsageLogDisplaySchema = ResourceUsageLogSchema.pick({
-  timestamp: true,
+  createdAt: true,
   instanceId: true,
   details: true,
 });

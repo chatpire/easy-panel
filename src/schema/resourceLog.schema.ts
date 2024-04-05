@@ -33,6 +33,6 @@ export type GPT4LogGroupbyAccountResult = z.infer<typeof GPT4LogGroupbyAccountRe
 export const ResourceUsageLogWhereInputSchema = z.object({
   userId: z.string().optional(),
   instanceId: z.string().optional(),
-  timestampStart: z.date().optional(),
-  timestampEnd: z.date().optional(),
+  timeStart: z.date().optional(),
+  timeEnd: z.date().optional(),
 });

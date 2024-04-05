@@ -40,7 +40,6 @@ export async function GET(request: NextRequest) {
       authenticateWith: "http_basic_auth",
     });
 
-    // eslint-disable-next-line drizzle/enforce-delete-with-where
     cookies().delete(env.COOKIE_PREFIX + "_oidc_state");
 
     console.debug("OIDC Token Response:", tokenResponse);

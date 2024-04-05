@@ -17,6 +17,12 @@ const config = {
     // "plugin:tailwindcss/recommended"
   ],
   rules: {
+    "drizzle/enforce-delete-with-where": [
+      "error",
+      {
+        drizzleObjectName: ["db"],
+      },
+    ],
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/consistent-type-definitions": "off",
     "@typescript-eslint/consistent-type-imports": [

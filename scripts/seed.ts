@@ -63,7 +63,7 @@ async function main() {
         userId: user.id,
         instanceId: faker.helpers.arrayElement(instances).id,
         text: randomText,
-        timestamp: randomDate,
+        createdAt: randomDate,
         details: {
           type: ServiceTypeSchema.Values.CHATGPT_SHARED,
           model: "gpt-4",

@@ -3,6 +3,7 @@
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import React from "react";
+import { toast } from "sonner";
 
 interface LoadingButtonProps extends ButtonProps {
   loading?: boolean;
@@ -33,7 +34,7 @@ export function FunctionButton({ onClick, ...props }: FunctionButtonProps) {
         try {
           await onClick?.();
         } catch (e) {
-          throw e;
+          toast.error(String(e));
         } finally {
           setLoading(false);
         }

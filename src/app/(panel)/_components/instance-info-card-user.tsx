@@ -24,7 +24,7 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">
         <div className="flex flex-row items-center space-x-3">
-          <Button>
+          <Button disabled={!token}>
             <Icons.externalLink className="mr-2 h-4 w-4" />
             <Link href={`${instance.url}/logintoken?access_token=${token}`} target="_blank">
               跳转到 ChatGPT
@@ -34,7 +34,7 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
         <div className="flex flex-row items-center space-x-3">
           <Label>Token</Label>
           <span className="rounded-md border px-3 py-1 text-sm">
-            {token ?? "无"}
+            {token ?? "无使用权限，请联系管理员创建 Token"}
             <Button
               className="ml-2 rounded p-1"
               variant={"ghost"}
@@ -47,9 +47,6 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
               <Icons.copy className="h-3 w-3" />
             </Button>
           </span>
-          {/* <FunctionButton variant={"outline"} disabled={!!token} onClick={() => generateToken(instance.id)}>
-            生成 Token
-          </FunctionButton> */}
         </div>
       </div>
     </InstanceInfoCard>

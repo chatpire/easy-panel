@@ -4,17 +4,28 @@ import * as React from "react";
 import { type UserReadAdmin, UserReadAdminSchema } from "@/schema/user.schema";
 import { api } from "@/trpc/react";
 import { popupEditPasswordForm } from "@/app/_helpers/edit-password-popup";
-import { banUser, deleteUser } from "./user-table-actions";
 import { DataTable, DataTableHeader, type DataTableDropdownAction } from "@/components/data-table";
+import { popup } from "@/components/popup";
+import { FunctionButton } from "@/components/loading-button";
+import { popupGenerateTokensForm } from "@/app/_helpers/generate-intance-token-popup";
+import { toast } from "sonner";
 
 export function UsersTable() {
   const getAllUserQuery = api.user.getAll.useQuery();
+  const updateUsersMutation = api.user.update.useMutation();
+  const deleteUserMutation = api.user.delete.useMutation();
 
   const rowDropdownActions: DataTableDropdownAction<UserReadAdmin>[] = [
     {
-      key: "view-tokens",
-      content: "View Tokens (TODO)",
+      key: "Generate Instance Tokens",
+      content: "Generate Instance Tokens",
       type: "item",
+      onClick: (row) => popupGenerateTokensForm(row.original.id, row.original.username),
+    },
+    {
+      key: "separator",
+      content: null,
+      type: "separator",
     },
     {
       key: "edit-password",
@@ -23,21 +34,51 @@ export function UsersTable() {
       onClick: (row) => popupEditPasswordForm(row.original.id, row.original.username),
     },
     {
-      key: "separator",
-      content: null,
-      type: "separator",
-    },
-    {
       key: "ban-user",
       content: <span className="text-red-500">Ban User</span>,
       type: "item",
-      onClick: (row) => banUser(row.original),
+      onClick: (row) =>
+        popup({
+          title: `Ban User`,
+          description:
+            "Set user.isActive to false. User cannot login to panel, but can still use Chat until session expires.",
+          content: (closePopup) => (
+            <FunctionButton
+              variant={"default"}
+              className="my-2 w-full"
+              onClick={async () => {
+                await updateUsersMutation.mutateAsync({ id: row.original.id, isActive: false });
+                closePopup();
+                toast.success("User has been banned.");
+              }}
+            >
+              Confirm
+            </FunctionButton>
+          ),
+        }),
     },
     {
       key: "delete-user",
       content: <span className="text-red-500">Delete User</span>,
       type: "item",
-      onClick: (row) => deleteUser(row.original),
+      onClick: (row) =>
+        popup({
+          title: `Delete User`,
+          description: "Delete user from database. This action cannot be undone.",
+          content: (closePopup) => (
+            <FunctionButton
+              variant={"destructive"}
+              className="my-2 w-full"
+              onClick={async () => {
+                await deleteUserMutation.mutateAsync({ id: row.original.id });
+                closePopup();
+                toast.success("User has been deleted.");
+              }}
+            >
+              Confirm
+            </FunctionButton>
+          ),
+        }),
     },
   ];
 

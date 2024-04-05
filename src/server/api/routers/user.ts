@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, adminProcedure, protectedWithUserProcedure } from "@/server/trpc";
+import { createTRPCRouter, adminProcedure, protectedWithUserProcedure, adminWithUserProcedure } from "@/server/trpc";
 import {
   UserReadAdminSchema,
   UserReadSchema,
@@ -9,6 +9,7 @@ import {
   UserUpdatePasswordSchema,
   UserCreateSchema,
   UserRoles,
+  UserUpdateAdminSchema,
 } from "@/schema/user.schema";
 import { hashPassword } from "@/lib/password";
 import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
@@ -74,6 +75,21 @@ export const userRouter = createTRPCRouter({
     return UserReadSchema.parse(result);
   }),
 
+  update: adminWithUserProcedure.input(UserUpdateAdminSchema).mutation(async ({ ctx, input }) => {
+    if (input.id === ctx.user.id && input.isActive !== undefined) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You cannot ban yourself" });
+    }
+    const result = await ctx.db.update(users).set(input).where(eq(users.id, input.id)).returning();
+    return UserReadAdminSchema.parse(result);
+  }),
+
+  delete: adminWithUserProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
+    if (input.id === ctx.user.id) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "You cannot delete yourself" });
+    }
+    await ctx.db.delete(users).where(eq(users.id, input.id));
+  }),
+
   changePassword: protectedWithUserProcedure.input(UserUpdatePasswordSchema).mutation(async ({ ctx, input }) => {
     const hashedPassword = await hashPassword(input.password);
 
@@ -89,31 +105,26 @@ export const userRouter = createTRPCRouter({
     return UserReadAdminSchema.array().parse(results);
   }),
 
-  generateToken: adminProcedure
+  generateTokens: adminProcedure
     .input(
       z.object({
         userId: z.string(),
-        instanceId: z.string(),
+        instanceIds: z.string().array(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { userId, instanceId } = input;
+      const { userId, instanceIds } = input;
 
       const user = await ctx.db.query.users.findFirst({ where: eq(users.id, userId) });
       if (!user) {
         throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
-      const token = await ctx.db
+      await ctx.db
         .insert(userInstanceTokens)
-        .values({
-          userId,
-          instanceId,
-          token: user.username + "__" + generateId(16),
-        })
-        .returning();
-
-      return UserInstanceTokenSchema.parse(token[0]);
+        .values(
+          instanceIds.map((instanceId) => ({ userId, instanceId, token: `${user.username}__${generateId(16)}` })),
+        );
     }),
 
   getInstanceToken: protectedWithUserProcedure

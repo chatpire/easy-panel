@@ -7,8 +7,8 @@ import StatusLabel from "@/components/custom/status-label";
 
 export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: string; className?: string }) {
   const gpt4GroupResults = api.resourceLog.groupGPT4LogsInDurationWindowByInstance.useQuery({
-    durationWindow: "3h",
     instanceId,
+    durationWindow: "3h",
   });
 
   const totalCount = gpt4GroupResults.data?.counts.reduce((acc, item) => acc + item.count, 0) ?? 0;

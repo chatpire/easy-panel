@@ -25,6 +25,7 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
   const grantToAll = async (instanceId: string) => {
     try {
       await grantMutation.mutateAsync({ instanceId });
+      toast.success("Published to all active users.");
     } catch (error) {
       console.error(error);
       if (error instanceof TRPCClientError) {
@@ -46,6 +47,22 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
             <Icons.externalLink className="mr-2 h-4 w-4" />
             <Link href={instance.url ?? ""}>{instance.url}</Link>
           </Button>
+        </div>
+        <div className="flex flex-row items-center space-x-3">
+          <Label>InstanceId</Label>
+          <span className="rounded-md border px-3 py-1 text-sm">
+            {instance.id}
+            <Button
+              className="ml-2 rounded p-1"
+              variant={"ghost"}
+              size={"sm"}
+              onClick={async () => {
+                await copyToClipBoard(instance.id);
+              }}
+            >
+              <Icons.copy className="h-3 w-3" />
+            </Button>
+          </span>
         </div>
         <div className="flex flex-row items-center space-x-3">
           <FunctionButton variant={"outline"} onClick={() => grantToAll(instance.id)}>

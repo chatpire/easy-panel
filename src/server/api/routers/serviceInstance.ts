@@ -31,7 +31,7 @@ export const serviceInstanceRouter = createTRPCRouter({
           userId: id,
           instanceId: input.instanceId,
           token: createCUID(),
-        });
+        }).onConflictDoNothing();
       }
     });
   }),

@@ -11,6 +11,6 @@ export type EventLog = z.infer<typeof EventLogSchema>;
 export const EventLogWhereInputSchema = z.object({
   userId: z.string().optional(),
   type: EventTypeSchema.optional(),
-  timestampStart: z.date().optional(),
-  timestampEnd: z.date().optional(),
+  timeStart: z.date().optional(),
+  timeEnd: z.date().optional(),
 });

@@ -28,21 +28,8 @@ export function InstanceUsageStatistics({ instanceId, className }: { instanceId:
 
   return (
     <div className={cn("flex flex-col", className)}>
-      <span className="text-md py-3 font-semibold">总用量统计</span>
+      <span className="text-md py-3 font-semibold">最近使用情况</span>
       {!allLogsAreEmpty && (
-        // <StatisticsGroup className="md:grid-cols-4 ">
-        //   {statisticsItems.map(
-        //     (item) =>
-        //       item.count > 0 && (
-        //         <StatisticsItem
-        //           key={item.duration}
-        //           label={`Last ${item.duration}`}
-        //           value={[`${item.count}`, `${item.utf8LengthSum}`,`${item.userCount}`]}
-        //           suffix={["times", "chars", "users"]}
-        //         />
-        //       ),
-        //   )}
-        // </StatisticsGroup>
         <div className="flex flex-col space-y-2 text-sm">
           {statisticsItems.map(
             (item) =>

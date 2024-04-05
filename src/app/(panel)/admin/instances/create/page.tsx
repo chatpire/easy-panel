@@ -33,6 +33,7 @@ function InstanceForm() {
   const form = useForm<CreateInstanceForm>({
     defaultValues: {
       type: "CHATGPT_SHARED",
+      grantToAllActiveUsers: false,
     },
     resolver: zodResolver(CreateInstanceFormSchema),
   });
@@ -56,13 +57,14 @@ function InstanceForm() {
       const instance = await createMutation.mutateAsync(instanceCreate);
       console.debug({ instance });
       toast.success("Instance created");
+      form.reset();
       if (grantToAllActiveUsers) {
         await grantMutation.mutateAsync({ instanceId: instance.id });
         toast.success("Instance granted to all active users");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create instance");
+      toast.error("Failed to create instance: " + String(error));
     } finally {
       setLoading(false);
     }

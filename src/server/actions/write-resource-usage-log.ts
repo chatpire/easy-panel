@@ -10,14 +10,16 @@ export async function writeChatResourceUsageLog(
     userId,
     instanceId,
     text,
+    textBytes,
     details,
-    timestamp,
+    createdAt
   }: {
     userId: string;
     instanceId: string;
-    text: string;
+    text?: string;
+    textBytes?: number;
     details: ResourceUsageLogDetails;
-    timestamp?: Date;
+    createdAt?: Date;
   },
 ) {
   return await db
@@ -28,8 +30,9 @@ export async function writeChatResourceUsageLog(
       instanceId,
       type: ServiceTypeSchema.Values.CHATGPT_SHARED,
       text,
+      textBytes,
       details,
-      timestamp: timestamp ?? new Date(),
+      createdAt: createdAt ?? new Date(),
     })
     .returning();
 }

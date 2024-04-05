@@ -10,6 +10,19 @@ export const UserRoleSchema = UserSchema.shape.role;
 export const UserRoles = UserRoleSchema.Values;
 export type UserRole = z.infer<typeof UserRoleSchema>;
 
+const UserInsertSchema = createInsertSchema(users);
+export const UserCreateSchema = UserInsertSchema.omit({
+  id: true,
+  hashedPassword: true,
+  createdAt: true,
+  updatedAt: true,
+}).merge(
+  z.object({
+    password: z.string().min(6).optional(),
+  }),
+);
+export type UserCreate = z.infer<typeof UserCreateSchema>;
+
 export const UserReadAdminSchema = UserSchema.omit({
   hashedPassword: true,
 });
@@ -28,26 +41,12 @@ export const UserUpdatePasswordSchema = UserSchema.pick({
   id: true,
 }).merge(UserPasswordSchema);
 
-export const UserUpdateAdminSchema = UserReadAdminSchema.omit({
-  userToken: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const UserUpdateAdminSchema = UserCreateSchema.partial().merge(
+  z.object({
+    id: z.string(),
+  }),
+);
 
 export const UserUpdateSelfSchema = UserUpdateAdminSchema.pick({
   name: true,
 });
-
-const UserInsertSchema = createInsertSchema(users);
-export const UserCreateSchema = UserInsertSchema.omit({
-  id: true,
-  hashedPassword: true,
-  createdAt: true,
-  updatedAt: true,
-}).merge(
-  z.object({
-    password: z.string().min(6).optional(),
-  }),
-);
-
-export type UserCreate = z.infer<typeof UserCreateSchema>;

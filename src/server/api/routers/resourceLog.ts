@@ -40,7 +40,7 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
       .from(resourceUsageLogs)
       .where(
         and(
-          gte(resourceUsageLogs.timestamp, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
+          gte(resourceUsageLogs.createdAt, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
           eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
           userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
           instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
@@ -69,19 +69,21 @@ const groupGPT4LogsInDurationWindow = async ({
   const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
   const groupByResult = await ctx.db
     .select({
-      chatgptAccountId: sql<string | null>`${resourceUsageLogs.details} ->> 'chatgptAccountId'`,
+      chatgptAccountId: sql<string | null>`${resourceUsageLogs.details}->>'chatgptAccountId'`,
       _count: count(),
     })
     .from(resourceUsageLogs)
     .where(
       and(
         eq(resourceUsageLogs.type, ServiceTypeSchema.Values.CHATGPT_SHARED),
-        sql`${resourceUsageLogs.timestamp} >= ${new Date(new Date().getTime() - durationWindowSeconds * 1000)}`,
-        instanceId ? sql`${resourceUsageLogs.instanceId} = ${instanceId}` : sql`true`,
-        sql`${resourceUsageLogs.details} ->> 'model' LIKE 'gpt-4%'`,
+        // sql`${resourceUsageLogs.createdAt} >= ${new Date(new Date().getTime() - durationWindowSeconds * 1000)}`,
+        gte(resourceUsageLogs.createdAt, new Date(new Date().getTime() - durationWindowSeconds * 1000)),
+        instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
+        sql`${resourceUsageLogs.details}->>'model' LIKE 'gpt-4%'`,
       ),
     )
-    .groupBy(sql`${resourceUsageLogs.details} ->> 'chatgptAccountId'`);
+    .groupBy(sql`${resourceUsageLogs.details}->>'chatgptAccountId'`);
+  console.log("groupByResult", groupByResult);
   const result = {
     durationWindow,
     counts: groupByResult.map((item) => ({
@@ -117,11 +119,11 @@ const getPaginatedResourceLogs = async ({
       if (where.instanceId) {
         andParams.push(eq(resourceUsageLogs.instanceId, where.instanceId));
       }
-      if (where.timestampStart) {
-        andParams.push(gte(resourceUsageLogs.timestamp, where.timestampStart));
+      if (where.timeStart) {
+        andParams.push(gte(resourceUsageLogs.createdAt, where.timeStart));
       }
-      if (where.timestampEnd) {
-        andParams.push(lte(resourceUsageLogs.timestamp, where.timestampEnd));
+      if (where.timeEnd) {
+        andParams.push(lte(resourceUsageLogs.createdAt, where.timeEnd));
       }
       const filter = and(...andParams);
       const { total, result } = await ctx.db.transaction(async (tx) => {

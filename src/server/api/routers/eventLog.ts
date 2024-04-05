@@ -31,11 +31,11 @@ const getPaginatedResourceLogs = async ({
       if (where.type) {
         andParams.push(eq(eventLogs.type, where.type));
       }
-      if (where.timestampStart) {
-        andParams.push(gte(eventLogs.timestamp, where.timestampStart));
+      if (where.timeStart) {
+        andParams.push(gte(eventLogs.createdAt, where.timeStart));
       }
-      if (where.timestampEnd) {
-        andParams.push(lte(eventLogs.timestamp, where.timestampEnd));
+      if (where.timeEnd) {
+        andParams.push(lte(eventLogs.createdAt, where.timeEnd));
       }
       const filter = and(...andParams);
       const { total, result } = await ctx.db.transaction(async (tx) => {

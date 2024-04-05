@@ -88,6 +88,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       userId: userTokenData.userId,
       instanceId,
       text,
+      textBytes: Buffer.byteLength(text, "utf-8"),
       details: {
         type: ServiceTypeSchema.Values.CHATGPT_SHARED,
         model: data.model,
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       },
     });
 
-    console.log("UserResourceUsageLog created", result);
+    console.debug("UserResourceUsageLog created", result);
     return new NextResponse(null, { status: 200 });
   } catch (e) {
     console.error(e);
