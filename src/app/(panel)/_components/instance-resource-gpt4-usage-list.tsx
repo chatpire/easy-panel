@@ -30,10 +30,12 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
 
   const getBackgroundColor = (value: number) => {
     let color;
-    if (value < 0.3) {
+    if (value < 0.2) {
       color = "bg-green-500";
     } else if (value < 0.6) {
       color = "bg-yellow-500";
+    } else if (value < 0.9) {
+      color = "bg-orange-500";
     } else {
       color = "bg-red-500";
     }
@@ -42,10 +44,12 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
 
   const getTextColor = (value: number) => {
     let color;
-    if (value < 0.3) {
+    if (value < 0.2) {
       color = "text-green-200";
     } else if (value < 0.6) {
       color = "text-yellow-200";
+    } else if (value < 0.9) {
+      color = "text-orange-200";
     } else {
       color = "text-red-200";
     }
@@ -53,12 +57,14 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
   };
 
   const getStatusLabel = (percentage: number) => {
-    if (percentage < 0.3) {
+    if (percentage < 0.2) {
       return "空闲";
     } else if (percentage < 0.6) {
       return "忙碌";
+    } else if (percentage < 0.9) {
+      return "拥挤";
     }
-    return "拥挤";
+    return "爆满";
   };
 
   return (
@@ -80,8 +86,7 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
                   {item.value} / {item.quota}
                 </span>
                 <Progress
-                  value={item.value}
-                  max={item.quota}
+                  value={Math.min(percentage * 100, 100)}
                   className={cn("w-[200px] max-w-full")}
                   indicatorClassName={getBackgroundColor(percentage)}
                 />

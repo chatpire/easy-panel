@@ -7,14 +7,12 @@ export const ResourceUsageLogSchema = createSelectSchema(resourceUsageLogs);
 
 export const ResourceLogSumResultSchema = z.object({
   durationWindow: DurationWindowSchema,
-  stats: z.array(
-    z.object({
-      userId: z.string().nullable(),
-      count: z.number().int(),
-      sumUtf8Length: z.number().int().nullable(),
-      sumTokensLength: z.number().int().nullable(),
-    }),
-  ),
+  stats: z.object({
+    userCount: z.number().int(),
+    count: z.number().int(),
+    sumUtf8Length: z.number().int().nullable(),
+    sumTokensLength: z.number().int().nullable(),
+  }),
 });
 
 export const GPT4LogGroupbyAccountResultSchema = z.object({

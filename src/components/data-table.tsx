@@ -43,7 +43,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DataTableColumnHeader, getDataTableCheckboxColumn } from "@/app/_helpers/data-table-helper";
 import { camelCaseToTitleCase, formatUserDataTableCellValue } from "@/app/_helpers/data-table-cell-formatter";
-import { extractKeysFromSchema } from "@/lib/utils";
+import { cn, extractKeysFromSchema } from "@/lib/utils";
 import { type z } from "zod";
 import { Icons } from "./icons";
 import { type PaginatedData, type PaginationInput } from "@/schema/pagination.schema";
@@ -236,7 +236,7 @@ export function DataTable<T>({
   const [tableData, setTableData] = React.useState<T[]>([]);
   const [currentPage, setCurrentPage] = React.useState(1);
   const [lastPage, setLastPage] = React.useState(1);
-  const [totalPages, setTotalPages] = React.useState(1);
+  const [totalPages, setTotalPages] = React.useState(lazyPagination ? 1 : Math.ceil(data?.length ?? 0 / pageSize));
 
   const columns = React.useMemo(() => createColumns(schema, rowIconActions, rowDropdownActions), []);
 
@@ -259,6 +259,7 @@ export function DataTable<T>({
         setTableData(response.data);
         setLastPage(response.pagination.totalPages);
         setTotalPages(response.pagination.totalPages);
+        console.log("Fetched data", response);
       })
       .catch((error) => {
         console.error("Error fetching data", error);
@@ -308,13 +309,13 @@ export function DataTable<T>({
   const isNextPageDisabled = lazyPagination ? currentPage === lastPage : !table.getCanNextPage();
 
   return (
-    <div className={className}>
+    <div>
       <DataTableHeader
         table={table}
         filterSearchField={filterSearchField}
         enableColumnSelector={enableColumnSelector}
       />
-      <div className="max-h-full w-full overflow-auto rounded-md border">
+      <div className={cn("max-h-full w-full overflow-auto rounded-md border", className)}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -361,14 +362,6 @@ export function DataTable<T>({
             )}
           </div>
         </div>
-        {/* <div className="space-x-2">
-          <Button variant="outline" size="sm" onClick={toPreviousPage} disabled={isPreviousPageDisabled}>
-            Previous
-          </Button>
-          <Button variant="outline" size="sm" onClick={toNextPage} disabled={isNextPageDisabled}>
-            Next
-          </Button>
-        </div> */}
         <Pagination>
           <PaginationContent>
             <PaginationItem>

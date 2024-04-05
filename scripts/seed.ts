@@ -8,9 +8,9 @@ import { ServiceTypeSchema } from "@/server/db/enum";
 import { log } from "console";
 
 const USERS_TO_CREATE = 50;
-const INSTANCES_TO_CREATE = 3;
-const LOGS_TO_CREATE_PER_USER = 4000;
-const LOG_DAY_SPAN = 360;
+const INSTANCES_TO_CREATE = 2;
+const LOGS_TO_CREATE_PER_USER = 100;
+const LOG_DAY_SPAN = 2;
 
 async function main() {
   console.log(`Start seeding ...`);
@@ -47,10 +47,10 @@ async function main() {
   console.log(`Created ${INSTANCES_TO_CREATE} service instances`);
 
   // Create logs over the past LOG_DAY_SPAN days
-  const logInterval = Math.floor((LOG_DAY_SPAN * 24 * 60 * 60 * 1000) / (USERS_TO_CREATE * LOGS_TO_CREATE_PER_USER));
-  let baseTime = Date.now() - LOG_DAY_SPAN * 24 * 60 * 60 * 1000;
-
+  const logInterval = Math.floor((LOG_DAY_SPAN * 24 * 60 * 60 * 1000) / (LOGS_TO_CREATE_PER_USER));
+  
   for (const user of usersCreated) {
+    let baseTime = Date.now() - LOG_DAY_SPAN * 24 * 60 * 60 * 1000;
     for (let i = 0; i < LOGS_TO_CREATE_PER_USER; i++) {
       const logsToCreate = [];
       const createdAt = new Date(baseTime);

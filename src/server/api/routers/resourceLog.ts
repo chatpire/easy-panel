@@ -9,10 +9,10 @@ import {
   ResourceUsageLogSchema,
 } from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
-import { type SQL, and, count, eq, gte, lte, sql } from "drizzle-orm";
+import { type SQL, and, count, eq, gte, lte, sql, countDistinct } from "drizzle-orm";
 import { resourceUsageLogs } from "@/server/db/schema";
 import { UserRoles } from "@/schema/user.schema";
-import { DURATION_WINDOWS, DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
+import { DURATION_WINDOWS, type DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 
 const sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,
@@ -27,11 +27,13 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
 }): Promise<ResourceLogSumResult[]> => {
   const results = [] as ResourceLogSumResult[];
 
+  console.log("sumChatGPTSharedLogsInDurationWindows", { durationWindows, userId, instanceId });
+
   for (const durationWindow of durationWindows) {
     const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
     const aggResult = await ctx.db
       .select({
-        userId: resourceUsageLogs.userId,
+        userCount: countDistinct(resourceUsageLogs.userId),
         count: count(),
         sumUtf8Length: sql<number>`sum(${resourceUsageLogs.textBytes})`.mapWith(Number),
         // sumTokensLength: sum(resourceUsageLogs.tokensLength).mapWith(Number),
@@ -46,13 +48,15 @@ const sumChatGPTSharedLogsInDurationWindows = async ({
           instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
         ),
       )
-      .groupBy(resourceUsageLogs.userId);
+      // .groupBy(resourceUsageLogs.userId);
 
     results.push({
       durationWindow,
-      stats: aggResult,
+      stats: aggResult[0]!,
     });
   }
+
+  console.log("results", results);
 
   return results;
 };
@@ -83,7 +87,7 @@ const groupGPT4LogsInDurationWindow = async ({
       ),
     )
     .groupBy(sql`${resourceUsageLogs.details}->>'chatgptAccountId'`);
-  console.log("groupByResult", groupByResult);
+  // console.log("groupByResult", groupByResult);
   const result = {
     durationWindow,
     counts: groupByResult.map((item) => ({
