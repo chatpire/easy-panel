@@ -1,12 +1,12 @@
+import { env } from "@/env";
 import { type SiteConfig } from "types";
 
 export const siteConfig: SiteConfig = {
-  name: "Cock Panel",
-  description:
-    "An open source application built using the new router, server components and everything new in Next.js 13.",
+  name: env.NEXT_PUBLIC_SITE_NAME,
+  description: "",
   url: "https://tx.shadcn.com",
   ogImage: "https://tx.shadcn.com/og.jpg",
   links: {
-    github: "https://github.com/shadcn/taxonomy",
+    github: "https://github.com/chatpire/easy-panel",
   },
 };
