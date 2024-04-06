@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build",
+    "build-zip": "next build && zip -r standalone.zip .next/standalone .next/static public package.json scripts-dist drizzle next.config.js",
     "build-scripts": "node scripts/build.mjs",
     "db:push": "drizzle-kit push:pg --config drizzle.config.dev.ts",
     "db:studio": "drizzle-kit studio",

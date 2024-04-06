@@ -14,3 +14,5 @@ README.md
 dist
 scripts-dist
 postgres-data
+standalone-dist
+*.zip

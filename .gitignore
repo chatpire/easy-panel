@@ -50,3 +50,6 @@ yarn-error.log*
 postgres-data
 dist
 scripts-dist
+
+*.zip
+standalone-dist
