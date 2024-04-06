@@ -1,8 +1,6 @@
 import { writeChatResourceUsageLog } from "@/server/actions/write-resource-usage-log";
 import { db } from "@/server/db";
 import { userInstanceTokens } from "@/server/db/schema";
-import { api } from "@/trpc/server";
-import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
