@@ -8,7 +8,6 @@ import { Icons } from "@/components/icons";
 import { type NavItem } from "types";
 import { useUserAttr } from "@/components/session-provider";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 import SidebarNav from "@/components/custom/sidebar-nav";
 import { ThemeToggle } from "@/components/mode-toggle";
 
@@ -54,7 +53,7 @@ export default function AdminSidebar({ className, isCollapsed, setIsCollapsed, i
                 <Icons.logo className={cn("transition-all", isCollapsed ? "h-6 w-6" : "h-6 w-6")} />
               </Link>
               <div className={`flex flex-col justify-end truncate ${isCollapsed ? "invisible w-0" : "visible w-auto"}`}>
-                <span className="font-medium">{siteConfig.name} Admin</span>
+                <span className="font-medium">Easy Panel Admin</span>
               </div>
             </div>
             <div suppressHydrationWarning className={isCollapsed ? "invisible w-0" : "visible w-auto"}>

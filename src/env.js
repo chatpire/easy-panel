@@ -44,6 +44,7 @@ export const env = createEnv({
 
     // develop
     TRPC_TIME_LOGGING: booleanEnv.default(false),
+    SITE_NAME: z.string().optional().default("Easy Panel"),
   },
 
   /**
@@ -53,7 +54,6 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
-    NEXT_PUBLIC_SITE_NAME: z.string(),
   },
 
   /**
@@ -86,7 +86,7 @@ export const env = createEnv({
     OIDC_DISPLAY_NAME: process.env.OIDC_DISPLAY_NAME,
     OIDC_SCOPES: process.env.OIDC_SCOPES,
 
-    NEXT_PUBLIC_SITE_NAME: process.env.NEXT_PUBLIC_SITE_NAME,
+    SITE_NAME: process.env.SITE_NAME,
 
     TRPC_TIME_LOGGING: process.env.TRPC_TIME_LOGGING,
   },

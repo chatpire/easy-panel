@@ -1,13 +1,10 @@
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
+// import { useSelectedLayoutSegment } from "next/navigation";
 import { type HeaderNavItem } from "types";
-import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
-// import { MobileNav } from "@/app/(panel)/_components/mobile-nav";
+import { siteConfig } from "@/config/site";
 
 interface MainNavProps {
   items?: HeaderNavItem[];
@@ -16,7 +13,7 @@ interface MainNavProps {
 }
 
 export function HeaderNav({ items, children, className }: MainNavProps) {
-  const segment = useSelectedLayoutSegment();
+  // const segment = useSelectedLayoutSegment();
   // const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
 
   return (
@@ -25,7 +22,7 @@ export function HeaderNav({ items, children, className }: MainNavProps) {
         <Icons.logo />
         <span className="hidden font-bold sm:inline-block">{siteConfig.name}</span>
       </Link>
-      {items?.length ? (
+      {/* {items?.length ? (
         <nav className="hidden gap-6 md:flex">
           {items?.map((item, index) => (
             <Link
@@ -41,7 +38,7 @@ export function HeaderNav({ items, children, className }: MainNavProps) {
             </Link>
           ))}
         </nav>
-      ) : null}
+      ) : null} */}
       {/* <button className="flex items-center space-x-2 md:hidden" onClick={() => setShowMobileMenu(!showMobileMenu)}>
         {showMobileMenu ? <Icons.close /> : <Icons.logo />}
         <span className="font-bold">Menu</span>
