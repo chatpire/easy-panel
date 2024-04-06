@@ -1,14 +1,3 @@
-#!/usr/bin/env bash
-# Use this script to start a docker container for a local development database
-
-# TO RUN ON WINDOWS:
-# 1. Install WSL (Windows Subsystem for Linux) - https://learn.microsoft.com/en-us/windows/wsl/install
-# 2. Install Docker Desktop for Windows - https://docs.docker.com/docker-for-windows/install/
-# 3. Open WSL - `wsl`
-# 4. Run this script - `./start-database.sh`
-
-# On Linux and macOS you can run this script directly - `./start-database.sh`
-
 DB_CONTAINER_NAME="easy-panel-postgres"
 
 if ! [ -x "$(command -v docker)" ]; then
@@ -26,20 +15,11 @@ fi
 set -a
 source .env
 
-DB_PASSWORD=$(echo $DATABASE_URL | awk -F':' '{print $3}' | awk -F'@' '{print $1}')
-
-if [ "$DB_PASSWORD" = "password" ]; then
-  echo "You are using the default database password"
-  read -p "Should we generate a random password for you? [y/N]: " -r REPLY
-  if ! [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "Please set a password in the .env file and try again"
-    exit 1
-  fi
-  # Generate a random URL-safe password
-  DB_PASSWORD=$(openssl rand -base64 12 | tr '+/' '-_')
-  sed -i -e "s#:password@#:$DB_PASSWORD@#" .env
+if ! [ -f .env ]; then
+  echo ".env file not found. Please create .env file and try again."
+  exit 1
 fi
 
-docker run --name $DB_CONTAINER_NAME -e POSTGRES_PASSWORD=$DB_PASSWORD -e POSTGRES_DB=easy-panel -d -p 5432:5432 docker.io/postgres
+docker run --name $DB_CONTAINER_NAME -e POSTGRES_PASSWORD=$POSTGRES_PASSWORD -e POSTGRES_DB=$POSTGRES_DB -d -p $POSTGRES_PORT:$POSTGRES_PORT postgres:16
 
 echo "Database container was successfully created"

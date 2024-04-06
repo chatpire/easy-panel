@@ -15,12 +15,8 @@ export const env = createEnv({
    */
   server: {
     DATABASE_TYPE: z.enum(["postgres", "neon"]),
-    POSTGRES_URL: z
-      .string()
-      .url()
-      .refine((str) => !str.includes("YOUR_MYSQL_URL_HERE"), "You forgot to change the default URL"),
+    POSTGRES_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-    LUCIA_ID_LENGTH: z.coerce.number().min(1).max(64).optional().default(16),
 
     ADMIN_USERNAME: z.string().optional().default("admin"),
     ADMIN_EMAIL: z.string().email().optional().default("admin@example.com"),
@@ -29,9 +25,9 @@ export const env = createEnv({
     COOKIE_PREFIX: z.string().optional().default("easy_cock"),
     ENABLE_PASSWORD_LOGIN: booleanEnv.default(true),
 
-    SECRET_KEY: z.string().length(64), // run: openssl rand -hex 32
+    // SECRET_KEY: z.string().length(64), // run: openssl rand -hex 32
 
-    BASE_URL: z.string().optional().default("http://localhost:3001"),
+    BASE_URL: z.string().optional().default("http://localhost:3000"),
     ENABLE_OIDC_LOGIN: booleanEnv.default(false),
 
     GRANT_ALL_INSTANCES_FOR_OIDC_USER: booleanEnv.default(true),
@@ -47,7 +43,7 @@ export const env = createEnv({
     OIDC_SCOPES: z.string().optional().default("openid profile email"),
 
     // develop
-    TRPC_TIME_LOGGING: z.boolean().optional().default(false),
+    TRPC_TIME_LOGGING: booleanEnv.default(false),
   },
 
   /**
@@ -66,9 +62,7 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_TYPE: process.env.DATABASE_TYPE,
     POSTGRES_URL: process.env.POSTGRES_URL,
-    DATABASE_TABLE_PREFIX: process.env.DATABASE_TABLE_PREFIX,
     NODE_ENV: process.env.NODE_ENV,
-    LUCIA_ID_LENGTH: process.env.LUCIA_ID_LENGTH,
 
     ADMIN_USERNAME: process.env.ADMIN_USERNAME,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL,
@@ -77,7 +71,6 @@ export const env = createEnv({
     COOKIE_PREFIX: process.env.COOKIE_PREFIX,
     BASE_URL: process.env.BASE_URL,
     ENABLE_PASSWORD_LOGIN: process.env.ENABLE_PASSWORD_LOGIN,
-    SECRET_KEY: process.env.SECRET_KEY,
 
     ENABLE_OIDC_LOGIN: process.env.ENABLE_OIDC_LOGIN,
     GRANT_ALL_INSTANCES_FOR_OIDC_USER: process.env.GRANT_ALL_INSTANCES_FOR_OIDC_USER,
