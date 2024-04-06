@@ -11,6 +11,7 @@ import { writeUserLoginEventLog } from "@/server/actions/write-event-log";
 import { eq } from "drizzle-orm";
 import { users } from "@/server/db/schema";
 import { UserCreateSchema, UserRoles } from "@/schema/user.schema";
+import { redirect } from "next/navigation";
 
 const OIDCUserInfoSchema = z.object({
   sub: z.string(),
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
     const sessionCookie = lucia.createSessionCookie(session.id);
     cookies().set(sessionCookie);
 
-    return NextResponse.redirect(new URL("/", request.url));
+    redirect("/");
   } catch (error) {
     console.error("Error in OIDC callback:", error);
     if (error instanceof OAuth2RequestError) {
