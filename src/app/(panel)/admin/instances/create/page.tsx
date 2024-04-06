@@ -16,10 +16,11 @@ import { LoadingButton } from "@/components/loading-button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ServiceInstanceCreateSchema } from "@/schema/serviceInstance.schema";
 import { ServiceTypeSchema } from "@/server/db/enum";
+import { popupChatGPTShareInstanceConfigDetails } from "./chatgpt-share-config-popup";
 
 const CreateInstanceFormSchema = ServiceInstanceCreateSchema.merge(
   z.object({
-    url: z.string().url(),
+    url: z.string().url().refine((url) => !url.endsWith("/"), { message: "URL should not end with a slash" }),
     description: z.string().optional(),
     grantToAllActiveUsers: z.boolean(),
   }),
@@ -56,12 +57,13 @@ function InstanceForm() {
       setLoading(true);
       const instance = await createMutation.mutateAsync(instanceCreate);
       console.debug({ instance });
-      toast.success("Instance created");
       form.reset();
       if (grantToAllActiveUsers) {
         await grantMutation.mutateAsync({ instanceId: instance.id });
         toast.success("Instance granted to all active users");
       }
+      toast.success("Instance created");
+      popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id });
     } catch (error) {
       console.error(error);
       toast.error("Failed to create instance: " + String(error));
@@ -78,7 +80,7 @@ function InstanceForm() {
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type</FormLabel>
+              <FormLabel required>Type</FormLabel>
               <FormControl>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
@@ -105,7 +107,7 @@ function InstanceForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel required>Name</FormLabel>
               <FormControl>
                 <Input placeholder="" {...field} />
               </FormControl>
@@ -119,7 +121,7 @@ function InstanceForm() {
           name="url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Url</FormLabel>
+              <FormLabel required>Url</FormLabel>
               <FormControl>
                 <Input placeholder="https://" {...field} />
               </FormControl>

@@ -31,6 +31,8 @@ import {
   Rocket,
   FileClock,
   Server,
+  Pencil,
+  Eye,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -43,9 +45,11 @@ export const Icons = {
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
   chevronDown: ChevronDown,
+  eye: Eye,
   trash: Trash,
   post: FileText,
   page: File,
+  pencil: Pencil,
   gauge: Gauge,
   media: Image,
   settings: Settings,

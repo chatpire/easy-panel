@@ -45,13 +45,13 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
   const getTextColor = (value: number) => {
     let color;
     if (value < 0.2) {
-      color = "text-green-200";
+      color = "text-green-500";
     } else if (value < 0.6) {
-      color = "text-yellow-200";
+      color = "text-yellow-500";
     } else if (value < 0.9) {
-      color = "text-orange-200";
+      color = "text-orange-500";
     } else {
-      color = "text-red-200";
+      color = "text-red-500";
     }
     return color;
   };

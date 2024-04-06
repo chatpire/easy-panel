@@ -41,12 +41,28 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { DataTableColumnHeader, getDataTableCheckboxColumn } from "@/app/_helpers/data-table-helper";
-import { camelCaseToTitleCase, formatUserDataTableCellValue } from "@/app/_helpers/data-table-cell-formatter";
+import { DataTableColumnHeader, getDataTableCheckboxColumn } from "@/components/data-table-helper";
 import { cn, extractKeysFromSchema } from "@/lib/utils";
 import { type z } from "zod";
 import { Icons } from "./icons";
 import { type PaginatedData, type PaginationInput } from "@/schema/pagination.schema";
+import { Badge } from "@/components/ui/badge";
+import { formatValueToNode } from "@/lib/format";
+
+export function formatUserDataTableCellValue(key: string, value: any): React.ReactNode {
+  if (key === "id") {
+    return <Badge variant="secondary">{(value as string).slice(0, 4)}...</Badge>;
+  }
+  if (key === "role") {
+    // return <Badge variant="default">{(value as string).toLowerCase()}</Badge>;
+    return (value as string).toLowerCase();
+  }
+  return formatValueToNode(key, value);
+}
+
+export function camelCaseToTitleCase(input: string): string {
+  return input.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/\b./g, (char) => char.toUpperCase());
+}
 
 export interface DataTableIconAction<T> {
   key: string;

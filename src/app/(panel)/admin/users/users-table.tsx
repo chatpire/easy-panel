@@ -3,11 +3,11 @@
 import * as React from "react";
 import { type UserReadAdmin, UserReadAdminSchema } from "@/schema/user.schema";
 import { api } from "@/trpc/react";
-import { popupEditPasswordForm } from "@/app/_helpers/edit-password-popup";
+import { popupEditPasswordForm } from "@/app/(panel)/_components/edit-password-popup";
 import { DataTable, DataTableHeader, type DataTableDropdownAction } from "@/components/data-table";
 import { popup } from "@/components/popup";
 import { FunctionButton } from "@/components/loading-button";
-import { popupGenerateTokensForm } from "@/app/_helpers/generate-intance-token-popup";
+import { popupGenerateTokensForm } from "@/app/(panel)/admin/users/generate-intance-token-popup";
 import { toast } from "sonner";
 
 export function UsersTable() {

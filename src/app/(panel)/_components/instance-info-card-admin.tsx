@@ -8,11 +8,12 @@ import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
 import { api } from "@/trpc/react";
-import { copyToClipBoard } from "@/app/_helpers/copy-to-clipboard";
+import { copyToClipBoard } from "@/lib/clipboard";
 import { InstanceInfoCard } from "./instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
+import { popupChatGPTShareInstanceConfigDetails } from "../admin/instances/create/chatgpt-share-config-popup";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -48,7 +49,7 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
             <Link href={instance.url ?? ""}>{instance.url}</Link>
           </Button>
         </div>
-        <div className="flex flex-row items-center space-x-3">
+        {/* <div className="flex flex-row items-center space-x-3">
           <Label>InstanceId</Label>
           <span className="rounded-md border px-3 py-1 text-sm">
             {instance.id}
@@ -63,15 +64,23 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
               <Icons.copy className="h-3 w-3" />
             </Button>
           </span>
-        </div>
+        </div> */}
         <div className="flex flex-row items-center space-x-3">
+
           <FunctionButton variant={"outline"} onClick={() => grantToAll(instance.id)}>
             Publish To All Active Users
           </FunctionButton>
           <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
             Unpublish
           </FunctionButton>
-          <Button onClick={() => toast.info("Not implemented")}>Edit</Button>
+          <Button onClick={() => popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id })}>
+            <Icons.eye className="mr-2 h-4 w-4" />
+            View Config
+          </Button>
+          <Button onClick={() => toast.info("Not implemented")}>
+            <Icons.pencil className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
         </div>
       </div>
     </InstanceInfoCard>

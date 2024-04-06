@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { copyToClipBoard } from "@/app/_helpers/copy-to-clipboard";
+import { copyToClipBoard } from "@/lib/clipboard";
 import { InstanceInfoCard } from "./instance-info-card";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
 

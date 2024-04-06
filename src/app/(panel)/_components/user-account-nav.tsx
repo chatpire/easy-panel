@@ -11,7 +11,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { type SessionUser } from "@/server/lucia";
 import { Badge } from "@/components/ui/badge";
 import { useLogout } from "@/hooks/logout";
-import { popupEditPasswordForm } from "@/app/_helpers/edit-password-popup";
+import { popupEditPasswordForm } from "@/app/(panel)/_components/edit-password-popup";
 
 interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: Pick<SessionUser, "id" | "name" | "image" | "username" | "role">;
