@@ -30,7 +30,7 @@ export default function LoginForm() {
   const loginMutation = api.auth.loginByPassword.useMutation();
   const [loading, setLoading] = React.useState(false);
   const [loginFormRemember, saveloginFormRemember] = useLocalStorage<{ username: string; rememberMe: boolean } | null>(
-    "cock-panel-login-form-remember",
+    "easy-panel-login-form-remember",
     null,
     { initializeWithValue: true },
   );

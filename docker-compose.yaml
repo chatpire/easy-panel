@@ -1,15 +1,15 @@
 version: "3.9"
 services:
-  cock-panel:
+  easy-panel:
     # platform: "linux/amd64"
-    container_name: cock-panel
+    container_name: easy-panel
     build:
       context: .
       dockerfile: Dockerfile
     working_dir: /app
     ports:
       - "3010:3000"
-    image: cock-panel
+    image: easy-panel
     env_file: .env.docker
     depends_on:
       - postgres
@@ -28,4 +28,4 @@ services:
     environment:
       POSTGRES_USER: "user"
       POSTGRES_PASSWORD: "password"
-      POSTGRES_DB: "cock-panel"
+      POSTGRES_DB: "easy-panel"
