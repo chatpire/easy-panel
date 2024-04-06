@@ -3,7 +3,7 @@ import { PageShell } from "../../_components/dashboard-shell";
 import { PageHeader } from "../../_components/page-header";
 import { Icons } from "@/components/icons";
 import { api } from "@/trpc/server";
-import { AdminInstanceInfoCard } from "../../_components/instance-info-card-admin";
+import { AdminInstanceInfoCard } from "./instance-info-card-admin";
 
 export default async function InstancesPage({}) {
   const instances = await api.serviceInstance.getAll();

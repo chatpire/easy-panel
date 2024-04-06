@@ -12,13 +12,10 @@ import {
   timestamp,
   primaryKey,
   unique,
-  pgTableCreator,
   index,
 } from "drizzle-orm/pg-core";
 import { type EventResultType, type EventType, type ServiceType } from "@/server/db/enum";
 import { createJsonbType } from "./jsonb";
-
-export const createTable = pgTableCreator((name) => `${env.DATABASE_TABLE_PREFIX}_${name}`);
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -82,7 +79,7 @@ export const serviceInstances = pgTable(
     type: text("type").notNull().$type<ServiceType>(),
     name: text("name").notNull(),
     description: text("description"),
-    url: text("url"),
+    url: text("url").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

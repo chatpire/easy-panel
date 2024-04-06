@@ -27,11 +27,14 @@ export const serviceInstanceRouter = createTRPCRouter({
     const userIds = await ctx.db.select({ id: users.id }).from(users).where(eq(users.isActive, true));
     await ctx.db.transaction(async (tx) => {
       for (const { id } of userIds) {
-        await tx.insert(userInstanceTokens).values({
-          userId: id,
-          instanceId: input.instanceId,
-          token: createCUID(),
-        }).onConflictDoNothing();
+        await tx
+          .insert(userInstanceTokens)
+          .values({
+            userId: id,
+            instanceId: input.instanceId,
+            token: createCUID(),
+          })
+          .onConflictDoNothing();
       }
     });
   }),
@@ -42,15 +45,28 @@ export const serviceInstanceRouter = createTRPCRouter({
     }
     const result = await ctx.db
       .update(serviceInstances)
-      .set(input)
+      .set({
+        ...input,
+        updatedAt: new Date(),
+      })
       .where(eq(serviceInstances.id, input.id))
       .returning();
-    return ServiceInstanceSchema.parse(result);
+    return ServiceInstanceSchema.parse(result[0]);
   }),
 
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.query.serviceInstances.findMany();
     return ServiceInstanceSchema.array().parse(result);
+  }),
+
+  getById: protectedProcedure.input(ServiceInstanceSchema.pick({ id: true })).query(async ({ ctx, input }) => {
+    const result = await ctx.db.query.serviceInstances.findFirst({
+      where: eq(serviceInstances.id, input.id),
+    });
+    if (!result) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Service instance not found" });
+    }
+    return ServiceInstanceSchema.parse(result);
   }),
 
   delete: adminProcedure.input(ServiceInstanceSchema.pick({ id: true })).mutation(async ({ ctx, input }) => {

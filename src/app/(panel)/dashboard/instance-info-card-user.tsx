@@ -8,7 +8,7 @@ import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/lib/clipboard";
-import { InstanceInfoCard } from "./instance-info-card";
+import { InstanceInfoCard } from "../_components/instance-info-card";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {

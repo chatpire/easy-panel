@@ -126,7 +126,7 @@ export const publicProcedure = _publicProcedure.use(async (opts) => {
   const durationMs = Date.now() - start;
   const meta = { path: opts.path, type: opts.type, durationMs };
 
-  result.ok ? console.log("OK request timing:", meta) : console.error("Non-OK request timing", meta);
+  result.ok ? console.log(`TRPC OK: ${durationMs} ms -`, meta.path) : console.error(`TRPC Non-OK: ${durationMs}`, meta.path);
 
   return result;
 });

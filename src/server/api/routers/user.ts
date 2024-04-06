@@ -69,6 +69,14 @@ export const userRouter = createTRPCRouter({
     return UserReadSchema.parse(user);
   }),
 
+  getById: adminWithUserProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
+      const result = await ctx.db.query.users.findFirst({ where: eq(users.id, input.id) });
+      if (!result) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+      }
+      return UserReadAdminSchema.parse(result);
+  }),
+
   updateSelf: protectedWithUserProcedure.input(UserUpdateSelfSchema).mutation(async ({ ctx, input }) => {
     const user = ctx.user;
     const result = await ctx.db.update(users).set(input).where(eq(users.id, user.id)).returning();
@@ -79,7 +87,15 @@ export const userRouter = createTRPCRouter({
     if (input.id === ctx.user.id && input.isActive !== undefined) {
       throw new TRPCError({ code: "FORBIDDEN", message: "You cannot ban yourself" });
     }
-    const result = await ctx.db.update(users).set(input).where(eq(users.id, input.id)).returning();
+    const hashedPassword = input.clearPassword ? null : input.password ? await hashPassword(input.password) : undefined;
+    const result = await ctx.db
+      .update(users)
+      .set({
+        ...input,
+        hashedPassword,
+      })
+      .where(eq(users.id, input.id))
+      .returning();
     return UserReadAdminSchema.parse(result);
   }),
 

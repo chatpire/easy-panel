@@ -9,11 +9,12 @@ import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/lib/clipboard";
-import { InstanceInfoCard } from "./instance-info-card";
+import { InstanceInfoCard } from "../../_components/instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
-import { popupChatGPTShareInstanceConfigDetails } from "../admin/instances/create/chatgpt-share-config-popup";
+import { popupChatGPTShareInstanceConfigDetails } from "./chatgpt-share-config-popup";
+import { useRouter } from "next/navigation";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -21,6 +22,7 @@ interface Props extends React.HTMLAttributes<HTMLFormElement> {
 }
 
 export function AdminInstanceInfoCard({ instance, className }: Props) {
+  const router = useRouter();
   const grantMutation = api.serviceInstance.grantToAllActiveUsers.useMutation();
 
   const grantToAll = async (instanceId: string) => {
@@ -77,7 +79,7 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
             <Icons.eye className="mr-2 h-4 w-4" />
             View Config
           </Button>
-          <Button onClick={() => toast.info("Not implemented")}>
+          <Button onClick={() => router.push(`/admin/instances/update/${instance.id}`)}>
             <Icons.pencil className="mr-2 h-4 w-4" />
             Edit
           </Button>

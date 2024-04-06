@@ -11,21 +11,22 @@ export const ServiceInstanceSchema = createSelectSchema(serviceInstances).merge(
 );
 export type ServiceInstance = z.infer<typeof ServiceInstanceSchema>;
 
-const ServiceInstanceInsertSchema = createInsertSchema(serviceInstances);
+const ServiceInstanceInsertSchema = createInsertSchema(serviceInstances).merge(
+  z.object({
+    type: ServiceTypeSchema,
+    description: z.string().optional(),
+    url: z.string().url(),
+  }),
+);
+
 export const ServiceInstanceCreateSchema = ServiceInstanceInsertSchema.omit({
   id: true,
   createdAt: true,
   updatedAt: true,
-}).merge(
-  z.object({
-    type: ServiceTypeSchema,
-    description: z.string().optional(),
-  }),
-);
+});
+
 export type ServiceInstanceCreate = z.infer<typeof ServiceInstanceCreateSchema>;
 
-export const ServiceInstanceUpdateSchema = ServiceInstanceInsertSchema.pick({
-  id: true,
-  name: true,
-  description: true,
+export const ServiceInstanceUpdateSchema = ServiceInstanceInsertSchema.omit({
+  createdAt: true,
 });

@@ -2,7 +2,7 @@ import { getCurrentUserOrRedirect } from "@/lib/session";
 import { PageShell } from "../_components/dashboard-shell";
 import { PageHeader } from "../_components/page-header";
 import { api } from "@/trpc/server";
-import { UserInstanceInfoCard } from "../_components/instance-info-card-user";
+import { UserInstanceInfoCard } from "./instance-info-card-user";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Icons } from "@/components/icons";
 

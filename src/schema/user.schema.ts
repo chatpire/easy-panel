@@ -44,6 +44,7 @@ export const UserUpdatePasswordSchema = UserSchema.pick({
 export const UserUpdateAdminSchema = UserCreateSchema.partial().merge(
   z.object({
     id: z.string(),
+    clearPassword: z.boolean().optional().default(false),
   }),
 );
 

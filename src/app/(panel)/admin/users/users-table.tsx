@@ -4,13 +4,15 @@ import * as React from "react";
 import { type UserReadAdmin, UserReadAdminSchema } from "@/schema/user.schema";
 import { api } from "@/trpc/react";
 import { popupEditPasswordForm } from "@/app/(panel)/_components/edit-password-popup";
-import { DataTable, DataTableHeader, type DataTableDropdownAction } from "@/components/data-table";
+import { DataTable, type DataTableDropdownAction } from "@/components/data-table";
 import { popup } from "@/components/popup";
 import { FunctionButton } from "@/components/loading-button";
 import { popupGenerateTokensForm } from "@/app/(panel)/admin/users/generate-intance-token-popup";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function UsersTable() {
+  const router = useRouter();
   const getAllUserQuery = api.user.getAll.useQuery();
   const updateUsersMutation = api.user.update.useMutation();
   const deleteUserMutation = api.user.delete.useMutation();
@@ -26,6 +28,12 @@ export function UsersTable() {
       key: "separator",
       content: null,
       type: "separator",
+    },
+    {
+      key: "edit-user",
+      content: "Edit User",
+      type: "item",
+      onClick: (row) => router.push(`/admin/users/update/${row.original.id}`),
     },
     {
       key: "edit-password",
