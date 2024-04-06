@@ -27,7 +27,7 @@ export const env = createEnv({
 
     // SECRET_KEY: z.string().length(64), // run: openssl rand -hex 32
 
-    BASE_URL: z.string().optional().default("http://localhost:3000"),
+    BASE_URL: z.string(),
     ENABLE_OIDC_LOGIN: booleanEnv.default(false),
 
     GRANT_ALL_INSTANCES_FOR_OIDC_USER: booleanEnv.default(true),

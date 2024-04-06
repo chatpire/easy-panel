@@ -9,6 +9,7 @@ import { popup } from "@/components/popup";
 import { Icons } from "@/components/icons";
 import { Textarea } from "@/components/ui/textarea";
 import { copyToClipBoard } from "@/lib/clipboard";
+import { env } from "@/env";
 
 const ServiceInstanceSchema = z.object({
   url: z.string().url(),
@@ -34,8 +35,9 @@ interface InstanceConfigDetailsProps {
 }
 
 function ChatGPTShareInstanceConfigDetailsPopup({ className, instanceDetails, closePopup }: InstanceConfigDetailsProps) {
-  const { url, id } = instanceDetails;
-  const configValue = `AUDIT_LIMIT_URL: ${url}/api/external/cockroachai/audit/${id}\n\nOAUTH_URL: ${url}/api/external/cockroachai/oauth/${id}`;
+  const { id } = instanceDetails;
+  const base_url = env.BASE_URL;
+  const configValue = `AUDIT_LIMIT_URL: ${base_url}/api/external/cockroachai/audit/${id}\n\nOAUTH_URL: ${base_url}/api/external/cockroachai/oauth/${id}`;
 
   return (
     <div className={cn("grid items-start gap-4", className)}>
