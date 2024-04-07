@@ -7,7 +7,7 @@ import { popupEditPasswordForm } from "@/app/(panel)/_components/edit-password-p
 import { DataTable, type DataTableDropdownAction } from "@/components/data-table";
 import { popup } from "@/components/popup";
 import { FunctionButton } from "@/components/loading-button";
-import { popupGenerateTokensForm } from "@/app/(panel)/admin/users/generate-intance-token-popup";
+import { popupGenerateTokensForm } from "@/app/(panel)/admin/users/edit-intance-ability-popup";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -19,8 +19,8 @@ export function UsersTable() {
 
   const rowDropdownActions: DataTableDropdownAction<UserReadAdmin>[] = [
     {
-      key: "Generate Instance Tokens",
-      content: "Generate Instance Tokens",
+      key: "Edit Instance Abilities",
+      content: "Edit Instance Abilities",
       type: "item",
       onClick: (row) => popupGenerateTokensForm(row.original.id, row.original.username),
     },

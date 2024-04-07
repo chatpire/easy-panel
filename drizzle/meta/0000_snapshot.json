@@ -1,5 +1,5 @@
 {
-  "id": "ec9ddbd6-8342-4e6c-b16e-169e8fd741c4",
+  "id": "c9ade9b0-73ab-4cc1-a016-ee3a07673293",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -362,7 +362,7 @@
           "name": "can_use",
           "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": true
         },
         "created_at": {

@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS "user_instance_ability" (
 	"user_id" text NOT NULL,
 	"instance_id" text NOT NULL,
 	"token" text NOT NULL,
-	"can_use" boolean DEFAULT true,
+	"can_use" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "user_instance_ability_user_id_instance_id_pk" PRIMARY KEY("user_id","instance_id"),

@@ -105,7 +105,8 @@ function NavLinkDropdown({ item, closeNav }: NavLinkProps) {
 
   /* Open collapsible by default
    * if one of child element is active */
-  const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
+  // const isChildActive = !!sub?.find((s) => checkActiveNav(s.href));
+  const isChildActive = true;
 
   return (
     <Collapsible defaultOpen={isChildActive}>

@@ -121,47 +121,46 @@ export const userRouter = createTRPCRouter({
     return UserReadAdminSchema.array().parse(results);
   }),
 
-  generateTokens: adminProcedure
+  editInstanceAbilities: adminProcedure
     .input(
       z.object({
         userId: z.string(),
-        instanceIds: z.string().array(),
+        instanceIdCanUse: z.record(z.boolean()),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { userId, instanceIds } = input;
+      const { userId, instanceIdCanUse } = input;
 
       const user = await ctx.db.query.users.findFirst({ where: eq(users.id, userId) });
       if (!user) {
         throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
-      await ctx.db
-        .insert(userInstanceAbilities)
-        .values(
-          instanceIds.map((instanceId) => ({
-            userId,
-            instanceId,
-            token: `${user.username}__${generateId(16)}`,
-            canUse: true,
-          })),
-        );
+      await ctx.db.transaction(async (tx) => {
+        for (const [instanceId, canUse] of Object.entries(instanceIdCanUse)) {
+          await tx
+            .insert(userInstanceAbilities)
+            .values({
+              userId,
+              instanceId,
+              token: user.username + "__" + generateId(16),
+              canUse,
+            })
+            .onConflictDoUpdate({
+              target: [userInstanceAbilities.userId, userInstanceAbilities.instanceId],
+              set: {
+                canUse,
+                updatedAt: new Date(),
+              },
+            });
+        }
+      });
     }),
 
-  getInstanceToken: protectedWithUserProcedure
-    .input(z.object({ instanceId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const user = ctx.user;
-      const token = await ctx.db.query.userInstanceAbilities.findFirst({
-        where: and(
-          eq(userInstanceAbilities.userId, user.id),
-          eq(userInstanceAbilities.instanceId, input.instanceId),
-          eq(userInstanceAbilities.canUse, true),
-        ),
-      });
-      if (!token) {
-        return null;
-      }
-      return UserInstanceAbilitySchema.parse(token);
-    }),
+  getInstanceAbilities: adminProcedure.input(z.object({ userId: z.string() })).query(async ({ ctx, input }) => {
+    const abilities = await ctx.db.query.userInstanceAbilities.findMany({
+      where: eq(userInstanceAbilities.userId, input.userId),
+    });
+    return UserInstanceAbilitySchema.array().parse(abilities);
+  }),
 });

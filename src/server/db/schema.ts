@@ -98,7 +98,7 @@ export const userInstanceAbilities = pgTable(
     userId: text("user_id").notNull(),
     instanceId: text("instance_id").notNull(),
     token: text("token").notNull(),
-    canUse: boolean("can_use").default(true),
+    canUse: boolean("can_use").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

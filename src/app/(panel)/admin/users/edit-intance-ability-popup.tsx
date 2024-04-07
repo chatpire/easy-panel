@@ -20,51 +20,81 @@ import {
 import { toast } from "sonner";
 
 const InstancesSelectionSchema = z.object({
-  instanceIds: z.array(z.string()),
+  instanceIdCanUse: z.record(z.boolean()),
 });
 
 type InstancesSelection = z.infer<typeof InstancesSelectionSchema>;
 
 export function popupGenerateTokensForm(userId: string, username: string) {
   const closePopup = popup({
-    title: "Generate Instance Tokens",
-    description: `Generate instance tokens for @${username}`,
-    content: (clossFn) => <GenerateInstanceTokensForm userId={userId} closePopup={clossFn} />,
+    title: "Edit Instance Permissions",
+    description: `Edit instance permissions for @${username}`,
+    content: (clossFn) => <UserInstanceAbilityForm userId={userId} closePopup={clossFn} />,
   });
 
   return closePopup;
 }
 
-interface EditPasswordFormProps extends React.ComponentProps<"form"> {
+interface Props extends React.ComponentProps<"form"> {
   className?: string;
   userId: string;
   closePopup: () => void;
 }
 
-function GenerateInstanceTokensForm({ className, userId, closePopup }: EditPasswordFormProps) {
-  const mutation = api.user.generateTokens.useMutation();
-  const instancesQuery = api.serviceInstance.getAllWithToken.useQuery();
+function UserInstanceAbilityForm({ className, userId, closePopup }: Props) {
+  const instancesQuery = api.serviceInstance.getAllAdmin.useQuery();
+  const userInstanceAbilitiesQuery = api.user.getInstanceAbilities.useQuery({ userId });
+  const mutation = api.user.editInstanceAbilities.useMutation();
 
   const [isSaving, setIsSaving] = React.useState<boolean>(false);
 
   const form = useForm<InstancesSelection>({
     resolver: zodResolver(InstancesSelectionSchema),
     defaultValues: {
-      instanceIds: instancesQuery.data?.map((instance) => instance.id) ?? [],
+      instanceIdCanUse: {},
     },
   });
 
+  React.useEffect(() => {
+    if (instancesQuery.data) {
+      form.setValue(
+        "instanceIdCanUse",
+        instancesQuery.data.reduce(
+          (acc, { id }) => {
+            acc[id] = false;
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        ),
+      );
+    }
+    if (userInstanceAbilitiesQuery.data) {
+      form.setValue(
+        "instanceIdCanUse",
+        userInstanceAbilitiesQuery.data.reduce(
+          (acc, { instanceId, canUse }) => {
+            acc[instanceId] = canUse;
+            return acc;
+          },
+          {} as Record<string, boolean>,
+        ),
+      );
+    }
+  }, [userInstanceAbilitiesQuery.data, instancesQuery.data]);
+
   async function onSubmit(values: InstancesSelection) {
+    const { instanceIdCanUse } = values;
+    console.log("values", values);
     try {
       form.clearErrors();
       setIsSaving(true);
-      await mutation.mutateAsync({ userId, instanceIds: values.instanceIds });
+      await mutation.mutateAsync({ userId, instanceIdCanUse });
       form.reset();
-      toast.success("Tokens generated successfully");
+      toast.success("Edit abilities successfully");
       closePopup();
     } catch (error) {
       console.error(error);
-      form.setError("instanceIds", { message: String(error) });
+      form.setError("instanceIdCanUse", { message: String(error) });
     } finally {
       setIsSaving(false);
     }
@@ -75,7 +105,7 @@ function GenerateInstanceTokensForm({ className, userId, closePopup }: EditPassw
       <form onSubmit={form.handleSubmit(onSubmit)} className={cn("grid items-start gap-4", className)}>
         <FormField
           control={form.control}
-          name="instanceIds"
+          name="instanceIdCanUse"
           render={({ field }) => {
             const { value, onChange } = field;
             return (
@@ -85,7 +115,8 @@ function GenerateInstanceTokensForm({ className, userId, closePopup }: EditPassw
                     <DropdownMenu>
                       <DropdownMenuTrigger className="w-full">
                         <div className="w-full rounded-md border p-2 text-sm">
-                          {value.length} instance{value.length > 1 ? "s" : ""} selected
+                          {instancesQuery.data?.length ?? "null"} Instances, {Object.values(value).filter(Boolean).length} can
+                          use
                         </div>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
@@ -93,11 +124,11 @@ function GenerateInstanceTokensForm({ className, userId, closePopup }: EditPassw
                           return (
                             <DropdownMenuCheckboxItem
                               key={instance.id}
-                              checked={value.includes(instance.id)}
+                              checked={value[instance.id]}
                               onCheckedChange={(val) =>
                                 val
-                                  ? onChange([...value, instance.id])
-                                  : onChange(value.filter((id) => id !== instance.id))
+                                  ? onChange({ ...value, [instance.id]: true })
+                                  : onChange({ ...value, [instance.id]: false })
                               }
                             >
                               {instance.name}
