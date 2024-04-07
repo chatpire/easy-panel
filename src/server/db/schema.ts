@@ -7,7 +7,6 @@ import {
   boolean,
   text,
   integer,
-  jsonb,
   foreignKey,
   timestamp,
   primaryKey,
@@ -16,6 +15,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { type EventResultType, type EventType, type ServiceType } from "@/server/db/enum";
 import { createJsonbType } from "./jsonb";
+import { type GlobalSettingContent } from "@/schema/globalSetting.schema";
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -190,3 +190,10 @@ export const resourceUsageLogsRelations = relations(resourceUsageLogs, ({ one })
     references: [serviceInstances.id],
   }),
 }));
+
+export const globalSettings = pgTable("global_settings", {
+  key: text("key").primaryKey(),
+  content: createJsonbType<GlobalSettingContent>("content"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
