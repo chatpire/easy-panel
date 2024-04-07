@@ -25,8 +25,8 @@ export const users = pgTable(
   "user",
   {
     id: text("id").primaryKey(),
-    name: text("name").notNull(),
     username: text("username").notNull(),
+    name: text("name").notNull(),
     email: text("email"),
     role: userRole("role").notNull().default("USER"),
     image: text("image"),
@@ -45,7 +45,7 @@ export const users = pgTable(
 
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
-  instanceTokens: many(userInstanceTokens),
+  instanceTokens: many(userInstanceAbilities),
 }));
 
 export const sessions = pgTable(
@@ -89,16 +89,18 @@ export const serviceInstances = pgTable(
 );
 
 export const serviceInstancesRelations = relations(serviceInstances, ({ many }) => ({
-  userTokens: many(userInstanceTokens),
+  userAbilities: many(userInstanceAbilities),
 }));
 
-export const userInstanceTokens = pgTable(
-  "user_instance_tokens",
+export const userInstanceAbilities = pgTable(
+  "user_instance_ability",
   {
     userId: text("user_id").notNull(),
     instanceId: text("instance_id").notNull(),
     token: text("token").notNull(),
+    canUse: boolean("can_use").default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.instanceId] }),
@@ -114,13 +116,13 @@ export const userInstanceTokens = pgTable(
   }),
 );
 
-export const userInstanceTokensRelations = relations(userInstanceTokens, ({ one }) => ({
+export const userInstanceAbilitiesRelations = relations(userInstanceAbilities, ({ one }) => ({
   user: one(users, {
-    fields: [userInstanceTokens.userId],
+    fields: [userInstanceAbilities.userId],
     references: [users.id],
   }),
   instance: one(serviceInstances, {
-    fields: [userInstanceTokens.instanceId],
+    fields: [userInstanceAbilities.instanceId],
     references: [serviceInstances.id],
   }),
 }));

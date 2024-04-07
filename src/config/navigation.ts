@@ -17,11 +17,11 @@ export const userNavConfig: NavItem[] = [
     href: "/dashboard/logs",
     icon: "fileClock",
   },
-  {
-    title: "Settings",
-    href: "/dashboard/settings",
-    icon: "settings",
-  },
+  // {
+  //   title: "Settings",
+  //   href: "/dashboard/settings",
+  //   icon: "settings",
+  // },
 ];
 
 export const adminNavConfig: SideItem[] = [

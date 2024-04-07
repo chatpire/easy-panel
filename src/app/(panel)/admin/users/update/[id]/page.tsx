@@ -15,7 +15,7 @@ export default function UpdateUserPage({ params }: { params: { id: string } }) {
   const userQuery = api.user.getById.useQuery({ id }, { retry: false });
   const updateMutation = api.user.update.useMutation();
   const generateTokensMutation = api.user.generateTokens.useMutation();
-  const instancesQuery = api.serviceInstance.getAll.useQuery();
+  const instancesQuery = api.serviceInstance.getAllWithToken.useQuery();
 
   if (userQuery.error) {
      notFound();

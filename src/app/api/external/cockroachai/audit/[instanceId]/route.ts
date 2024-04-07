@@ -1,6 +1,6 @@
 import { writeChatResourceUsageLog } from "@/server/actions/write-resource-usage-log";
 import { db } from "@/server/db";
-import { userInstanceTokens } from "@/server/db/schema";
+import { userInstanceAbilities } from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -71,11 +71,14 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
   }
 
   try {
-    const userTokenData = await db.query.userInstanceTokens.findFirst({
-      where: and(eq(userInstanceTokens.token, userToken), eq(userInstanceTokens.instanceId, instanceId)),
+    const userInstanceAbility = await db.query.userInstanceAbilities.findFirst({
+      where: and(eq(userInstanceAbilities.token, userToken), eq(userInstanceAbilities.instanceId, instanceId)),
     });
-    if (!userTokenData) {
+    if (!userInstanceAbility) {
       return NextResponse.json({ detail: "invalid token" }, { status: 401 });
+    }
+    if (!userInstanceAbility.canUse) {
+      return NextResponse.json({ detail: "You are not permitted to use this instance." }, { status: 401 });
     }
 
     const content = await request.json();
@@ -83,7 +86,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     const text = getTextFromCompletionRequest(data);
 
     const result = await writeChatResourceUsageLog(db, {
-      userId: userTokenData.userId,
+      userId: userInstanceAbility.userId,
       instanceId,
       text,
       textBytes: Buffer.byteLength(text, "utf-8"),

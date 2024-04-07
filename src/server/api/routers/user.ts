@@ -14,9 +14,9 @@ import {
 import { hashPassword } from "@/lib/password";
 import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
 import { type Db } from "@/server/db";
-import { userInstanceTokens, users } from "@/server/db/schema";
+import { userInstanceAbilities, users } from "@/server/db/schema";
 import { and, eq, sql } from "drizzle-orm";
-import { UserInstanceTokenSchema } from "@/schema/userInstanceToken.schema";
+import { UserInstanceAbilitySchema } from "@/schema/userInstanceToken.schema";
 import { createCUID } from "@/lib/cuid";
 import { generateId } from "lucia";
 import { type UserCreateEventContentCreatedBy } from "@/schema/definition.schema";
@@ -38,7 +38,7 @@ export async function createUser(
       .returning();
     const createdUser = createdResult[0]!;
     for (const instanceId of instanceIds) {
-      await tx.insert(userInstanceTokens).values({
+      await tx.insert(userInstanceAbilities).values({
         userId: createdUser.id,
         instanceId,
         token: createdUser.username + "__" + generateId(16),
@@ -70,11 +70,11 @@ export const userRouter = createTRPCRouter({
   }),
 
   getById: adminWithUserProcedure.input(z.object({ id: z.string() })).query(async ({ ctx, input }) => {
-      const result = await ctx.db.query.users.findFirst({ where: eq(users.id, input.id) });
-      if (!result) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-      return UserReadAdminSchema.parse(result);
+    const result = await ctx.db.query.users.findFirst({ where: eq(users.id, input.id) });
+    if (!result) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
+    }
+    return UserReadAdminSchema.parse(result);
   }),
 
   updateSelf: protectedWithUserProcedure.input(UserUpdateSelfSchema).mutation(async ({ ctx, input }) => {
@@ -137,9 +137,14 @@ export const userRouter = createTRPCRouter({
       }
 
       await ctx.db
-        .insert(userInstanceTokens)
+        .insert(userInstanceAbilities)
         .values(
-          instanceIds.map((instanceId) => ({ userId, instanceId, token: `${user.username}__${generateId(16)}` })),
+          instanceIds.map((instanceId) => ({
+            userId,
+            instanceId,
+            token: `${user.username}__${generateId(16)}`,
+            canUse: true,
+          })),
         );
     }),
 
@@ -147,12 +152,16 @@ export const userRouter = createTRPCRouter({
     .input(z.object({ instanceId: z.string() }))
     .query(async ({ ctx, input }) => {
       const user = ctx.user;
-      const token = await ctx.db.query.userInstanceTokens.findFirst({
-        where: and(eq(userInstanceTokens.userId, user.id), eq(userInstanceTokens.instanceId, input.instanceId)),
+      const token = await ctx.db.query.userInstanceAbilities.findFirst({
+        where: and(
+          eq(userInstanceAbilities.userId, user.id),
+          eq(userInstanceAbilities.instanceId, input.instanceId),
+          eq(userInstanceAbilities.canUse, true),
+        ),
       });
       if (!token) {
         return null;
       }
-      return UserInstanceTokenSchema.parse(token);
+      return UserInstanceAbilitySchema.parse(token);
     }),
 });

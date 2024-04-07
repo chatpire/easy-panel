@@ -1,5 +1,5 @@
 {
-  "id": "d985994f-f696-4014-8117-c28a3aaa90e2",
+  "id": "ec9ddbd6-8342-4e6c-b16e-169e8fd741c4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -71,6 +71,42 @@
           "onUpdate": "no action"
         }
       },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "global_settings": {
+      "name": "global_settings",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -215,7 +251,7 @@
           "name": "url",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -300,8 +336,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "user_instance_tokens": {
-      "name": "user_instance_tokens",
+    "user_instance_ability": {
+      "name": "user_instance_ability",
       "schema": "",
       "columns": {
         "user_id": {
@@ -322,8 +358,22 @@
           "primaryKey": false,
           "notNull": true
         },
+        "can_use": {
+          "name": "can_use",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
+        },
         "created_at": {
           "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": true,
@@ -332,9 +382,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "user_instance_tokens_user_id_user_id_fk": {
-          "name": "user_instance_tokens_user_id_user_id_fk",
-          "tableFrom": "user_instance_tokens",
+        "user_instance_ability_user_id_user_id_fk": {
+          "name": "user_instance_ability_user_id_user_id_fk",
+          "tableFrom": "user_instance_ability",
           "tableTo": "user",
           "columnsFrom": [
             "user_id"
@@ -345,9 +395,9 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "user_instance_tokens_instance_id_service_instances_id_fk": {
-          "name": "user_instance_tokens_instance_id_service_instances_id_fk",
-          "tableFrom": "user_instance_tokens",
+        "user_instance_ability_instance_id_service_instances_id_fk": {
+          "name": "user_instance_ability_instance_id_service_instances_id_fk",
+          "tableFrom": "user_instance_ability",
           "tableTo": "service_instances",
           "columnsFrom": [
             "instance_id"
@@ -360,8 +410,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "user_instance_tokens_user_id_instance_id_pk": {
-          "name": "user_instance_tokens_user_id_instance_id_pk",
+        "user_instance_ability_user_id_instance_id_pk": {
+          "name": "user_instance_ability_user_id_instance_id_pk",
           "columns": [
             "user_id",
             "instance_id"
@@ -369,8 +419,8 @@
         }
       },
       "uniqueConstraints": {
-        "user_instance_tokens_token_unique": {
-          "name": "user_instance_tokens_token_unique",
+        "user_instance_ability_token_unique": {
+          "name": "user_instance_ability_token_unique",
           "nullsNotDistinct": false,
           "columns": [
             "token"
@@ -388,14 +438,14 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
+        "username": {
+          "name": "username",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "username": {
-          "name": "username",
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true

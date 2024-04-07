@@ -9,17 +9,15 @@ import Link from "next/link";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/lib/clipboard";
 import { InstanceInfoCard } from "../_components/instance-info-card";
-import { type ServiceInstance } from "@/schema/serviceInstance.schema";
+import { type ServiceInstanceWithToken } from "@/schema/serviceInstance.schema";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
-  instance: ServiceInstance;
+  instanceWithToken: ServiceInstanceWithToken;
   className?: string;
 }
 
-export function UserInstanceInfoCard({ instance, className }: Props) {
-  const instanceTokenQuery = api.user.getInstanceToken.useQuery({ instanceId: instance.id });
-  const token = instanceTokenQuery.data?.token ?? null;
-
+export function UserInstanceInfoCard({ instanceWithToken, className }: Props) {
+  const { token, ...instance } = instanceWithToken;
   return (
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">

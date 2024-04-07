@@ -43,7 +43,7 @@ interface EditPasswordFormProps extends React.ComponentProps<"form"> {
 
 function GenerateInstanceTokensForm({ className, userId, closePopup }: EditPasswordFormProps) {
   const mutation = api.user.generateTokens.useMutation();
-  const instancesQuery = api.serviceInstance.getAll.useQuery();
+  const instancesQuery = api.serviceInstance.getAllWithToken.useQuery();
 
   const [isSaving, setIsSaving] = React.useState<boolean>(false);
 

@@ -13,6 +13,13 @@ CREATE TABLE IF NOT EXISTS "event_logs" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "global_settings" (
+	"key" text PRIMARY KEY NOT NULL,
+	"content" jsonb,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "resource_usage_logs" (
 	"id" text PRIMARY KEY NOT NULL,
 	"user_id" text,
@@ -29,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "service_instances" (
 	"type" text NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
-	"url" text,
+	"url" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	CONSTRAINT "service_instances_name_unique" UNIQUE("name")
@@ -43,19 +50,21 @@ CREATE TABLE IF NOT EXISTS "sessions" (
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "user_instance_tokens" (
+CREATE TABLE IF NOT EXISTS "user_instance_ability" (
 	"user_id" text NOT NULL,
 	"instance_id" text NOT NULL,
 	"token" text NOT NULL,
+	"can_use" boolean DEFAULT true,
 	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "user_instance_tokens_user_id_instance_id_pk" PRIMARY KEY("user_id","instance_id"),
-	CONSTRAINT "user_instance_tokens_token_unique" UNIQUE("token")
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "user_instance_ability_user_id_instance_id_pk" PRIMARY KEY("user_id","instance_id"),
+	CONSTRAINT "user_instance_ability_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "user" (
 	"id" text PRIMARY KEY NOT NULL,
-	"name" text NOT NULL,
 	"username" text NOT NULL,
+	"name" text NOT NULL,
 	"email" text,
 	"role" "user_role" DEFAULT 'USER' NOT NULL,
 	"image" text,
@@ -98,13 +107,13 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "user_instance_tokens" ADD CONSTRAINT "user_instance_tokens_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "user_instance_ability" ADD CONSTRAINT "user_instance_ability_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "user_instance_tokens" ADD CONSTRAINT "user_instance_tokens_instance_id_service_instances_id_fk" FOREIGN KEY ("instance_id") REFERENCES "service_instances"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "user_instance_ability" ADD CONSTRAINT "user_instance_ability_instance_id_service_instances_id_fk" FOREIGN KEY ("instance_id") REFERENCES "service_instances"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

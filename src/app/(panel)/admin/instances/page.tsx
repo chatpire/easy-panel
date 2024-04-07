@@ -6,7 +6,7 @@ import { api } from "@/trpc/server";
 import { AdminInstanceInfoCard } from "./instance-info-card-admin";
 
 export default async function InstancesPage({}) {
-  const instances = await api.serviceInstance.getAll();
+  const instances = await api.serviceInstance.getAllWithToken();
 
   return (
     <PageShell>

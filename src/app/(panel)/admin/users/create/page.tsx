@@ -11,7 +11,7 @@ import { type CreateUserForm, UserForm } from "../UserForm";
 export default function CreateUserPage({}) {
   const [loading, setLoading] = React.useState(false);
   const createMutation = api.user.create.useMutation();
-  const instancesQuery = api.serviceInstance.getAll.useQuery();
+  const instancesQuery = api.serviceInstance.getAllWithToken.useQuery();
 
   async function onSubmit(values: CreateUserForm) {
     const { generateTokens, clearPassword, ...userCreate } = values;

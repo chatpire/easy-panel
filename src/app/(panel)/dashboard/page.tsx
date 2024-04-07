@@ -9,7 +9,7 @@ import { globalSettingsManager } from "@/server/globalSettings";
 
 export default async function DashboardPage({}) {
   await getCurrentUserOrRedirect();
-  const instances = await api.serviceInstance.getAll();
+  const instances = await api.serviceInstance.getAllWithToken();
   const announcement = await globalSettingsManager.getSettingContent("chatGPTShareAnnouncement");
 
   return (
@@ -24,7 +24,7 @@ export default async function DashboardPage({}) {
       </Alert>
       <div className="grid gap-10">
         {instances.map((instance) => (
-          <UserInstanceInfoCard key={instance.id} instance={instance} />
+          <UserInstanceInfoCard key={instance.id} instanceWithToken={instance} />
         ))}
       </div>
       {instances.length === 0 && (
