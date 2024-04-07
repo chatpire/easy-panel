@@ -22,14 +22,14 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
             title: key,
             description: "Text",
             content: () => (
-              <ScrollArea className="max-h-[300px]">
-                <pre className="text-sm">{text}</pre>
+              <ScrollArea className="max-h-[300px] w-full">
+                <div className="text-sm">{text}</div>
               </ScrollArea>
             ),
           });
         }}
       >
-        {text.substring(0, 100) + (text.length > 100 ? "..." : "")}
+        {text.substring(0, 50) + (text.length > 50 ? "..." : "")}
       </Button>
     );
   }
@@ -45,7 +45,7 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
             description: "JSON",
             content: () => (
               <ScrollArea className="max-h-[300px]">
-                <pre className="text-sm">{JSON.stringify(value, null, 2)}</pre>
+                <div className="text-sm font-mono">{JSON.stringify(value, null, 2)}</div>
               </ScrollArea>
             ),
           });

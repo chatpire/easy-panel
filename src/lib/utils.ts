@@ -9,9 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 
 export function extractKeysFromSchema(
   schema: z.ZodObject<z.ZodRawShape>,
+  maxDepth?: number,
   currentDepth = 1,
   prefix = "",
-  maxDepth?: number,
 ): string[] {
   let keys: string[] = [];
   if (maxDepth && currentDepth > maxDepth) return keys;
@@ -23,9 +23,9 @@ export function extractKeysFromSchema(
     if (value instanceof z.ZodObject) {
       const nestedKeys = extractKeysFromSchema(
         value as z.ZodObject<z.ZodRawShape>,
+        maxDepth,
         currentDepth + 1,
         newPrefix,
-        maxDepth,
       );
       keys = keys.concat(nestedKeys);
     }

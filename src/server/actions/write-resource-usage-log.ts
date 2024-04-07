@@ -1,4 +1,5 @@
-import { type ResourceUsageLogDetails } from "@/schema/definition.schema";
+
+import { type ResourceUsageLogDetails } from "@/schema/resourceLog.schema";
 import { type Db } from "../db";
 import { resourceUsageLogs } from "../db/schema";
 import { createCUID } from "@/lib/cuid";

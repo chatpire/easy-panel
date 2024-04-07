@@ -1,13 +1,13 @@
 import "dotenv/config";
 import { faker } from "@faker-js/faker";
 import { createAdminUser } from "./utils";
-import { db } from "@/server/db";
+import { conn, db } from "@/server/db";
 import { resourceUsageLogs, serviceInstances, users } from "@/server/db/schema";
 import { createCUID } from "@/lib/cuid";
 import { ServiceTypeSchema } from "@/server/db/enum";
 import { log } from "console";
 
-const USERS_TO_CREATE = 50;
+const USERS_TO_CREATE = 20;
 const INSTANCES_TO_CREATE = 2;
 const LOGS_TO_CREATE_PER_USER = 100;
 const LOG_DAY_SPAN = 2;
@@ -17,7 +17,9 @@ async function main() {
 
   // Create users
   const admin = await createAdminUser(db);
-  console.log(`Created admin user ${admin.name}, id: ${admin.id}`);
+  if (admin) {
+    console.log(`Created admin user ${admin.name}, id: ${admin.id}`);
+  }
 
   const usersToCreate = [];
   for (let i = 0; i < USERS_TO_CREATE; i++) {
@@ -47,21 +49,22 @@ async function main() {
   console.log(`Created ${INSTANCES_TO_CREATE} service instances`);
 
   // Create logs over the past LOG_DAY_SPAN days
-  const logInterval = Math.floor((LOG_DAY_SPAN * 24 * 60 * 60 * 1000) / (LOGS_TO_CREATE_PER_USER));
-  
+  const logInterval = Math.floor((LOG_DAY_SPAN * 24 * 60 * 60 * 1000) / LOGS_TO_CREATE_PER_USER);
+
   for (const user of usersCreated) {
     let baseTime = Date.now() - LOG_DAY_SPAN * 24 * 60 * 60 * 1000;
     for (let i = 0; i < LOGS_TO_CREATE_PER_USER; i++) {
       const logsToCreate = [];
       const createdAt = new Date(baseTime);
       baseTime += logInterval;
-
+      const text = faker.lorem.paragraph(30);
       logsToCreate.push({
         id: createCUID(),
         type: ServiceTypeSchema.Values.CHATGPT_SHARED,
         userId: user.id,
         instanceId: instances[i % instances.length]!.id,
-        textBytes: faker.number.int(1000),
+        text: text,
+        textBytes: Buffer.byteLength(text),
         createdAt: createdAt,
         details: {
           type: ServiceTypeSchema.Values.CHATGPT_SHARED,
@@ -79,8 +82,11 @@ async function main() {
 }
 
 main()
-  .then()
+  .then(async () => {
+    await conn.end();
+  })
   .catch(async (e) => {
     console.error(e);
     process.exit(1);
-  });
+  })
+  .finally();

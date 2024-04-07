@@ -2,7 +2,7 @@
 import { type PaginationInput } from "@/schema/pagination.schema";
 import { PageShell } from "../../../_components/dashboard-shell";
 import { PageHeader } from "../../../_components/page-header";
-import { ResourceLogsTable } from "./resource-logs-table";
+import { ResourceLogsTable } from "./admin-resource-logs-table";
 import { api } from "@/trpc/server";
 
 async function fetchData(pagination: PaginationInput) {

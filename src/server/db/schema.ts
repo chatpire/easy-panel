@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { type EventContent, type ResourceUsageLogDetails } from "@/schema/definition.schema";
+import { type EventContent } from "@/schema/definition.schema";
 import { relations, sql } from "drizzle-orm";
 import {
   pgEnum,
@@ -16,6 +16,7 @@ import {
 import { type EventResultType, type EventType, type ServiceType } from "@/server/db/enum";
 import { createJsonbType } from "./jsonb";
 import { type GlobalSettingContent } from "@/schema/globalSetting.schema";
+import { ResourceUsageLogDetails } from "@/schema/resourceLog.schema";
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);

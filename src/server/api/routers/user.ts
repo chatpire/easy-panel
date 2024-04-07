@@ -15,7 +15,7 @@ import { hashPassword } from "@/lib/password";
 import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
 import { type Db } from "@/server/db";
 import { userInstanceAbilities, users } from "@/server/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { UserInstanceAbilitySchema } from "@/schema/userInstanceToken.schema";
 import { createCUID } from "@/lib/cuid";
 import { generateId } from "lucia";
@@ -84,9 +84,10 @@ export const userRouter = createTRPCRouter({
   }),
 
   update: adminWithUserProcedure.input(UserUpdateAdminSchema).mutation(async ({ ctx, input }) => {
-    if (input.id === ctx.user.id && input.isActive !== undefined) {
+    if (input.id === ctx.user.id && input.isActive === false) {
       throw new TRPCError({ code: "FORBIDDEN", message: "You cannot ban yourself" });
     }
+    console.log("users.update", input);
     const hashedPassword = input.clearPassword ? null : input.password ? await hashPassword(input.password) : undefined;
     const result = await ctx.db
       .update(users)
@@ -96,7 +97,7 @@ export const userRouter = createTRPCRouter({
       })
       .where(eq(users.id, input.id))
       .returning();
-    return UserReadAdminSchema.parse(result);
+    return UserReadAdminSchema.parse(result[0]);
   }),
 
   delete: adminWithUserProcedure.input(z.object({ id: z.string() })).mutation(async ({ ctx, input }) => {
@@ -117,7 +118,7 @@ export const userRouter = createTRPCRouter({
   }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const results = await ctx.db.query.users.findMany();
+    const results = await ctx.db.select().from(users);
     return UserReadAdminSchema.array().parse(results);
   }),
 

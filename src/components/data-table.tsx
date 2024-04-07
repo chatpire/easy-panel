@@ -146,6 +146,8 @@ export function createColumns<T>(
 ): ColumnDef<T>[] {
   const columnHelper = createColumnHelper<T>();
 
+  console.log(schema.shape, extractKeysFromSchema(schema));
+
   const columns = [
     getDataTableCheckboxColumn(columnHelper),
     ...extractKeysFromSchema(schema).map((key) =>
@@ -229,6 +231,7 @@ interface DataTableProps<T> {
   selectedRowActions?: DatatableSelectedRowAction<T>[];
   lazyPagination?: boolean;
   defaultPageSize?: number;
+  defaultColumnVisibility?: Record<string, boolean>;
   fetchData?: (pagination: PaginationInput) => Promise<PaginatedData<T>>;
 }
 
@@ -242,11 +245,12 @@ export function DataTable<T>({
   className,
   lazyPagination,
   defaultPageSize,
+  defaultColumnVisibility,
   fetchData,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(defaultColumnVisibility ?? {});
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [pageSize, setPageSize] = React.useState(defaultPageSize ?? 10);
   const [tableData, setTableData] = React.useState<T[]>([]);

@@ -14,11 +14,11 @@ export default function UpdateUserPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = React.useState(false);
   const userQuery = api.user.getById.useQuery({ id }, { retry: false });
   const updateMutation = api.user.update.useMutation();
-  const generateTokensMutation = api.user.editInstanceAbilities.useMutation();
+  const editAbilitiesMutation = api.user.editInstanceAbilities.useMutation();
   const instancesQuery = api.serviceInstance.getAllWithToken.useQuery();
 
   if (userQuery.error) {
-     notFound();
+    notFound();
   }
 
   async function onSubmit(values: CreateUserForm) {
@@ -28,11 +28,14 @@ export default function UpdateUserPage({ params }: { params: { id: string } }) {
     try {
       setLoading(true);
       await updateMutation.mutateAsync({ id, ...userUpdate });
-      await generateTokensMutation.mutateAsync({ userId: id, instanceIds });
-      toast.success("User created");
+      await editAbilitiesMutation.mutateAsync({
+        userId: id,
+        instanceIdCanUse: instanceIds.reduce((acc, id) => ({ ...acc, [id]: true }), {}),
+      });
+      toast.success("User updated");
     } catch (error) {
       console.error(error);
-      toast.error("Failed to create user: " + String(error));
+      toast.error("Failed to update user: " + String(error));
     } finally {
       setLoading(false);
     }

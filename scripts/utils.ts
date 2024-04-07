@@ -23,6 +23,7 @@ export async function createAdminUser(db: Db) {
       hashedPassword: await hashPassword(password),
       id: createCUID(),
     })
+    .onConflictDoNothing()
     .returning();
   return result[0]!;
 }

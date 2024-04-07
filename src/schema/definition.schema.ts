@@ -2,7 +2,6 @@ import { z } from "zod";
 import {
   ChatGPTSharedInstanceAttributesSchema,
   ChatGPTSharedOAuthEventContentSchema,
-  ChatGPTSharedResourceUsageLogDetailsSchema,
 } from "./service/chatgpt-shared.schema";
 
 export const ServiceInstanceAttributesSchema = z.discriminatedUnion("type", [ChatGPTSharedInstanceAttributesSchema]);
@@ -36,5 +35,3 @@ export const ResourceEventTypeSchema = z.enum(["consume"]);
 
 export const ResourcePermissionSchema = z.enum(["view", "use"]);
 
-export const ResourceUsageLogDetailsSchema = z.discriminatedUnion("type", [ChatGPTSharedResourceUsageLogDetailsSchema]);
-export type ResourceUsageLogDetails = z.infer<typeof ResourceUsageLogDetailsSchema>;
