@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
@@ -46,10 +46,10 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">
         <div className="flex flex-row items-center space-x-3">
-          <Button variant="link">
+          <Link className={buttonVariants({ variant: "link" })} href={instance.url ?? ""}>
             <Icons.externalLink className="mr-2 h-4 w-4" />
-            <Link href={instance.url ?? ""}>{instance.url}</Link>
-          </Button>
+            {instance.url}
+          </Link>
         </div>
         {/* <div className="flex flex-row items-center space-x-3">
           <Label>InstanceId</Label>
@@ -68,7 +68,6 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
           </span>
         </div> */}
         <div className="flex flex-row items-center space-x-3">
-
           <FunctionButton variant={"outline"} onClick={() => grantToAll(instance.id)}>
             Publish To All Active Users
           </FunctionButton>

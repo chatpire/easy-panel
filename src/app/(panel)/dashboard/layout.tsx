@@ -3,7 +3,7 @@ import { getSessionUserAttrOrRedirect } from "@/lib/session";
 import { HeaderNav } from "@/app/(panel)/_components/dashboard-header-nav";
 import { UserAccountNav } from "@/app/(panel)/_components/user-account-nav";
 import { LegacySidebarNav } from "../../../components/legacy-sidebar-nav";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 import { ThemeToggle } from "@/components/mode-toggle";
@@ -24,10 +24,10 @@ export default async function UserDashboardLayout({ children }: DashboardLayoutP
 
           <div className="flex flex-row items-center space-x-4">
             {user.role === UserRoles.ADMIN && (
-              <Button variant={"outline"}>
+              <Link className={buttonVariants({ variant: "outline" })} href="/admin">
                 <Icons.settings className="mr-2 h-4 w-4" />
-                <Link href="/admin">Admin Panel</Link>
-              </Button>
+                Admin Panel
+              </Link>
             )}
             <UserAccountNav user={user} />
             <ThemeToggle />

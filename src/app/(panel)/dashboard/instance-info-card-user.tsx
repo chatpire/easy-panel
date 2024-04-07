@@ -2,7 +2,7 @@
 
 import * as React from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
@@ -24,12 +24,14 @@ export function UserInstanceInfoCard({ instance, className }: Props) {
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">
         <div className="flex flex-row items-center space-x-3">
-          <Button disabled={!token}>
+          <Link
+            className={buttonVariants({ variant: "default" })}
+            href={`${instance.url}/logintoken?access_token=${token}`}
+            target="_blank"
+          >
             <Icons.externalLink className="mr-2 h-4 w-4" />
-            <Link href={`${instance.url}/logintoken?access_token=${token}`} target="_blank">
-              跳转到 ChatGPT
-            </Link>
-          </Button>
+            跳转到 ChatGPT
+          </Link>
         </div>
         <div className="flex flex-row items-center space-x-3">
           <Label>Token</Label>
