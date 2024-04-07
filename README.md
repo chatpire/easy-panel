@@ -1,10 +1,30 @@
-## Deploy
+# Easy Panel
 
-### Docker Compose
+Easy Panel 是一款用 Next.js 开发的服务管理面板，目前支持 Cockroachai 的用户管理。
 
-```bash
-docker compose build
-docker compose run --rm easy-panel yarn docker:db-migrate
-docker compose run --rm easy-panel yarn docker:create-admin
-docker compose up -d
-```
+> [!NOTE]
+>
+> Easy Panel 尚在早期开发测试阶段，存在不稳定性，请斟酌使用。
+
+项目适合：
+- 私人小规模共享
+- 中小规模的团队、组织、实验室内部使用
+
+项目不适合：
+- 商业行为
+
+## 特点
+
+- 支持多实例的配置和管理
+- 支持 OIDC 一键登录
+- 实例级别的用户权限管理
+- 详细的日志记录
+
+尚未实现：
+- [ ] 审计功能
+- [ ] 限速功能
+- [ ] 手机端适配
+
+## 部署和使用教程
+
+请参考项目 wiki。
