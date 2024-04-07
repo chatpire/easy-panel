@@ -34,10 +34,20 @@ interface InstanceConfigDetailsProps {
   closePopup: () => void;
 }
 
-function ChatGPTShareInstanceConfigDetailsPopup({ className, instanceDetails, closePopup }: InstanceConfigDetailsProps) {
+function ChatGPTShareInstanceConfigDetailsPopup({
+  className,
+  instanceDetails,
+  closePopup,
+}: InstanceConfigDetailsProps) {
   const { id } = instanceDetails;
-  const base_url = env.BASE_URL;
-  const configValue = `AUDIT_LIMIT_URL: ${base_url}/api/external/cockroachai/audit/${id}\n\nOAUTH_URL: ${base_url}/api/external/cockroachai/oauth/${id}`;
+  const [baseUrl, setBaseUrl] = React.useState("<base_url>");
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setBaseUrl(`${window.location.protocol}//${window.location.host}`);
+    }
+  }, []);
+  const configValue = `AUDIT_LIMIT_URL: ${baseUrl}/api/external/cockroachai/audit/${id}\n\nOAUTH_URL: ${baseUrl}/api/external/cockroachai/oauth/${id}`;
 
   return (
     <div className={cn("grid items-start gap-4", className)}>
