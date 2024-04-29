@@ -22,6 +22,6 @@ if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
 export const db = drizzle(conn, { schema, logger: false });
 
-await migrate(db, { migrationsFolder: "drizzle" });
+// await migrate(db, { migrationsFolder: "drizzle" });
 
 export type Db = typeof db;
