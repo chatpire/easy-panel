@@ -28,7 +28,7 @@ export const adminNavConfig: SideItem[] = [
   {
     title: "Dashboard",
     href: "/admin/dashboard",
-    icon: "info",
+    icon: "gauge",
   },
   {
     title: "Instances",
