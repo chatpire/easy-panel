@@ -3,7 +3,7 @@
 import { customType } from "drizzle-orm/pg-core";
 
 export function createJsonbType<T>(name: string) {
-  return customType<{ data: T; notNull: true }>({
+  return customType<{ data: T; notNull: false }>({
     dataType() {
       return "jsonb";
     },

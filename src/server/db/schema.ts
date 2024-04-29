@@ -7,7 +7,6 @@ import {
   boolean,
   text,
   integer,
-  foreignKey,
   timestamp,
   primaryKey,
   unique,
@@ -16,14 +15,14 @@ import {
 import { type EventResultType, type EventType, type ServiceType } from "@/server/db/enum";
 import { createJsonbType } from "./jsonb";
 import { type GlobalSettingContent } from "@/schema/globalSetting.schema";
-import { ResourceUsageLogDetails } from "@/schema/resourceLog.schema";
+import { type ResourceUsageLogDetails } from "@/schema/resourceLog.schema";
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
 
 // Tables
 export const users = pgTable(
-  "user",
+  "users",
   {
     id: text("id").primaryKey(),
     username: text("username").notNull(),
@@ -57,13 +56,7 @@ export const sessions = pgTable(
     expiresAt: timestamp("expires_at").notNull(),
     currentIp: text("current_ip"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => ({
-    fkUser: foreignKey({
-      columns: [table.userId],
-      foreignColumns: [users.id],
-    }),
-  }),
+  }
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -81,6 +74,7 @@ export const serviceInstances = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     url: text("url").notNull(),
+    data: createJsonbType<Record<string, unknown>>("data"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
@@ -98,21 +92,14 @@ export const userInstanceAbilities = pgTable(
   {
     userId: text("user_id").notNull(),
     instanceId: text("instance_id").notNull(),
-    token: text("token").notNull(),
+    token: text("token"),
     canUse: boolean("can_use").notNull().default(true),
+    data: createJsonbType<Record<string, unknown>>("data"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.userId, table.instanceId] }),
-    referenceUserId: foreignKey({
-      columns: [table.userId],
-      foreignColumns: [users.id],
-    }),
-    referenceInstanceId: foreignKey({
-      columns: [table.instanceId],
-      foreignColumns: [serviceInstances.id],
-    }),
     uniqueToken: unique().on(table.token),
   }),
 );
@@ -136,14 +123,10 @@ export const eventLogs = pgTable(
     type: text("type").notNull().$type<EventType>(),
     resultType: text("result_type").notNull().$type<EventResultType>(),
     // content: jsonb("content").notNull().$type<EventContent>(),
-    content: createJsonbType<EventContent>("content"),
+    content: createJsonbType<EventContent>("content").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
-    fkUser: foreignKey({
-      columns: [table.userId],
-      foreignColumns: [users.id],
-    }),
     indexCreatedAtUserId: index().on(table.createdAt, table.userId),
   }),
 );
@@ -165,18 +148,10 @@ export const resourceUsageLogs = pgTable(
     text: text("text"),
     textBytes: integer("text_bytes"),
     // details: jsonb("details").notNull().$type<ResourceUsageLogDetails>(),
-    details: createJsonbType<ResourceUsageLogDetails>("details"),
+    details: createJsonbType<ResourceUsageLogDetails>("details").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
-    fkUser: foreignKey({
-      columns: [table.userId],
-      foreignColumns: [users.id],
-    }),
-    fkInstance: foreignKey({
-      columns: [table.instanceId],
-      foreignColumns: [serviceInstances.id],
-    }),
     indexTypeCreatedAt: index().on(table.type, table.createdAt),
     indexUserId: index().on(table.userId),
     indexInstanceId: index().on(table.instanceId),
@@ -196,7 +171,7 @@ export const resourceUsageLogsRelations = relations(resourceUsageLogs, ({ one })
 
 export const globalSettings = pgTable("global_settings", {
   key: text("key").primaryKey(),
-  content: createJsonbType<GlobalSettingContent>("content"),
+  content: createJsonbType<GlobalSettingContent>("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
