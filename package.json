@@ -7,9 +7,9 @@
     "build": "next build",
     "build-zip": "next build && zip -r standalone.zip .next/standalone .next/static public package.json scripts-dist drizzle next.config.js",
     "build-scripts": "node scripts/build.mjs",
-    "db:push": "drizzle-kit push:pg --config drizzle.config.dev.ts",
     "db:studio": "drizzle-kit studio",
     "db:generate": "drizzle-kit generate:pg",
+    "db:migrate": "tsx ./scripts/db-migrate.ts",
     "dev": "next dev",
     "format": "prettier src --write",
     "lint": "next lint",
@@ -17,7 +17,8 @@
     "start": "next start",
     "create-admin": "tsx scripts/create-admin.ts",
     "seed-test": "pnpm db:push && tsx scripts/seed.ts",
-    "docker:create-admin": "node scripts-dist/create-admin.cjs"
+    "docker:create-admin": "node scripts-dist/create-admin.cjs",
+    "docker:db-migrate": "node scripts-dist/db-migrate.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

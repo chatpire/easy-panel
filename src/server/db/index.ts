@@ -15,13 +15,11 @@ const globalForDb = globalThis as unknown as {
 
 export const conn = globalForDb.conn ?? postgres(env.POSTGRES_URL, {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onnotice: (_notice) => {}
+  // onnotice: (_notice) => {}
 });
 
 if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
 export const db = drizzle(conn, { schema, logger: false });
-
-// await migrate(db, { migrationsFolder: "drizzle" });
 
 export type Db = typeof db;
