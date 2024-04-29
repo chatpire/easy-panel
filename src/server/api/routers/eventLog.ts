@@ -3,8 +3,8 @@ import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { paginateQuery } from "../pagination";
 import { EventLogSchema, EventLogWhereInputSchema } from "@/schema/eventLog.schema";
-import { type SQL, and, count, eq, gte, lte, desc } from "drizzle-orm";
-import { eventLogs } from "@/server/db/schema";
+import { type SQL, and, count, eq, gte, lte, desc, getTableColumns } from "drizzle-orm";
+import { eventLogs, users } from "@/server/db/schema";
 
 const PaginationEventLogsInputSchema = z.object({
   where: EventLogWhereInputSchema,
@@ -46,7 +46,13 @@ const getPaginatedResourceLogs = async ({
           .from(eventLogs)
           .where(and(...andParams));
         const result = await tx
-          .select()
+          .select({
+            ...getTableColumns(eventLogs),
+            user: {
+              username: users.username,
+              name: users.name,
+            }
+          })
           .from(eventLogs)
           .where(filter)
           .orderBy(desc(eventLogs.createdAt))

@@ -9,8 +9,8 @@ import {
   ResourceUsageLogSchema,
 } from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
-import { type SQL, and, count, eq, gte, lte, sql, countDistinct, desc } from "drizzle-orm";
-import { resourceUsageLogs } from "@/server/db/schema";
+import { type SQL, and, count, eq, gte, lte, sql, countDistinct, desc, getTableColumns } from "drizzle-orm";
+import { resourceUsageLogs, serviceInstances, users } from "@/server/db/schema";
 import { UserRoles } from "@/schema/user.schema";
 import { DURATION_WINDOWS, type DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 import { alignTimeToGranularity } from "@/lib/utils";
@@ -98,7 +98,6 @@ const _groupGPT4LogsInDurationWindow = async ({
       ),
     )
     .groupBy(sql`${resourceUsageLogs.details}->>'chatgptAccountId'`);
-  // console.log("groupByResult", groupByResult);
   const result = {
     durationWindow,
     counts: groupByResult.map((item) => ({
@@ -156,11 +155,21 @@ const getPaginatedResourceLogs = async ({
             value: count(),
           })
           .from(resourceUsageLogs)
-          .where(and(...andParams));
+          .where(and(...andParams))
+          .leftJoin(users, eq(resourceUsageLogs.userId, users.id));
         const result = await tx
-          .select()
+          .select({
+            ...getTableColumns(resourceUsageLogs),
+            user: {
+              username: users.username,
+              name: users.name,
+            },
+            instanceName: serviceInstances.name,
+          })
           .from(resourceUsageLogs)
           .where(filter)
+          .leftJoin(users, eq(resourceUsageLogs.userId, users.id))
+          .leftJoin(serviceInstances, eq(resourceUsageLogs.instanceId, serviceInstances.id))
           .orderBy(desc(resourceUsageLogs.createdAt))
           .limit(take)
           .offset(skip);

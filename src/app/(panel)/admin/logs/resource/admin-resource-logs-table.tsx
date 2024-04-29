@@ -16,9 +16,12 @@ export function ResourceLogsTable({ fetchData }: { fetchData: (input: Pagination
         enableColumnSelector={true}
         defaultColumnVisibility={{
           type: false,
-          "details": false,
-          "details_type": false,
-          "details_inputTokens": false
+          userId: false,
+          instanceId: false,
+          user: false,
+          details: false,
+          details_type: false,
+          details_inputTokens: false,
         }}
       />
     </div>

@@ -29,6 +29,16 @@ export function extractKeysFromSchema(
       );
       keys = keys.concat(nestedKeys);
     }
+    if (value instanceof z.ZodOptional && value._def.innerType instanceof z.ZodObject) {
+      const nestedKeys = extractKeysFromSchema(
+        value._def.innerType as z.ZodObject<z.ZodRawShape>,
+        maxDepth,
+        currentDepth + 1,
+        newPrefix,
+      );
+      keys = keys.concat(nestedKeys);
+    }
+
   }
 
   return keys;

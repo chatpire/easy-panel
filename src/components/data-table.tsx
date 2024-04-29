@@ -50,8 +50,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatValueToNode } from "@/lib/format";
 
 export function formatUserDataTableCellValue(key: string, value: any): React.ReactNode {
-  if (key === "id") {
-    return <Badge variant="secondary">{(value as string).slice(0, 4)}...</Badge>;
+  if (value && (key === "id" || key.endsWith("Id"))) {
+    return <Badge variant="secondary">{(value as string).slice(0, 8)}...</Badge>;
   }
   if (key === "role") {
     // return <Badge variant="default">{(value as string).toLowerCase()}</Badge>;
@@ -145,8 +145,6 @@ export function createColumns<T>(
   rowDropdownActions?: DataTableDropdownAction<T>[],
 ): ColumnDef<T>[] {
   const columnHelper = createColumnHelper<T>();
-
-  console.log(schema.shape, extractKeysFromSchema(schema));
 
   const columns = [
     getDataTableCheckboxColumn(columnHelper),
@@ -302,7 +300,7 @@ export function DataTable<T>({
         setTableData(response.data);
         setLastPage(response.pagination.totalPages);
         setTotalPages(response.pagination.totalPages);
-        console.log("Fetched data", response);
+        // console.log("Fetched data", response);
       })
       .catch((error) => {
         console.error("Error fetching data", error);

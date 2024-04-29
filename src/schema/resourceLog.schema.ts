@@ -4,8 +4,6 @@ import { resourceUsageLogs } from "@/server/db/schema";
 import { DurationWindowSchema } from "@/server/db/enum";
 import { ChatGPTSharedResourceUsageLogDetailsSchema } from "./service/chatgpt-shared.schema";
 
-
-
 export const ResourceLogSumResultSchema = z.object({
   durationWindow: DurationWindowSchema,
   stats: z.object({
@@ -39,10 +37,24 @@ export const ResourceUsageLogWhereInputSchema = z.object({
 export const ResourceUsageLogDetailsSchema = z.discriminatedUnion("type", [ChatGPTSharedResourceUsageLogDetailsSchema]);
 export type ResourceUsageLogDetails = z.infer<typeof ResourceUsageLogDetailsSchema>;
 
-export const ResourceUsageLogSchema = createSelectSchema(resourceUsageLogs).merge(z.object({
-  details: ResourceUsageLogDetailsSchema
-}))
+export const ResourceUsageLogSchema = createSelectSchema(resourceUsageLogs).merge(
+  z.object({
+    details: ResourceUsageLogDetailsSchema,
+    user: z.object({
+      username: z.string(),
+      name: z.string(),
+    }).optional(),
+    instanceName: z.string().optional()
+  }),
+);
 
-export const ChatGPTSharedResourceUsageLogSchema = createSelectSchema(resourceUsageLogs).merge(z.object({
-  details: ChatGPTSharedResourceUsageLogDetailsSchema
-}));
+export const ChatGPTSharedResourceUsageLogSchema = createSelectSchema(resourceUsageLogs).merge(
+  z.object({
+    details: ChatGPTSharedResourceUsageLogDetailsSchema,
+    user: z.object({
+      username: z.string(),
+      name: z.string(),
+    }).optional(),
+    instanceName: z.string().optional()
+  }),
+);

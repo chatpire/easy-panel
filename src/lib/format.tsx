@@ -6,10 +6,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function formatValueToNode(key: string, value: unknown): React.ReactNode {
   if (value === null) {
-    return <span className="text-gray-400"> null </span>;
+    return <span className="text-muted-foreground"> null </span>;
   }
   if (value instanceof Date) {
-    return <span className="text-sm">{value.toLocaleString()}</span>;
+    return <span className="text-muted-foreground">{value.toLocaleString()}</span>;
   }
   if (key === "text") {
     const text = value as string;

@@ -14,3 +14,12 @@ export const EventLogWhereInputSchema = z.object({
   timeStart: z.date().optional(),
   timeEnd: z.date().optional(),
 });
+
+export const EventLogSchemaWithUser = EventLogSchema.merge(
+  z.object({
+    user: z.object({
+      username: z.string(),
+      name: z.string(),
+    }).optional(),
+  }),
+);
