@@ -17,8 +17,7 @@
     "start": "next start",
     "create-admin": "tsx scripts/create-admin.ts",
     "seed-test": "pnpm db:push && tsx scripts/seed.ts",
-    "docker:create-admin": "node scripts-dist/create-admin.cjs",
-    "docker:db-migrate": "node scripts-dist/db-migrate.cjs"
+    "docker:create-admin": "node scripts-dist/create-admin.cjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",

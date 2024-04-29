@@ -2,9 +2,9 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 const booleanEnv = z.preprocess((val) => {
-  val = String(val).toLowerCase();
-  if (val === "true") return true;
-  if (val === "false") return false;
+  val = String(val).toLowerCase().trim();
+  if (val === "true" || val === "1") return true;
+  if (val === "false" || val === "0") return false;
   return undefined;
 }, z.boolean().optional());
 
@@ -14,6 +14,8 @@ export const env = createEnv({
    * isn't built with invalid env vars.
    */
   server: {
+    IS_BUILDING: booleanEnv.default(false),
+
     DATABASE_TYPE: z.enum(["postgres", "neon"]),
     POSTGRES_URL: z.string().url(),
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -61,6 +63,8 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    IS_BUILDING: process.env.IS_BUILDING,
+
     DATABASE_TYPE: process.env.DATABASE_TYPE,
     POSTGRES_URL: process.env.POSTGRES_URL,
     NODE_ENV: process.env.NODE_ENV,
