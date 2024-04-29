@@ -4,7 +4,7 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl g++ make python3
 WORKDIR /app
 
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml\* ./
+COPY package.json pnpm-lock.yaml ./
 
 RUN \
     if [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i; \
