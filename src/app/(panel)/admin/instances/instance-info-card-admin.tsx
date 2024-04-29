@@ -15,10 +15,44 @@ import { TRPCClientError } from "@trpc/client";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
 import { popupChatGPTShareInstanceConfigDetails } from "./chatgpt-share-config-popup";
 import { useRouter } from "next/navigation";
+import { popup } from "@/components/popup";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
   className?: string;
+}
+
+export function DeleteInstance({ instanceId, closePopup }: { instanceId: string; closePopup: () => void }) {
+  const router = useRouter();
+  const deleteMutation = api.serviceInstance.delete.useMutation();
+  const [deleteLogs, setDeleteLogs] = React.useState(false);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center space-x-2">
+        <Checkbox checked={deleteLogs} onCheckedChange={() => setDeleteLogs((current) => !current)} />
+        <label
+          htmlFor="terms"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          Delete logs associated with this instance
+        </label>
+      </div>
+      <FunctionButton
+        variant={"destructive"}
+        className="my-2 w-full"
+        onClick={async () => {
+          await deleteMutation.mutateAsync({ id: instanceId, deleteLogs });
+          closePopup();
+          toast.success("Instance has been deleted.");
+          router.refresh();
+        }}
+      >
+        Confirm
+      </FunctionButton>
+    </div>
+  );
 }
 
 export function AdminInstanceInfoCard({ instance, className }: Props) {
@@ -38,10 +72,6 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
     }
   };
 
-  const unpublish = async (instanceId: string) => {
-    toast.info("Unpublishing is not implemented yet.");
-  };
-
   return (
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">
@@ -55,9 +85,9 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
           <FunctionButton className="lt-md:w-full" variant={"outline"} onClick={() => grantToAll(instance.id)}>
             Publish To All Active Users
           </FunctionButton>
-          <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
+          {/* <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
             Unpublish
-          </FunctionButton>
+          </FunctionButton> */}
           <Button onClick={() => popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id })}>
             <Icons.eye className="mr-2 h-4 w-4" />
             View Config
@@ -66,6 +96,19 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
             <Icons.pencil className="mr-2 h-4 w-4" />
             Edit
           </Button>
+          <FunctionButton
+            className="lt-md:w-full"
+            variant={"destructive"}
+            onClick={async () => {
+              popup({
+                title: `Delete Instance`,
+                description: `Delete instance ${instance.name} from database. This will delete all associated user data.`,
+                content: (closePopup) => <DeleteInstance instanceId={instance.id} closePopup={closePopup} />,
+              });
+            }}
+          >
+            Delete
+          </FunctionButton>
         </div>
       </div>
     </InstanceInfoCard>

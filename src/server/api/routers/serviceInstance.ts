@@ -14,7 +14,7 @@ import {
   ServiceInstanceUpdateSchema,
   ServiceInstanceWithToken,
 } from "@/schema/serviceInstance.schema";
-import { serviceInstances, userInstanceAbilities, users } from "@/server/db/schema";
+import { resourceUsageLogs, serviceInstances, userInstanceAbilities, users } from "@/server/db/schema";
 import { createCUID } from "@/lib/cuid";
 import { and, eq } from "drizzle-orm";
 
@@ -107,9 +107,17 @@ export const serviceInstanceRouter = createTRPCRouter({
     return ServiceInstanceSchema.parse(result);
   }),
 
-  delete: adminProcedure.input(ServiceInstanceSchema.pick({ id: true })).mutation(async ({ ctx, input }) => {
-    await ctx.db.delete(serviceInstances).where(eq(serviceInstances.id, input.id));
-  }),
+  delete: adminProcedure
+    .input(ServiceInstanceSchema.pick({ id: true }).merge(z.object({ deleteLogs: z.boolean() })))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.transaction(async (tx) => {
+        await tx.delete(userInstanceAbilities).where(eq(userInstanceAbilities.instanceId, input.id));
+        await tx.delete(serviceInstances).where(eq(serviceInstances.id, input.id));
+        if (input.deleteLogs) {
+          await tx.delete(resourceUsageLogs).where(eq(resourceUsageLogs.instanceId, input.id));
+        }
+      });
+    }),
 
   verifyUserAbility: publicProcedure
     .input(
