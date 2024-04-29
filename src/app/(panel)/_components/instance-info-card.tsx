@@ -16,7 +16,7 @@ interface Props extends React.HTMLAttributes<HTMLFormElement> {
 
 export function InstanceInfoCard({ instance, className, children }: Props) {
   return (
-    <Card className={cn("w-full", className)}>
+    <Card className={cn("max-w-full overflow-x-hidden", className)}>
       <CardHeader className="border-b">
         <CardTitle>
           <StatusLabel status={"success"}>{instance.name}</StatusLabel>
@@ -24,7 +24,7 @@ export function InstanceInfoCard({ instance, className, children }: Props) {
         {instance?.description && <CardDescription>{instance.description}</CardDescription>}
       </CardHeader>
       <CardContent className="py-3">
-        <div className="flex flex-row space-x-4">
+        <div className="grid gap-4 md:grid-cols-2">
           <InstanceGpt4UsageList className="flex-1" instanceId={instance.id} />
           <InstanceUsageStatistics className="flex-1" instanceId={instance.id} />
         </div>

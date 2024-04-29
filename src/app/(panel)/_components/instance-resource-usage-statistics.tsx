@@ -1,7 +1,9 @@
 "use client";
 
+import { Icons } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function InstanceUsageStatistics({ instanceId, className }: { instanceId: string; className?: string }) {
   const sumResult = api.resourceLog.sumLogsInDurationWindowsByInstance.useQuery({
@@ -19,11 +21,32 @@ export function InstanceUsageStatistics({ instanceId, className }: { instanceId:
           {sumResult.data?.map((item) => (
             <div key={item.durationWindow} className="flex w-full flex-row justify-between">
               <div>Last {item.durationWindow}</div>
-              <div className="flex flex-row space-x-2">
-                <span>{item.stats.userCount} 用户在线</span>
-                <span>对话 {item.stats.count} 次</span>
-                <span>共 {item.stats.sumUtf8Length ?? 0} 字符</span>
-              </div>
+              <TooltipProvider delayDuration={0}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div className="flex flex-row space-x-2">
+                      {/* <span>{item.stats.userCount}</span>
+                <span>{item.stats.count}</span>
+                <span>{item.stats.sumUtf8Length ?? 0}</span> */}
+                      <div className="flex flex-row items-center">
+                        {" "}
+                        <Icons.user className="mr-2 h-4 w-4" /> {item.stats.userCount}
+                      </div>
+                      <div className="flex flex-row items-center">
+                        {" "}
+                        <Icons.message className="mr-2 h-4 w-4" /> {item.stats.count}
+                      </div>
+                      <div className="flex flex-row items-center">
+                        {" "}
+                        <Icons.fileBarChart className="mr-2 h-4 w-4" /> {item.stats.sumUtf8Length ?? 0}{" "}
+                      </div>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>{item.stats.userCount} 用户在线，对话 {item.stats.count} 次，共 {item.stats.sumUtf8Length ?? 0} 字符</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           ))}
         </div>

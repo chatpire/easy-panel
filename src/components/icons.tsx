@@ -33,6 +33,8 @@ import {
   Server,
   Pencil,
   Eye,
+  MessageSquareMore,
+  FileBarChart,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -69,6 +71,8 @@ export const Icons = {
   externalLink: ExternalLink,
   info: Info,
   fileClock: FileClock,
+  message: MessageSquareMore,
+  fileBarChart: FileBarChart,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

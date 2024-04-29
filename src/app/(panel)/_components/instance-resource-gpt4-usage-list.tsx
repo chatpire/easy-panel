@@ -87,7 +87,7 @@ export function InstanceGpt4UsageList({ instanceId, className }: { instanceId: s
                 </span>
                 <Progress
                   value={Math.min(percentage * 100, 100)}
-                  className={cn("w-[200px] max-w-full")}
+                  className={cn("md:w-[200px] w-[120px] max-w-full")}
                   indicatorClassName={getBackgroundColor(percentage)}
                 />
               </div>

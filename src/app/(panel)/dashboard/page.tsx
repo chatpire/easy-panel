@@ -22,7 +22,7 @@ export default async function DashboardPage({}) {
           {announcement.text}
         </AlertDescription>
       </Alert>
-      <div className="grid gap-10">
+      <div className="grid gap-6">
         {instances.map((instance) => (
           <UserInstanceInfoCard key={instance.id} instanceWithToken={instance} />
         ))}

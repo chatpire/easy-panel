@@ -19,7 +19,7 @@ export default async function UserDashboardLayout({ children }: DashboardLayoutP
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
+        <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center justify-between px-4 py-4">
           <HeaderNav items={[]} />
 
           <div className="flex flex-row items-center space-x-4">
@@ -34,11 +34,13 @@ export default async function UserDashboardLayout({ children }: DashboardLayoutP
           </div>
         </div>
       </header>
-      <div className="container grid flex-1 gap-12 md:grid-cols-[200px_1fr]">
+      <div className="mx-auto grid w-full max-w-[1400px] gap-12 px-4 md:grid-cols-[200px_1fr]">
         <aside className="hidden w-[200px] flex-col md:flex">
           <LegacySidebarNav items={userNavConfig} />
         </aside>
-        <main className="flex w-full flex-1 flex-col overflow-hidden pb-6">{children}</main>
+        <main className="w-full flex-1 overflow-x-auto pb-6">
+          {children}
+        </main>
       </div>
     </>
   );

@@ -6,12 +6,12 @@ import { api } from "@/trpc/server";
 import { AdminInstanceInfoCard } from "./instance-info-card-admin";
 
 export default async function InstancesPage({}) {
-  const instances = await api.serviceInstance.getAllWithToken();
+  const instances = await api.serviceInstance.getAllAdmin();
 
   return (
     <PageShell>
       <PageHeader heading="Instances" text="实例管理" />
-      <div className="max-w-full overflow-hidden">
+      <div className="max-w-full overflow-hidden pb-6">
         <div className="grid gap-4 ">
           {instances.map((instance) => (
             <AdminInstanceInfoCard key={instance.id} instance={instance} />

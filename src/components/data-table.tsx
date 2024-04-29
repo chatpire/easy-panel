@@ -351,7 +351,7 @@ export function DataTable<T>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody>
+          <TableBody className="text-xs">
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
