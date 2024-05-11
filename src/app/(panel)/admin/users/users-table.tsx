@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { type UserReadAdmin, UserReadAdminSchema } from "@/schema/user.schema";
+import { type UserReadAdmin, UserReadAdminSchema, UserReadAdminWithLastLoginSchema } from "@/schema/user.schema";
 import { api } from "@/trpc/react";
 import { popupEditPasswordForm } from "@/app/(panel)/_components/edit-password-popup";
 import { DataTable, type DataTableDropdownAction } from "@/components/data-table";
@@ -102,7 +102,7 @@ export function UsersTable() {
       <DataTable
         data={getAllUserQuery.data ?? []}
         filterSearchField={"username"}
-        schema={UserReadAdminSchema}
+        schema={UserReadAdminWithLastLoginSchema}
         rowDropdownActions={rowDropdownActions}
         defaultPageSize={30}
       />

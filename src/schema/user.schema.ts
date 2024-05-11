@@ -25,14 +25,17 @@ export type UserCreate = z.infer<typeof UserCreateSchema>;
 
 export const UserReadAdminSchema = UserSchema.omit({
   hashedPassword: true,
-}).merge(
+});
+
+export const UserReadAdminWithLastLoginSchema = UserReadAdminSchema.merge(
   z.object({
     lastLoginAt: z
       .string()
-      .nullable()
+      .nullish()
       .transform((v) => (v ? new Date(v) : null)),
   }),
 );
+
 export type UserReadAdmin = z.infer<typeof UserReadAdminSchema>;
 export const UserReadSchema = UserReadAdminSchema.omit({
   comment: true,

@@ -10,6 +10,7 @@ import {
   UserCreateSchema,
   UserRoles,
   UserUpdateAdminSchema,
+  UserReadAdminWithLastLoginSchema,
 } from "@/schema/user.schema";
 import { hashPassword } from "@/lib/password";
 import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
@@ -126,7 +127,7 @@ export const userRouter = createTRPCRouter({
       .from(users)
       .leftJoin(sessions, eq(sessions.userId, users.id))
       .groupBy(users.id);
-    return UserReadAdminSchema.array().parse(results);
+    return UserReadAdminWithLastLoginSchema.array().parse(results);
   }),
 
   editInstanceAbilities: adminProcedure
