@@ -10,6 +10,7 @@ import { FunctionButton } from "@/components/loading-button";
 import { popupGenerateTokensForm } from "@/app/(panel)/admin/users/edit-intance-ability-popup";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { popupUserInstanceTokensViewer } from "./view-tokens-popup";
 
 export function UsersTable() {
   const router = useRouter();
@@ -23,6 +24,12 @@ export function UsersTable() {
       content: "Edit Instance Abilities",
       type: "item",
       onClick: (row) => popupGenerateTokensForm(row.original.id, row.original.username),
+    },
+    {
+      key: "view-instance-tokens",
+      content: "View Tokens",
+      type: "item",
+      onClick: (row) => popupUserInstanceTokensViewer(row.original.id, row.original.username),
     },
     {
       key: "separator",
@@ -97,7 +104,7 @@ export function UsersTable() {
         filterSearchField={"username"}
         schema={UserReadAdminSchema}
         rowDropdownActions={rowDropdownActions}
-        defaultPageSize={15}
+        defaultPageSize={30}
       />
     </div>
   );

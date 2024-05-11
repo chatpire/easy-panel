@@ -14,8 +14,8 @@ import {
 import { hashPassword } from "@/lib/password";
 import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
 import { type Db } from "@/server/db";
-import { userInstanceAbilities, users } from "@/server/db/schema";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { sessions, userInstanceAbilities, users } from "@/server/db/schema";
+import { and, asc, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { UserInstanceAbilitySchema } from "@/schema/userInstanceToken.schema";
 import { createCUID } from "@/lib/cuid";
 import { generateId } from "lucia";
@@ -118,7 +118,14 @@ export const userRouter = createTRPCRouter({
   }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const results = await ctx.db.select().from(users);
+    const results = await ctx.db
+      .select({
+        lastLoginAt: sql`MAX(${sessions.createdAt})`,
+        ...getTableColumns(users),
+      })
+      .from(users)
+      .leftJoin(sessions, eq(sessions.userId, users.id))
+      .groupBy(users.id);
     return UserReadAdminSchema.array().parse(results);
   }),
 

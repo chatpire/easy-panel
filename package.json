@@ -16,7 +16,7 @@
     "lint-fix": "next lint --fix",
     "start": "next start",
     "create-admin": "tsx scripts/create-admin.ts",
-    "seed-test": "pnpm db:push && tsx scripts/seed.ts",
+    "seed-test": "tsx scripts/seed.ts",
     "docker:create-admin": "node scripts-dist/create-admin.cjs",
     "docker:db-migrate": "node scripts-dist/db-migrate.cjs"
   },

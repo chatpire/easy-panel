@@ -6,14 +6,29 @@ import { ChatGPTSharedResourceUsageLogSchema } from "@/schema/resourceLog.schema
 
 const UserResourceUsageLogDisplaySchema = ChatGPTSharedResourceUsageLogSchema.pick({
   createdAt: true,
-  instanceName: true,
   details: true,
+  instance: true,
 });
 
 export function UserResourceLogsTable({ fetchData }: { fetchData: (input: PaginationInput) => Promise<any> }) {
   return (
     <div className="w-full">
-      <DataTable schema={UserResourceUsageLogDisplaySchema} lazyPagination={true} fetchData={fetchData} />
+      <DataTable
+        schema={UserResourceUsageLogDisplaySchema}
+        lazyPagination={true}
+        fetchData={fetchData}
+        defaultColumnVisibility={{
+          type: false,
+          userId: false,
+          instanceId: false,
+          instance: false,
+          instance_url: false,
+          user: false,
+          details: false,
+          details_type: false,
+          details_inputTokens: false,
+        }}
+      />
     </div>
   );
 }

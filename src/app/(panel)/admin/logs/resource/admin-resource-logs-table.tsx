@@ -18,6 +18,8 @@ export function ResourceLogsTable({ fetchData }: { fetchData: (input: Pagination
           type: false,
           userId: false,
           instanceId: false,
+          instance: false,
+          instance_url: false,
           user: false,
           details: false,
           details_type: false,

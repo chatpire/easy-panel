@@ -5,7 +5,6 @@ import { conn, db } from "@/server/db";
 import { resourceUsageLogs, serviceInstances, users } from "@/server/db/schema";
 import { createCUID } from "@/lib/cuid";
 import { ServiceTypeSchema } from "@/server/db/enum";
-import { log } from "console";
 
 const USERS_TO_CREATE = 20;
 const INSTANCES_TO_CREATE = 2;

@@ -164,7 +164,10 @@ const getPaginatedResourceLogs = async ({
               username: users.username,
               name: users.name,
             },
-            instanceName: serviceInstances.name,
+            instance: {
+              name: serviceInstances.name,
+              url: serviceInstances.url,
+            }
           })
           .from(resourceUsageLogs)
           .where(filter)

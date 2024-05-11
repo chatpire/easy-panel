@@ -55,6 +55,9 @@ export const ChatGPTSharedResourceUsageLogSchema = createSelectSchema(resourceUs
       username: z.string(),
       name: z.string(),
     }).optional(),
-    instanceName: z.string().optional()
+    instance: z.object({
+      name: z.string(),
+      url: z.string().url(),
+    }).optional(),
   }),
 );
