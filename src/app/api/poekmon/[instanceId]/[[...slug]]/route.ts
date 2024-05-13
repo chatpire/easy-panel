@@ -16,6 +16,25 @@ import { type PoekmonAPIResourceUsageLogDetails } from "@/schema/service/poekmon
 
 export const dynamic = "force-dynamic";
 
+export async function OPTIONS(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
+  const { slug } = params;
+  const p = slug.join("/");
+  if (p !== "v1/chat/completions") {
+    return NextResponse.json({ detail: "Not Found" }, { status: 404 });
+  }
+
+  const headers = new Headers({
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  });
+
+  return new NextResponse(null, {
+    status: 204,
+    headers: headers,
+  });
+}
+
 export async function POST(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
   const userToken = request.headers.get("authorization")?.replace("Bearer ", "");
   const { instanceId, slug } = params;
@@ -169,7 +188,9 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
 
       response = new NextResponse(newStream, {
         status: proxyResponse.status,
-        headers: proxyResponse.headers,
+        headers: {
+          "Content-Type": "text/event-stream",
+        },
       });
     } else {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -198,6 +219,12 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
         details: resourceLogDetail,
       });
     }
+
+    response.headers.set("Access-Control-Allow-Origin", "*");
+    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    console.log("Poekmon API response", response.headers);
 
     return response;
   } catch (e) {
