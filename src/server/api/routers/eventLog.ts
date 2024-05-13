@@ -55,6 +55,7 @@ const getPaginatedResourceLogs = async ({
           })
           .from(eventLogs)
           .where(filter)
+          .leftJoin(users, eq(eventLogs.userId, users.id))
           .orderBy(desc(eventLogs.createdAt))
           .limit(take)
           .offset(skip);
