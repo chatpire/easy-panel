@@ -5,8 +5,14 @@ import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function PoekmonAPIInstanceUsageStatistics({ instanceId, className }: { instanceId: string; className?: string }) {
-  const sumResult = api.resourceLog.sumLogsInDurationWindowsByInstance.useQuery({
+export function PoekmonAPIInstanceUsageStatistics({
+  instanceId,
+  className,
+}: {
+  instanceId: string;
+  className?: string;
+}) {
+  const sumResult = api.resourceLog.sumPoekmonAPIResourceLogsInDurationWindowsByInstance.useQuery({
     durationWindows: ["10m", "1h", "8h", "24h"],
     instanceId,
   });
@@ -38,12 +44,17 @@ export function PoekmonAPIInstanceUsageStatistics({ instanceId, className }: { i
                       </div>
                       <div className="flex flex-row items-center">
                         {" "}
-                        <Icons.fileBarChart className="mr-2 h-4 w-4" /> {item.stats.sumUtf8Length ?? 0}{" "}
+                        <Icons.fileBarChart className="mr-2 h-4 w-4" />{" "}
+                        {`${item.stats.sumPromptTokens ?? 0} / ${item.stats.sumCompletionTokens ?? 0} / ${item.stats.sumTotalTokens ?? 0}`}{" "}
                       </div>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left">
-                    <p>{item.stats.userCount} 用户在线，对话 {item.stats.count} 次，共 {item.stats.sumUtf8Length ?? 0} 字符</p>
+                    <p>
+                      最近 {item.durationWindow}：{item.stats.userCount} 用户使用，请求 {item.stats.count} 次，输入共{" "}
+                      {item.stats.sumPromptTokens ?? 0} tokens，输出共 {item.stats.sumCompletionTokens ?? 0}{" "}
+                      tokens，总共 {item.stats.sumTotalTokens ?? 0} tokens
+                    </p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

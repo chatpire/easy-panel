@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import StatusLabel from "@/components/custom/status-label";
 
-export function PoekmonAPIResourceUsage({ instanceId, className }: { instanceId: string; className?: string }) {
-  const gpt4GroupResults = api.resourceLog.groupGPT4LogsInDurationWindowByInstance.useQuery({
+export function ChatGPTSharedInstanceGpt4UsageList({ instanceId, className }: { instanceId: string; className?: string }) {
+  const gpt4GroupResults = api.resourceLog.groupChatGPTSharedGPT4LogsInDurationWindowByInstance.useQuery({
     instanceId,
     durationWindow: "3h",
   });

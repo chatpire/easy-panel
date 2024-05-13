@@ -2,7 +2,7 @@ import { StatisticsGroup, StatisticsItem } from "@/components/custom/statistics"
 import { api } from "@/trpc/server";
 
 export async function UserUsageStatistics({ userId }: { userId?: string }) {
-  const result = await api.resourceLog.sumLogsInDurationWindowsByUserId({
+  const result = await api.resourceLog.sumChatGPTSharedLogsInDurationWindowsByUserId({
     durationWindows: ["3h", "24h", "7d", "30d"],
     userId, // by default is the current user
   });

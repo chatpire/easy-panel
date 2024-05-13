@@ -2,12 +2,7 @@ import { createTRPCRouter, protectedWithUserProcedure, type TRPCContext, protect
 import { PaginationInputSchema } from "@/schema/pagination.schema";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
-import {
-  ResourceUsageLogWhereInputSchema,
-  type GPT4LogGroupbyAccountResult,
-  type ResourceLogSumResult,
-  ResourceUsageLogSchema,
-} from "@/schema/resourceLog.schema";
+import { ResourceUsageLogWhereInputSchema, ResourceUsageLogSchema } from "@/schema/resourceLog.schema";
 import { paginateQuery } from "../pagination";
 import { type SQL, and, count, eq, gte, lte, sql, countDistinct, desc, getTableColumns } from "drizzle-orm";
 import { resourceUsageLogs, serviceInstances, users } from "@/server/db/schema";
@@ -15,6 +10,14 @@ import { UserRoles } from "@/schema/user.schema";
 import { DURATION_WINDOWS, type DurationWindow, DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 import { alignTimeToGranularity } from "@/lib/utils";
 import { memoize } from "@/lib/memoize";
+import {
+  type ChatGPTSharedGPT4LogGroupbyAccountResult,
+  type ChatGPTSharedResourceLogSumResult,
+} from "@/schema/service/chatgpt-shared.schema";
+import {
+  type PoekmonAPILogGroupbyModelResult,
+  type PoekmonAPIResourceLogSumResult,
+} from "@/schema/service/poekmon-api.schema";
 
 const _sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,
@@ -28,8 +31,8 @@ const _sumChatGPTSharedLogsInDurationWindows = async ({
   timeEnd: Date;
   userId?: string;
   instanceId?: string;
-}): Promise<ResourceLogSumResult[]> => {
-  const results = [] as ResourceLogSumResult[];
+}): Promise<ChatGPTSharedResourceLogSumResult[]> => {
+  const results = [] as ChatGPTSharedResourceLogSumResult[];
 
   for (const durationWindow of durationWindows) {
     const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
@@ -80,7 +83,7 @@ const _groupGPT4LogsInDurationWindow = async ({
   durationWindow: DurationWindow;
   instanceId?: string;
   timeEnd: Date;
-}): Promise<GPT4LogGroupbyAccountResult> => {
+}): Promise<ChatGPTSharedGPT4LogGroupbyAccountResult> => {
   const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
   const groupByResult = await ctx.db
     .select({
@@ -109,6 +112,115 @@ const _groupGPT4LogsInDurationWindow = async ({
 };
 
 const groupGPT4LogsInDurationWindow = memoize(_groupGPT4LogsInDurationWindow, {
+  genKey: ({ durationWindow, instanceId }) => {
+    return JSON.stringify({ durationWindow, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});
+
+const _sumPoekmonAPILogsInDurationWindows = async ({
+  ctx,
+  durationWindows,
+  timeEnd,
+  userId,
+  instanceId,
+}: {
+  ctx: TRPCContext;
+  durationWindows: DurationWindow[];
+  timeEnd: Date;
+  userId?: string;
+  instanceId?: string;
+}): Promise<PoekmonAPIResourceLogSumResult[]> => {
+  const results = [] as PoekmonAPIResourceLogSumResult[];
+
+  for (const durationWindow of durationWindows) {
+    const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+    const aggResult = await ctx.db
+      .select({
+        userCount: countDistinct(resourceUsageLogs.userId),
+        count: count(),
+        sumPromptTokens:
+          sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'prompt_tokens')::integer)`.mapWith(Number),
+        sumCompletionTokens:
+          sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'completion_tokens')::integer)`.mapWith(Number),
+        sumTotalTokens: sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'total_tokens')::integer)`.mapWith(
+          Number,
+        ),
+      })
+      .from(resourceUsageLogs)
+      .where(
+        and(
+          eq(resourceUsageLogs.type, ServiceTypeSchema.Values.POEKMON_API),
+          gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
+          userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
+          instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
+        ),
+      );
+    // .groupBy(resourceUsageLogs.userId);
+
+    results.push({
+      durationWindow,
+      stats: aggResult[0]!,
+    });
+  }
+
+  return results;
+};
+
+const sumPoekmonAPILogsInDurationWindows = memoize(_sumPoekmonAPILogsInDurationWindows, {
+  genKey: ({ durationWindows, timeEnd, userId, instanceId }) => {
+    return JSON.stringify({ durationWindows, timeEnd, userId, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});
+
+const _groupPoekmonAPILogsInDurationWindowByModel = async ({
+  ctx,
+  durationWindow,
+  instanceId,
+  timeEnd,
+}: {
+  ctx: TRPCContext;
+  durationWindow: DurationWindow;
+  instanceId?: string;
+  timeEnd: Date;
+}): Promise<PoekmonAPILogGroupbyModelResult> => {
+  const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+  const groupByResult = await ctx.db
+    .select({
+      model: sql<string | null>`${resourceUsageLogs.details}->>'model'`,
+      count: count(),
+      sumTotalTokens: sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'total_tokens')::integer)`.mapWith(
+        Number,
+      ),
+    })
+    .from(resourceUsageLogs)
+    .where(
+      and(
+        eq(resourceUsageLogs.type, ServiceTypeSchema.Values.POEKMON_API),
+        gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
+        instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
+      ),
+    )
+    .groupBy(sql`${resourceUsageLogs.details}->>'model'`);
+  const result = {
+    durationWindow,
+    groups: groupByResult
+      .filter((item) => item.model !== null)
+      .map((item) => ({
+        model: item.model!,
+        count: item.count,
+        sumTotalTokens: item.sumTotalTokens,
+      })),
+  };
+  return result;
+};
+
+const groupPoekmonAPILogsInDurationWindowByModel = memoize(_groupPoekmonAPILogsInDurationWindowByModel, {
   genKey: ({ durationWindow, instanceId }) => {
     return JSON.stringify({ durationWindow, instanceId });
   },
@@ -167,7 +279,7 @@ const getPaginatedResourceLogs = async ({
             instance: {
               name: serviceInstances.name,
               url: serviceInstances.url,
-            }
+            },
           })
           .from(resourceUsageLogs)
           .where(filter)
@@ -199,7 +311,7 @@ export const resourceLogRouter = createTRPCRouter({
       return getPaginatedResourceLogs({ input, ctx });
     }),
 
-  sumLogsInDurationWindowsByUserId: protectedWithUserProcedure
+  sumChatGPTSharedLogsInDurationWindowsByUserId: protectedWithUserProcedure
     .input(
       z.object({
         userId: z.string().optional(),
@@ -219,7 +331,7 @@ export const resourceLogRouter = createTRPCRouter({
       });
     }),
 
-  sumLogsInDurationWindowsByInstance: protectedProcedure
+  sumChatGPTSharedLogsInDurationWindowsByInstance: protectedProcedure
     .input(
       z.object({
         instanceId: z.string(),
@@ -236,21 +348,7 @@ export const resourceLogRouter = createTRPCRouter({
       });
     }),
 
-  sumLogsInDurationWindowsGlobal: protectedProcedure
-    .input(
-      z.object({
-        durationWindows: DurationWindowSchema.array(),
-      }),
-    )
-    .query(async ({ input, ctx }) => {
-      return sumChatGPTSharedLogsInDurationWindows({
-        ctx,
-        durationWindows: input.durationWindows,
-        timeEnd: alignTimeToGranularity(60),
-      });
-    }),
-
-  groupGPT4LogsInDurationWindowByInstance: protectedProcedure
+  groupChatGPTSharedGPT4LogsInDurationWindowByInstance: protectedProcedure
     .input(
       z.object({
         instanceId: z.string(),
@@ -259,6 +357,38 @@ export const resourceLogRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx }) => {
       return groupGPT4LogsInDurationWindow({
+        ctx,
+        durationWindow: input.durationWindow,
+        instanceId: input.instanceId,
+        timeEnd: alignTimeToGranularity(60),
+      });
+    }),
+
+  sumPoekmonAPIResourceLogsInDurationWindowsByInstance: protectedProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+        durationWindows: DurationWindowSchema.array(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return sumPoekmonAPILogsInDurationWindows({
+        ctx,
+        durationWindows: input.durationWindows,
+        timeEnd: alignTimeToGranularity(60),
+        instanceId: input.instanceId,
+      });
+    }),
+
+  groupPoekmonAPIResourceLogsInDurationWindowByModel: protectedProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+        durationWindow: DurationWindowSchema,
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return groupPoekmonAPILogsInDurationWindowByModel({
         ctx,
         durationWindow: input.durationWindow,
         instanceId: input.instanceId,

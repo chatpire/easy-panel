@@ -9,7 +9,7 @@ import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/lib/clipboard";
-import { InstanceInfoCard } from "../../_components/instance-info-card/card";
+import { InstanceInfoCard } from "../../_components/instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";

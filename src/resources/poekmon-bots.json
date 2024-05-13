@@ -1,0 +1,691 @@
+[
+  {
+    "id": "Qm90OjMwMDI=",
+    "botId": 3002,
+    "handle": "Assistant",
+    "displayName": "Assistant",
+    "description": "通用助手机器人，擅长编程相关任务和非英语语言。由gpt-3.5-turbo和Claude 3 Haiku提供技术支持。",
+    "picture": { "__typename": "LocalBotImage", "localName": "assistant" }
+  },
+  {
+    "id": "Qm90OjIyNTQ3MDQ=",
+    "botId": 2254704,
+    "handle": "Web-Search",
+    "displayName": "Web-Search",
+    "description": "General-purpose assistant bot capable of conducting web search as necessary to inform its responses. Particularly good for queries regarding up-to-date information or specific facts. Powered by gpt-3.5-turbo. (Currently in beta release)\n\nWeb-Search is powered by search APIs to ground its outputs, which may include Bing (Microsoft Privacy Statement: https://privacy.microsoft.com/en-us/privacystatement).",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-2254704-200-frglciooglqoetmxwtnjvoezstfasmvp.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTE=",
+    "botId": 1011,
+    "handle": "Claude-3-Sonnet",
+    "displayName": "Claude-3-Sonnet",
+    "description": "Anthropic的Claude-3-Sonnet实现了智能和速度的平衡，并缩短了上下文窗口，用以优化速度和成本。对于更长的上下文信息，请尝试Claude-3-Sonnet-200k。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1011-200-phggnnskbfadkgntvkacpazkogidumhg.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTc=",
+    "botId": 1017,
+    "handle": "Claude-3-Haiku",
+    "displayName": "Claude-3-Haiku",
+    "description": "Anthropic的Claude 3 Haiku在性能、速度和成本方面超越了同类智能模型，无需专门微调。缩短了上下文窗口，用以优化速度和成本。对于更长的上下文消息，请尝试Claude-3-Haiku-200k。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1017-200-ztwmvhfvyauktipmhdwhasdlrbjpcabm.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTI=",
+    "botId": 1012,
+    "handle": "Claude-3-Opus",
+    "displayName": "Claude-3-Opus",
+    "description": "Anthropic最智能的模型，能够处理复杂分析、多步骤的长任务以及高阶数学和编码任务。缩短了上下文窗口，用以优化速度和成本。对于更长的上下文信息，请尝试Claude-3-Opus-200k。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1012-200-afogukcxakrtskfdaitupfvchongovtr.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwMDc=",
+    "botId": 3007,
+    "handle": "GPT-4",
+    "displayName": "GPT-4",
+    "description": "OpenAI的最强大模型。在定量问题（数学和物理）、创意写作以及许多其他挑战性任务中，表现比ChatGPT更强。由GPT-4 Turbo with Vision提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3007-200-bvmjtgglfjudsgwaznrljnhngtdulrxz.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwODkxMzU=",
+    "botId": 3089135,
+    "handle": "Playground-v2.5",
+    "displayName": "Playground-v2.5",
+    "description": "Generates high quality images based on the user's most recent prompt.\n\nAllows users to specify elements to avoid in the image using the \"--no\" parameter at the end of the prompt (e.g. \"Tall trees, daylight --no rain\"). \n\nOptionally, specify the aspect ratio using the `--aspect` parameter (e.g. \"Tall trees, daylight --aspect 1:2\").\n\nPowered by Playground_v2.5 from playground.com.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3089135-200-nnvcmawmcgkxboozejerfbwbysaomhsi.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMDg=",
+    "botId": 6008,
+    "handle": "Gemini-1.5-Pro",
+    "displayName": "Gemini-1.5-Pro",
+    "description": "Google的Gemini系列多模态模型实现了性能和速度的平。该模型接受整个对话中的文本、图像和视频输入，并提供文本输出。每条信息仅限一个视频。缩短了上下文窗口，用以优化速度和成本。对于更长的上下文信息，请尝试Gemini-1.5-Pro-128k和Gemini-1.5-Pro-1M。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-6008-200-xqdhfwuzwuepuiyghswetefiogrtcvam.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMTE=",
+    "botId": 6011,
+    "handle": "Gemini-1.5-Pro-Search",
+    "displayName": "Gemini-1.5-Pro-Search",
+    "description": "Gemini 1.5 Pro由Grounding和Google搜索提供功能增强支持，可以提供最新信息，并实现了模型性能与速度的平衡。Grounding模型目前仅支持文本。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-6011-200-xeyjzyxruiygnulozyysiywaipexfree.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMDQ=",
+    "botId": 6004,
+    "handle": "Gemini-1.0-Pro",
+    "displayName": "Gemini-1.0-Pro",
+    "description": "The multi-modal model from Google's Gemini family that balances model performance and speed. Exhibits strong generalist capabilities and excels particularly in cross-modal reasoning.\n\nThe model accepts text, image, and video input and provides text output. It considers only the images and videos from the latest user message, with a restriction of one video per message.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-6004-200-qckiyedrwdtrnhdzewunjclkwdqdeibm.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMDc=",
+    "botId": 6007,
+    "handle": "Gemini-1.0-Pro-Search",
+    "displayName": "Gemini-1.0-Pro-Search",
+    "description": "Gemini Pro由Grounding和Google搜索提供功能增强支持，可以提供最新信息，并实现了模型性能与速度的平衡。Grounding模型目前仅支持文本。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-6007-200-hvcoujefiovhgphwaeclpewpwokaahas.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjI4MjgwMjk=",
+    "botId": 2828029,
+    "handle": "DALL-E-3",
+    "displayName": "DALL-E-3",
+    "description": "OpenAI最强大的图像生成模型。可根据用户最近的提示词生成具有复杂细节的高质量图像。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-2828029-200-mlvmbysbpfpcjfyxswvxbzufpvszchqb.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQwNDE5ODk=",
+    "botId": 4041989,
+    "handle": "StableDiffusion3",
+    "displayName": "StableDiffusion3",
+    "description": "Stable Diffusion 3, the newest image generation model from Stability AI, which is equal to or outperforms state-of-the-art text-to-image generation systems such as DALL-E 3 and Midjourney v6 in typography and prompt adherence, based on human preference evaluations. \n\nStability AI has partnered with Fireworks AI, the fastest and most reliable API platform in the market, to deliver Stable Diffusion 3 and Stable Diffusion 3 Turbo.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4041989-200-oonfoultoysscqohajybollnliztvpmm.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQwNDIxODM=",
+    "botId": 4042183,
+    "handle": "SD3-Turbo",
+    "displayName": "SD3-Turbo",
+    "description": "Distilled, few-step version of Stable Diffusion 3, the newest image generation model from Stability AI, which is equal to or outperforms state-of-the-art text-to-image generation systems such as DALL-E 3 and Midjourney v6 in typography and prompt adherence, based on human preference evaluations. \n\nStability AI has partnered with Fireworks AI, the fastest and most reliable API platform in the market, to deliver Stable Diffusion 3 and Stable Diffusion 3 Turbo.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4042183-200-xsgtfivmvgzjkvvlggrvzofjejsohaer.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjE1Nzk4NTI=",
+    "botId": 1579852,
+    "handle": "StableDiffusionXL",
+    "displayName": "StableDiffusionXL",
+    "description": "根据用户最近的提示词生成高质量的图像。\n\n允许用户在提示词末尾使用“--无”参数指定图像中要避免的元素（例如“高大的树木，白天，--无雨”）。\n\n由Stable Diffusion XL提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1579852-200-lucxefupsdwraneitjvtcsgorqrbmncv.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQwNjQxMjQ=",
+    "botId": 4064124,
+    "handle": "Llama-3-70b-Groq",
+    "displayName": "Llama-3-70b-Groq",
+    "description": "Llama 3 70b由Groq LPU™推理引擎提供技术支持",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4064124-200-zzqqvdszcmfxrivdwslzwcpmcqhucnmx.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQwMzUyOTc=",
+    "botId": 4035297,
+    "handle": "Llama-3-70B-T",
+    "displayName": "Llama-3-70B-T",
+    "description": "Llama 3 70B Instruct from Meta.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/meta-llama/Llama-3-70b-chat-hf\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4035297-200-djtgxhlxkcnmbobklcpsctuyqpbszrtp.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQwMzYxMTU=",
+    "botId": 4036115,
+    "handle": "Llama-3-70b-Inst-FW",
+    "displayName": "Llama-3-70b-Inst-FW",
+    "description": "Meta's Llama-3-70B-Instruct hosted by Fireworks AI. ",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4036115-200-kdobqjfbmkgswbqkxnolgumuhxbfcmpe.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM5OTM3MzY=",
+    "botId": 3993736,
+    "handle": "Mixtral8x22b-Inst-FW",
+    "displayName": "Mixtral8x22b-Inst-FW",
+    "description": "Mixtral 8x22B Mixture-of-Experts instruct model from Mistral hosted by Fireworks. ",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3993736-200-bfevqevrnmmcehczovuycpxismwvsfgp.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM4NDMxOTc=",
+    "botId": 3843197,
+    "handle": "Command-R",
+    "displayName": "Command-R",
+    "description": "I can search the web for up to date information and respond in over 10 languages!",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3843197-200-cusraxjispryimltoijbphlngyvjyqhd.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMTA=",
+    "botId": 7010,
+    "handle": "Mistral-Large",
+    "displayName": "Mistral-Large",
+    "description": "Mistral AI的最强大模型。支持32k个Token（约24,000字）的上下文窗口，并且在全面的基准测试中比Mistral-Medium、Mixtral-8x7b和Mistral-7b更强大。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7010-200-jaspeixxffhayqwvhydkkjjmjwtjzgrv.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDk=",
+    "botId": 7009,
+    "handle": "Mistral-Medium",
+    "displayName": "Mistral-Medium",
+    "description": "Mistral AI的中等大小模型。支持32k个Token（约24,000字）的上下文窗口，并且在全面的基准测试中比Mixtral-8x7b和Mistral-7b更强大。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7009-200-wxkbzvleprmbkslrrqmnswcikmnhgvvw.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM5MDA0MDg=",
+    "botId": 3900408,
+    "handle": "dbrx-instruct-fw",
+    "displayName": "dbrx-instruct-fw",
+    "description": "DBRX Instruct is a mixture-of-experts (MoE) large language model trained from scratch by Databricks. DBRX Instruct specializes in few-turn interactions. Dbrx is hosted as an experimental model. Fireworks only guarantees that it will be hosted through April 2024. Future availability will depend on overall usage.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3900408-200-fxgafiheqtxflayowavkdlahjberrdgl.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM5OTk5NDc=",
+    "botId": 3999947,
+    "handle": "RekaCore",
+    "displayName": "RekaCore",
+    "description": "Reka's largest and most capable multimodal language model. Works with text, images, and video inputs. 8k context length.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3999947-200-pcxpgucyuilduxfvuilppbgzhritxhan.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM2MDc3ODg=",
+    "botId": 3607788,
+    "handle": "RekaFlash",
+    "displayName": "RekaFlash",
+    "description": "Reka's efficient and capable 21B multimodal model optimized for fast workloads and amazing quality. Works with text, images and video inputs.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3607788-200-xuvlpqzwfzykawbpmwvrdifizmzczifv.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMDk=",
+    "botId": 6009,
+    "handle": "Gemini-1.5-Pro-128k",
+    "displayName": "Gemini-1.5-Pro-128k",
+    "description": "Google的Gemini系列多模态模型实现了性能和速度的平。该模型接受整个对话中的文本、图像和视频输入，并提供文本输出。每条信息仅限一个视频。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-6009-200-klfvgetltjpszwyqliowfolyryhmjrur.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM5NzUzMTI=",
+    "botId": 3975312,
+    "handle": "Command-R-Plus",
+    "displayName": "Command-R-Plus",
+    "description": "A supercharged version of Command R. I can search the web for up to date information and respond in over 10 languages!",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3975312-200-wvngbssarrrzyjqicprkrgexhqbvojcn.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwMDQ=",
+    "botId": 3004,
+    "handle": "ChatGPT",
+    "displayName": "ChatGPT",
+    "description": "由gpt-3.5-turbo提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3004-200-jougqzjtwfqfyqprxbdwofvnwattmtrg.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwMDk=",
+    "botId": 3009,
+    "handle": "ChatGPT-16k",
+    "displayName": "ChatGPT-16k",
+    "description": "由gpt-3.5-turbo-16k提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3009-200-xhftaxojdaaaennzvlbzceqpjkkrewcn.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwMTA=",
+    "botId": 3010,
+    "handle": "GPT-4-128k",
+    "displayName": "GPT-4-128k",
+    "description": "由GPT-4 Turbo with Vision提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3010-200-hdigbpuraghmvxelmnbgjgduanukevwx.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTM=",
+    "botId": 1013,
+    "handle": "Claude-3-Sonnet-200k",
+    "displayName": "Claude-3-Sonnet-200k",
+    "description": "Anthropic的Claude-3-Sonnet实现了智能和速度的平衡。支持200k个上下文Token。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1013-200-rgexuxyropjxulsymujtypannokeyrvf.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTg=",
+    "botId": 1018,
+    "handle": "Claude-3-Haiku-200k",
+    "displayName": "Claude-3-Haiku-200k",
+    "description": "Anthropic的Claude 3 Haiku在性能、速度和成本方面超越了同类智能模型，无需专门微调。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1018-200-ekdvnswmmxmfhptxrrtiturkhtekzbxq.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTQ=",
+    "botId": 1014,
+    "handle": "Claude-3-Opus-200k",
+    "displayName": "Claude-3-Opus-200k",
+    "description": "Anthropic最智能的模型，能够处理复杂分析、多步骤的长任务以及高阶数学和编码任务。支持200k个上下文Token。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1014-200-ydfccporrhedursyhclfdhlabjyabtsw.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMTA=",
+    "botId": 6010,
+    "handle": "Gemini-1.5-Pro-1M",
+    "displayName": "Gemini-1.5-Pro-1M",
+    "description": "Google的Gemini系列多模态模型实现了性能和速度的平。该模型接受整个对话中的文本、图像和视频输入，并提供文本输出。每条信息仅限一个视频。计算积分值可能会变化。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-6010-200-yvzubvyfzqdfwzdqtaqvijlcnmpxtxkg.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMxMjk2MDI=",
+    "botId": 3129602,
+    "handle": "Mixtral-8x7B-Chat",
+    "displayName": "Mixtral-8x7B-Chat",
+    "description": "Mixtral 8x7B Mixture-of-Experts model from Mistral AI fine-tuned for instruction following\n\nHosted by Fireworks.ai: https://app.fireworks.ai/models/fireworks/mixtral-8x7b-instruct",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3129602-200-bxcnsqpzlksuilfptbonwryllkrtdimb.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM3NDE1NTg=",
+    "botId": 3741558,
+    "handle": "DeepSeek-Coder-33B-T",
+    "displayName": "DeepSeek-Coder-33B-T",
+    "description": "Deepseek Coder Instruct (33B) from Deepseek.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/deepseek-ai/deepseek-coder-33b-instruct\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3741558-200-knmoayzzkzijxlhesmeihmiikvfglejt.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM1MTI0MTg=",
+    "botId": 3512418,
+    "handle": "Code-Llama-70B-FW",
+    "displayName": "Code-Llama-70B-FW",
+    "description": "Llama 70b Code Instruct bot hosted by Fireworks. \n\nThis model is designed for general code synthesis and understanding.\n\nModel card: https://huggingface.co/codellama/CodeLlama-70b-Instruct-hf",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3512418-200-rxcipfdhfxnzzvepxoevxkqrioadesgf.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM2OTc5MDY=",
+    "botId": 3697906,
+    "handle": "CodeLlama-70B-T",
+    "displayName": "CodeLlama-70B-T",
+    "description": "Code Llama Instruct (70B) from Meta.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/codellama/CodeLlama-70b-Instruct-hf\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3697906-200-zewlmbwadubmvwiuxndmtrhwfanpdqrk.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQxNjA3OTE=",
+    "botId": 4160791,
+    "handle": "Qwen-1.5-110B-T",
+    "displayName": "Qwen-1.5-110B-T",
+    "description": "Qwen1.5 (通义千问1.5) 110B，基于阿里巴巴自研大模型的AI助手，尤其擅长中文对话。\n\nAlibaba's general-purpose model which excels particularly in Chinese-language queries.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/Qwen/Qwen1.5-110B-Chat\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4160791-200-qlqunomdvkyitpedtghnhsgjlutapgfl.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMxNTQyNTk=",
+    "botId": 3154259,
+    "handle": "Qwen-72b-Chat",
+    "displayName": "Qwen-72b-Chat",
+    "description": "通义千问，基于阿里巴巴自研大模型的AI助手， 尤其擅长中文对话。\n\nAlibaba's general-purpose model which excels particularly in Chinese-language queries.\n",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3154259-200-advkcthayotyqcecistcibcckjjnbmji.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM2OTc4Mjk=",
+    "botId": 3697829,
+    "handle": "Qwen-72B-T",
+    "displayName": "Qwen-72B-T",
+    "description": "Qwen1.5 (通义千问1.5) 72B，基于阿里巴巴自研大模型的AI助手，尤其擅长中文对话。\n\nAlibaba's general-purpose model which excels particularly in Chinese-language queries.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/qwen/qwen1.5-72B-Chat\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3697829-200-nwaxdwsysmgosvmgbzxhizqxnvjebjgf.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMTU=",
+    "botId": 1015,
+    "handle": "Claude-2",
+    "displayName": "Claude-2",
+    "description": "Anthropic的Claude 2模型。缩短了上下文窗口，用以优化速度和成本。对于更长的上下文信息，请尝试Claude-2-100k。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1015-200-rclyacbfxvetegvwlbcztydxbtggrvaf.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMDg=",
+    "botId": 1008,
+    "handle": "Claude-2-100k",
+    "displayName": "Claude-2-100k",
+    "description": "Anthropic的Claude 2模型，支持100k个Token（约75,000个词）的上下文窗口。特别擅长创意写作。",
+    "picture": { "__typename": "LocalBotImage", "localName": "Avatar_Orange_Gradient" }
+  },
+  {
+    "id": "Qm90OjMwMTQ=",
+    "botId": 3014,
+    "handle": "GPT-4-Classic",
+    "displayName": "GPT-4-Classic",
+    "description": "OpenAI的GPT-4模型。文本输入由gpt-4-0613（非Turbo）提供技术支持，图像输入由gpt-4-1106-vision-preview提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3014-200-juzifapbssqruonlejbcdkwvmgjwaroi.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjYwMDA=",
+    "botId": 6000,
+    "handle": "Google-PaLM",
+    "displayName": "Google-PaLM",
+    "description": "由Google的PaLM 2 chat-bison@002模型提供技术支持。支持8k个Token的上下文窗口。",
+    "picture": { "__typename": "LocalBotImage", "localName": "googlePalmAvatar" }
+  },
+  {
+    "id": "Qm90OjMzNzczMDI=",
+    "botId": 3377302,
+    "handle": "Llama-3-8b-Groq",
+    "displayName": "Llama-3-8b-Groq",
+    "description": "Llama 3 8b由Groq LPU™推理引擎提供技术支持",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3377302-200-dedxqnkepkmeylpbzscnealdwevdvipb.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjQwMzUyNjE=",
+    "botId": 4035261,
+    "handle": "Llama-3-8B-T",
+    "displayName": "Llama-3-8B-T",
+    "description": "Llama 3 8B Instruct from Meta.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/meta-llama/Llama-3-8b-chat-hf\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-4035261-200-nrqaacrohyhqrhlmclaudtpkgjqqcnur.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM2OTc2OTQ=",
+    "botId": 3697694,
+    "handle": "Gemma-Instruct-7B-T",
+    "displayName": "Gemma-Instruct-7B-T",
+    "description": "Gemma Instruct 7B from Google.\n\nHosted by Together.ai: https://api.together.xyz/playground/chat/google/gemma-7b-it\n\nThe points price is subject to change.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3697694-200-giimkxnzbjpfehcchvyriispygjaruqv.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM2NjAyMzU=",
+    "botId": 3660235,
+    "handle": "Gemma-7b-FW",
+    "displayName": "Gemma-7b-FW",
+    "description": "A lightweight open model from Google built from the same research and technology used to create the Gemini models.\n\nGemma is provided under and subject to the Gemma Terms of Use found at ai.google.dev/gemma/terms",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3660235-200-wjcduriwrftetvmkxislysbjojrjkxwm.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjI1MDY1NDI=",
+    "botId": 2506542,
+    "handle": "fw-mistral-7b",
+    "displayName": "fw-mistral-7b",
+    "description": "Bot powered by Fireworks.ai's hosted Mistral-7b-instruct model https://app.fireworks.ai/models/fireworks/mistral-7b-instruct-4k",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-2506542-200-vspjpcztgxctbuaczsvejsylgunccioj.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM2MTgyNTQ=",
+    "botId": 3618254,
+    "handle": "MythoMax-L2-13B",
+    "displayName": "MythoMax-L2-13B",
+    "description": "这个模型由Gryphe基于LLama-2-13B创建，擅长角色扮演和故事编写。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3618254-200-jizfrjckqzmdtpllccvvkrexzcmwjllx.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDA=",
+    "botId": 7000,
+    "handle": "Llama-2-70b",
+    "displayName": "Llama-2-70b",
+    "description": "Meta的Llama-2-70b-chat。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7000-200-mbefngawwdkkzikwfbfbrdzddtgmnwgw.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDU=",
+    "botId": 7005,
+    "handle": "Code-Llama-34b",
+    "displayName": "Code-Llama-34b",
+    "description": "Meta的Code-Llama-34b-instruct。擅长生成和讨论代码，并支持16k个Token的上下文窗口。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7005-200-zblubkfzxrrchehdibuoldnljdevzogm.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDE=",
+    "botId": 7001,
+    "handle": "Llama-2-13b",
+    "displayName": "Llama-2-13b",
+    "description": "Meta的Llama-2-13b-chat。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7001-200-rkkidfyrnfinqbotixnkvyuqdvkxdrdk.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDI=",
+    "botId": 7002,
+    "handle": "Llama-2-7b",
+    "displayName": "Llama-2-7b",
+    "description": "Meta的Llama-2-7b-chat。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7002-200-egcbmdvsyzqskuokzfojgicbkubovnnn.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDQ=",
+    "botId": 7004,
+    "handle": "Code-Llama-13b",
+    "displayName": "Code-Llama-13b",
+    "description": "Meta的Code-Llama-13b-instruct。擅长生成和讨论代码，并支持16k个Token的上下文窗口。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7004-200-mywemautrcwacuelzxvxmggltjncxiwd.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDM=",
+    "botId": 7003,
+    "handle": "Code-Llama-7b",
+    "displayName": "Code-Llama-7b",
+    "description": "Meta的Code-Llama-7b-instruct。擅长生成和讨论代码，并支持16k个Token的上下文窗口。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7003-200-ubcyzknwlcdlujwelwjarpbtqejsndsc.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjcwMDY=",
+    "botId": 7006,
+    "handle": "Solar-Mini",
+    "displayName": "Solar-Mini",
+    "description": "相比其前身Solar-0-70b，Solar Mini体积更小，但速度更快、功能更强。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-7006-200-dnximukscwcxskuqvhrmtbgqcmjevtge.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwMTE=",
+    "botId": 3011,
+    "handle": "GPT-3.5-Turbo-Instruct",
+    "displayName": "GPT-3.5-Turbo-Instruct",
+    "description": "由gpt-3.5-turbo-instruct提供技术支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3011-200-rhbndzfymcsktyrgnuztlvtjnslbvbxk.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjMwMTI=",
+    "botId": 3012,
+    "handle": "GPT-3.5-Turbo",
+    "displayName": "GPT-3.5-Turbo",
+    "description": "由gpt-3.5-turbo提供技术支持，无系统提示词。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3012-200-hqhelenyzzfwwrvdbvajtfyfyrtnjksz.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjEwMDY=",
+    "botId": 1006,
+    "handle": "Claude-instant",
+    "displayName": "Claude-instant",
+    "description": "Anthropic的最快模型，擅长创意类任务。支持9k个Token（约7,000个词）的上下文窗口。",
+    "picture": { "__typename": "LocalBotImage", "localName": "Avatar_Placeholder_Orange" }
+  },
+  {
+    "id": "Qm90OjEwMDk=",
+    "botId": 1009,
+    "handle": "Claude-instant-100k",
+    "displayName": "Claude-instant-100k",
+    "description": "Anthropic的最快速模型，支持高达100k个Token（约75,000个词）的上下文窗口。可以分析非常长的文档、代码等。",
+    "picture": { "__typename": "LocalBotImage", "localName": "Avatar_Placeholder_Orange" }
+  },
+  {
+    "id": "Qm90OjEwMTY=",
+    "botId": 1016,
+    "handle": "Claude-2.1-200k",
+    "displayName": "Claude-2.1-200k",
+    "description": "Anthropic的Claude 2.1在性能上有所提升，相较于Claude 2，其上下文大小增加到了200k个令牌。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-1016-200-xxwgicmffyschctlfikrdaxtgnrgoqdn.jpeg"
+    }
+  },
+  {
+    "id": "Qm90OjM0NjI2Mzg=",
+    "botId": 3462638,
+    "handle": "Mixtral-8x7b-Groq",
+    "displayName": "Mixtral-8x7b-Groq",
+    "description": "Enjoy Mixtral 8x7B running on the Groq LPU™ Inference Engine.\nAPI access available, email api@groq.com.",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3462638-200-xzqrewfckzplacspczcbuokkmalvmaco.jpeg"
+    }
+  }
+]
