@@ -103,11 +103,9 @@ ${
 
     "python openai":
       `import openai
-openai.api_key = "${token}"
-openai.api_base = "${baseUrl}/api/poekmon/${id}/v1"
 
 from openai import OpenAI
-client = OpenAI()
+client = OpenAI(api_key="${token}", base_url="${baseUrl}/api/poekmon/${id}/v1")
 
 completion = client.chat.completions.create(
     model="${form.watch("model")}",
@@ -121,7 +119,8 @@ completion = client.chat.completions.create(
 ${
   form.watch("stream")
         ? `for chunk in completion:
-  print(chunk.choices[0].delta)`
+    if len(chunk.choices) > 0 and chunk.choices[0].delta:
+        print(chunk.choices[0].delta)`
         : `print(completion.choices[0].message)`
 }`,
   };

@@ -2,7 +2,7 @@
 
 import { DataTable } from "@/components/data-table";
 import { type PaginationInput } from "@/schema/pagination.schema";
-import { ChatGPTSharedResourceUsageLogSchema } from "@/schema/resourceLog.schema";
+import { ChatGPTSharedResourceUsageLogSchema } from "@/schema/service/chatgpt-shared.schema";
 
 const UserResourceUsageLogDisplaySchema = ChatGPTSharedResourceUsageLogSchema.pick({
   createdAt: true,

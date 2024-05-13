@@ -38,7 +38,7 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
     return (
       <Button
         variant="ghost"
-        className="p-2 text-xs"
+        className="p-2 text-xs "
         onClick={() => {
           popup({
             title: key,
@@ -51,7 +51,7 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
           });
         }}
       >
-        {jsonStr + (jsonStr.length > 100 ? "..." : "")}
+        {jsonStr.substring(0, 100) + (jsonStr.length > 100 ? "..." : "")}
       </Button>
     );
   }

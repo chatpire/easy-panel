@@ -260,6 +260,9 @@ const getPaginatedResourceLogs = async ({
       if (where.timeEnd) {
         andParams.push(lte(resourceUsageLogs.createdAt, where.timeEnd));
       }
+      if (where.type) {
+        andParams.push(eq(resourceUsageLogs.type, where.type));
+      }
       const filter = and(...andParams);
       const { total, result } = await ctx.db.transaction(async (tx) => {
         const total = await tx

@@ -148,7 +148,7 @@ export function createColumns<T>(
 
   const columns = [
     getDataTableCheckboxColumn(columnHelper),
-    ...extractKeysFromSchema(schema).map((key) =>
+    ...extractKeysFromSchema(schema, 2).map((key) =>
       columnHelper.accessor(key as any, {
         header: ({ column }) => <DataTableColumnHeader column={column} title={camelCaseToTitleCase(key)} />,
         cell: (props) => {

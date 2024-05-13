@@ -4,10 +4,13 @@ import { PageShell } from "../../../_components/dashboard-shell";
 import { PageHeader } from "../../../_components/page-header";
 import { ResourceLogsTable } from "./admin-resource-logs-table";
 import { api } from "@/trpc/server";
+import { type ServiceType } from "@/server/db/enum";
 
-async function fetchData(pagination: PaginationInput) {
+async function fetchData(pagination: PaginationInput, type: ServiceType) {
   "use server";
-  return await api.resourceLog.getMany({ pagination, where: {} });
+  return await api.resourceLog.getMany({ pagination, where: {
+    type
+  } });
 }
 
 export default async function UsersPage({}) {

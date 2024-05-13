@@ -2,6 +2,8 @@ import { DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 import { create } from "domain";
 import { z } from "zod";
 import { OpenAIRequestMessageSchema, OpenAIResponseMessageSchema } from "../external/openai.schema";
+import { createSelectSchema } from "drizzle-zod";
+import { resourceUsageLogs } from "@/server/db/schema";
 
 export const PoekmonAPIInstanceDataSchema = z.object({
   type: z.literal("POEKMON_API"),
@@ -51,3 +53,22 @@ export const PoekmonAPILogGroupbyModelResultSchema = z.object({
   ),
 });
 export type PoekmonAPILogGroupbyModelResult = z.infer<typeof PoekmonAPILogGroupbyModelResultSchema>;
+
+export const PoekmonAPIResourceUsageLogSchema = createSelectSchema(resourceUsageLogs).merge(
+  z.object({
+    details: PoekmonAPIResourceUsageLogDetailsSchema,
+    user: z
+      .object({
+        username: z.string(),
+        name: z.string(),
+      })
+      .optional(),
+    instance: z
+      .object({
+        name: z.string(),
+        url: z.string().url(),
+      })
+      .optional(),
+  }),
+);
+export type PoekmonAPIResourceUsageLog = z.infer<typeof PoekmonAPIResourceUsageLogSchema>;

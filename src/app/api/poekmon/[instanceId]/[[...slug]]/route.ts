@@ -126,7 +126,6 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
                 textBytes: undefined,
                 details: resourceLogDetail,
               });
-              console.log("Resource log written", log);
               break;
             }
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -198,7 +197,6 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
         textBytes: undefined,
         details: resourceLogDetail,
       });
-      console.log("Resource log written", log);
     }
 
     return response;
