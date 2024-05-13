@@ -13,11 +13,11 @@ import { InstanceInfoCard } from "../../_components/instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
-import { popupChatGPTShareInstanceConfigDetails } from "./chatgpt-share-config-popup";
+import { popupChatGPTShareInstanceConfigDetails } from "../../_components/chatgpt-shared/chatgpt-share-config-popup";
 import { useRouter } from "next/navigation";
 import { popup } from "@/components/popup";
 import { Checkbox } from "@/components/ui/checkbox";
-import { popupPoekmonAPIConfigForm } from "./poekmon-api-config-popup";
+import { popupPoekmonAPIConfigForm } from "../../_components/poekmon-api/poekmon-api-config-popup";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;

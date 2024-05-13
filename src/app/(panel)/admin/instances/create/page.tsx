@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { api } from "@/trpc/react";
 import { InstanceForm, type InstanceFormSchema } from "../instance-form";
 import { type z } from "zod";
-import { popupChatGPTShareInstanceConfigDetails } from "../chatgpt-share-config-popup";
+import { popupChatGPTShareInstanceConfigDetails } from "../../../_components/chatgpt-shared/chatgpt-share-config-popup";
 import { useState } from "react";
-import { popupPoekmonAPIConfigForm } from "../poekmon-api-config-popup";
+import { popupPoekmonAPIConfigForm } from "../../../_components/poekmon-api/poekmon-api-config-popup";
 
 export default function CreateInstancePage({}) {
   const [loading, setLoading] = useState(false);
