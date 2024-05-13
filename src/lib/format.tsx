@@ -44,8 +44,8 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
             title: key,
             description: "JSON",
             content: () => (
-              <ScrollArea className="max-h-[300px]">
-                <div className="text-sm font-mono">{JSON.stringify(value, null, 2)}</div>
+              <ScrollArea className="h-[400px]">
+                <div className="text-xs font-mono whitespace-pre-wrap">{JSON.stringify(value, null, 2)}</div>
               </ScrollArea>
             ),
           });
