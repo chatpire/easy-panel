@@ -1,0 +1,52 @@
+"use client";
+
+import * as React from "react";
+
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import StatusLabel from "@/components/custom/status-label";
+import { ChatGPTSharedInstanceUsageStatistics } from "./chatgpt-statistics";
+import { ChatGPTSharedInstanceGpt4UsageList } from "./chatgpt-gpt4-usage-list";
+import { type ServiceInstance } from "@/schema/serviceInstance.schema";
+import { PoekmonAPIInstanceUsageStatistics } from "./poekmon-api-statistics";
+import { PoekmonAPIResourceUsage } from "./poekmon-api-resource-usage";
+
+interface Props extends React.HTMLAttributes<HTMLFormElement> {
+  instance: ServiceInstance;
+  className?: string;
+}
+
+export function SharedChatGPTCardContent({ instance }: { instance: ServiceInstance }) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <ChatGPTSharedInstanceGpt4UsageList className="flex-1" instanceId={instance.id} />
+      <ChatGPTSharedInstanceUsageStatistics className="flex-1" instanceId={instance.id} />
+    </div>
+  );
+}
+
+export function PoekmonAPICardContent({ instance }: { instance: ServiceInstance }) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <PoekmonAPIResourceUsage className="flex-1" instanceId={instance.id} />
+      <PoekmonAPIInstanceUsageStatistics className="flex-1" instanceId={instance.id} />
+    </div>
+  );
+}
+
+export function InstanceInfoCard({ instance, className, children }: Props) {
+  return (
+    <Card className={cn("max-w-full overflow-x-hidden", className)}>
+      <CardHeader className="border-b">
+        <CardTitle>
+          <StatusLabel status={"success"}>{instance.name}</StatusLabel>
+        </CardTitle>
+        {instance?.description && <CardDescription>{instance.description}</CardDescription>}
+      </CardHeader>
+      <CardContent className="py-3">
+        <SharedChatGPTCardContent instance={instance} />
+      </CardContent>
+      <CardFooter className="border-t py-3">{children}</CardFooter>
+    </Card>
+  );
+}

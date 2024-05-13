@@ -9,7 +9,7 @@ import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
 import { api } from "@/trpc/react";
 import { copyToClipBoard } from "@/lib/clipboard";
-import { InstanceInfoCard } from "../../_components/instance-info-card";
+import { InstanceInfoCard } from "../../_components/instance-info-card/card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
 import { type ServiceInstance } from "@/schema/serviceInstance.schema";
@@ -17,6 +17,7 @@ import { popupChatGPTShareInstanceConfigDetails } from "./chatgpt-share-config-p
 import { useRouter } from "next/navigation";
 import { popup } from "@/components/popup";
 import { Checkbox } from "@/components/ui/checkbox";
+import { popupPoekmonAPIConfigForm } from "./poekmon-api-config-popup";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -88,10 +89,24 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
           {/* <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
             Unpublish
           </FunctionButton> */}
-          <Button onClick={() => popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id })}>
-            <Icons.eye className="mr-2 h-4 w-4" />
-            View Config
-          </Button>
+          {instance.type === "CHATGPT_SHARED" && (
+            <Button
+              onClick={() => popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id })}
+            >
+              <Icons.eye className="mr-2 h-4 w-4" />
+              View Config
+            </Button>
+          )}
+          {instance.type === "POEKMON_API" && (
+            <Button
+              onClick={() =>
+                popupPoekmonAPIConfigForm({ url: instance.url ?? "", id: instance.id, data: instance.data })
+              }
+            >
+              <Icons.pencil className="mr-2 h-4 w-4" />
+              Edit Config
+            </Button>
+          )}
           <Button onClick={() => router.push(`/admin/instances/update/${instance.id}`)}>
             <Icons.pencil className="mr-2 h-4 w-4" />
             Edit

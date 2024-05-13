@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { copyToClipBoard } from "@/lib/clipboard";
-import { InstanceInfoCard } from "../_components/instance-info-card";
+import { InstanceInfoCard } from "../_components/instance-info-card/card";
 import { type ServiceInstanceWithToken } from "@/schema/serviceInstance.schema";
 import { cn } from "@/lib/utils";
 

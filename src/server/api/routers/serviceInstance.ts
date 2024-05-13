@@ -69,6 +69,23 @@ export const serviceInstanceRouter = createTRPCRouter({
     return ServiceInstanceSchema.parse(result[0]);
   }),
 
+  updateData: adminProcedure.input(ServiceInstanceUpdateSchema.pick({ id: true, data: true })).mutation(
+    async ({ ctx, input }) => {
+      if (!input.id) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "ID is required" });
+      }
+      const result = await ctx.db
+        .update(serviceInstances)
+        .set({
+          data: input.data,
+          updatedAt: new Date(),
+        })
+        .where(eq(serviceInstances.id, input.id))
+        .returning();
+      return ServiceInstanceSchema.parse(result[0]);
+    },
+  ),
+
   getAllAdmin: adminProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.query.serviceInstances.findMany();
     return ServiceInstanceSchema.array().parse(result);

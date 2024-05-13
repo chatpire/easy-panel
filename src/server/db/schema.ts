@@ -16,6 +16,7 @@ import { type EventResultType, type EventType, type ServiceType } from "@/server
 import { createJsonbType } from "./jsonb";
 import { type GlobalSettingContent } from "@/schema/globalSetting.schema";
 import { type ResourceUsageLogDetails } from "@/schema/resourceLog.schema";
+import { type ServiceInstanceData } from "@/schema/serviceInstance.schema";
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -74,7 +75,7 @@ export const serviceInstances = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     url: text("url").notNull(),
-    data: createJsonbType<Record<string, unknown>>("data"),
+    data: createJsonbType<ServiceInstanceData>("data"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

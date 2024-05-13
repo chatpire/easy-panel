@@ -37,10 +37,6 @@ export function InstanceForm({ onSubmit, defaultValues, loading }: InstanceFormP
     resolver: zodResolver(InstanceFormSchema),
   });
 
-  useEffect(() => {
-    form.reset(defaultValues);
-  }, [defaultValues]);
-
   return (
     <Form {...form}>
       <form key={defaultValues?.name} onSubmit={form.handleSubmit(onSubmit)} className="max-w-[600px] space-y-8">
@@ -66,7 +62,7 @@ export function InstanceForm({ onSubmit, defaultValues, loading }: InstanceFormP
                   </SelectContent>
                 </Select>
               </FormControl>
-              <FormDescription>Note: “CHATGPT_SHARED” is for cockroackai.</FormDescription>
+              <FormDescription>“CHATGPT_SHARED” for CockroackAI.</FormDescription>
               <FormMessage />
             </FormItem>
           )}

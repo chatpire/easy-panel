@@ -9,6 +9,7 @@ import { InstanceForm, type InstanceFormSchema } from "../instance-form";
 import { type z } from "zod";
 import { popupChatGPTShareInstanceConfigDetails } from "../chatgpt-share-config-popup";
 import { useState } from "react";
+import { popupPoekmonAPIConfigForm } from "../poekmon-api-config-popup";
 
 export default function CreateInstancePage({}) {
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,14 @@ export default function CreateInstancePage({}) {
         toast.success("Instance granted to all active users");
       }
       toast.success("Instance created");
-      popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id });
+      if (instance.type === "CHATGPT_SHARED") {
+        popupChatGPTShareInstanceConfigDetails(instance);
+      } else if (instance.type === "POEKMON_API") {
+        popupPoekmonAPIConfigForm({
+          ...instance,
+          data: undefined,
+        });
+      }
     } catch (error) {
       console.error(error);
       toast.error("Failed to create instance: " + String(error));
@@ -50,9 +58,13 @@ export default function CreateInstancePage({}) {
         <Card>
           <CardHeader>Create Instance</CardHeader>
           <CardContent>
-            <InstanceForm onSubmit={onSubmit} loading={loading} defaultValues={{
-              grantToAllActiveUsers: true,
-            }}/>
+            <InstanceForm
+              onSubmit={onSubmit}
+              loading={loading}
+              defaultValues={{
+                grantToAllActiveUsers: true,
+              }}
+            />
           </CardContent>
         </Card>
       </div>

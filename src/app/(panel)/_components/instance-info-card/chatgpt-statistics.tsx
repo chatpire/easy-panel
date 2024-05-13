@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function InstanceUsageStatistics({ instanceId, className }: { instanceId: string; className?: string }) {
+export function ChatGPTSharedInstanceUsageStatistics({ instanceId, className }: { instanceId: string; className?: string }) {
   const sumResult = api.resourceLog.sumLogsInDurationWindowsByInstance.useQuery({
     durationWindows: ["10m", "1h", "8h", "24h"],
     instanceId,

@@ -3,7 +3,10 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { ServiceTypeSchema } from "@/server/db/enum";
-import { UserInstanceAbilitySchema } from "./userInstanceToken.schema";
+import { PoekmonAPIInstanceDataSchema } from "./service/poekmon-api.schema";
+
+export const ServiceInstanceDataSchema = z.discriminatedUnion("type", [PoekmonAPIInstanceDataSchema]);
+export type ServiceInstanceData = z.infer<typeof ServiceInstanceDataSchema>;
 
 export const ServiceInstanceSchema = createSelectSchema(serviceInstances).merge(
   z.object({
