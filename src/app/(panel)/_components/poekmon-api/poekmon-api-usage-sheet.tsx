@@ -15,6 +15,8 @@ import poeBots from "@/resources/poekmon-bots.json";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import { copyToClipBoard } from "@/lib/clipboard";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const ServiceInstanceSchema = z.object({
   id: z.string(),
@@ -50,8 +52,7 @@ export function PoekmonAPIConfigSheet({ instanceDetails }: InstanceConfigDetails
     resolver: zodResolver(PoekmonAPIUsageFormSchema),
   });
 
-  const systemPrompt =
-    "You are a helpful assistant.";
+  const systemPrompt = "You are a helpful assistant.";
   const userPrompt = "What is the purpose of life?";
 
   const codeExampleMap: Record<string, string> = {
@@ -95,14 +96,13 @@ headers = {
 
 ${
   form.watch("stream")
-        ? `with requests.post(url, json=payload, headers=headers, stream=True) as response:
+    ? `with requests.post(url, json=payload, headers=headers, stream=True) as response:
     for chunk in response.iter_content():
         print(chunk)`
-        : `response = requests.post(url, json=payload, headers=headers)`
+    : `response = requests.post(url, json=payload, headers=headers)`
 }`,
 
-    "python openai":
-      `import openai
+    "python openai": `import openai
 
 from openai import OpenAI
 client = OpenAI(api_key="${token}", base_url="${baseUrl}/api/poekmon/${id}/v1")
@@ -118,10 +118,10 @@ completion = client.chat.completions.create(
 
 ${
   form.watch("stream")
-        ? `for chunk in completion:
+    ? `for chunk in completion:
     if len(chunk.choices) > 0 and chunk.choices[0].delta:
         print(chunk.choices[0].delta)`
-        : `print(completion.choices[0].message)`
+    : `print(completion.choices[0].message)`
 }`,
   };
 
@@ -138,7 +138,25 @@ ${
           <SheetTitle>使用说明</SheetTitle>
           <SheetDescription>Poe API 使用说明</SheetDescription>
         </SheetHeader>
-        <div className="mt-6 flex flex-col space-y-6">
+        <div className="mt-6 flex flex-col space-y-6 w-full">
+          <div className="w-full items-center space-y-2">
+            <Label htmlFor="api-url">API URL</Label>
+            <div className="flex flex-row space-x-3">
+              <Input className="w-full" id="api-url" value={`${baseUrl}/api/poekmon/${id}`} readOnly />
+              <Button variant={"ghost"} onClick={() => copyToClipBoard(`${baseUrl}/api/poekmon/${id}`)}>
+                <Icons.copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+          <div className="w-full items-center space-y-2">
+            <Label htmlFor="api-token">API Token</Label>
+            <div className="flex flex-row space-x-3">
+              <Input className="w-full" id="api-token" value={token} readOnly />
+              <Button variant={"ghost"} onClick={() => copyToClipBoard(token)}>
+                <Icons.copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           <Form {...form}>
             <form key={id} className="space-y-8">
               <FormField

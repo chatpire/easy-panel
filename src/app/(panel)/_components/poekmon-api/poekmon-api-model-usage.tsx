@@ -14,7 +14,7 @@ export function PoekmonAPIModelUsage({ instanceId, className }: { instanceId: st
   const groups = groupResults.data?.groups ?? [];
 
   // 按照 tokens 排序
-  const sortedGroups = groups.sort((a, b) => b.sumTotalTokens - a.sumTotalTokens);
+  const sortedGroups = groups.sort((a, b) => b.sumTotalTokens - a.sumTotalTokens).slice(0, 5);
 
   return (
     <div className={cn("flex flex-col", className)}>
