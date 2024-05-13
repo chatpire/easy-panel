@@ -26,7 +26,7 @@ export async function OPTIONS(request: NextRequest, { params }: { params: { inst
   const headers = new Headers({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "*",
   });
 
   return new NextResponse(null, {
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-    console.log("Poekmon API response", response.headers);
+    // console.log("Poekmon API response", response.headers);
 
     return response;
   } catch (e) {
