@@ -1,9 +1,8 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageShell } from "../../_components/dashboard-shell";
 import { PageHeader } from "../../_components/page-header";
 import { getVersion } from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
-
 
 export default async function DashboardPage({}) {
   const currentVersion = getVersion();
@@ -18,9 +17,7 @@ export default async function DashboardPage({}) {
             <CardDescription>服务状态</CardDescription>
           </CardHeader>
           <CardContent className="text-sm">
-            <div>
-              <p>当前版本：<Badge variant="outline">{currentVersion}</Badge></p>
-            </div>
+                当前版本：<Badge variant="outline">{currentVersion}</Badge>
           </CardContent>
         </Card>
       </div>
