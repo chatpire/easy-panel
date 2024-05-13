@@ -9,7 +9,6 @@ import { popup } from "@/components/popup";
 import { Icons } from "@/components/icons";
 import { Textarea } from "@/components/ui/textarea";
 import { copyToClipBoard } from "@/lib/clipboard";
-import { env } from "@/env";
 
 const ServiceInstanceSchema = z.object({
   url: z.string().url(),

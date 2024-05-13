@@ -89,6 +89,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       userId: userInstanceAbility.userId,
       instanceId,
       text,
+      type: ServiceTypeSchema.Values.CHATGPT_SHARED,
       textBytes: Buffer.byteLength(text, "utf-8"),
       details: {
         type: ServiceTypeSchema.Values.CHATGPT_SHARED,

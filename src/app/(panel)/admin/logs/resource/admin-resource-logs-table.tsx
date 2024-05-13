@@ -9,6 +9,13 @@ import {
   PoekmonAPIResourceUsageLogSchema,
 } from "@/schema/service/poekmon-api.schema";
 
+type TabConfig = {
+  type: ServiceType,
+  name: string,
+  schema: any,
+  visibility: Record<string, boolean>,
+};
+
 export function ResourceLogsTable({ fetchData }: { fetchData: (input: PaginationInput, type: ServiceType) => Promise<any> }) {
   const tabsConfig = [
     {
@@ -45,7 +52,7 @@ export function ResourceLogsTable({ fetchData }: { fetchData: (input: Pagination
         details_inputTokens: false,
       }
     },
-  ];
+  ] as TabConfig[];
 
   return (
     <Tabs defaultValue={ServiceTypeSchema.Values.CHATGPT_SHARED} className="w-full">

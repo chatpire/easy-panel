@@ -1,33 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
 import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { popup } from "@/components/popup";
 import { api } from "@/trpc/react";
 import { Icons } from "@/components/icons";
-import { useForm } from "react-hook-form";
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
-import { UserInstanceAbility } from "@/schema/userInstanceToken.schema";
-import Link from "next/link";
-import { Label } from "@/components/ui/label";
 import { copyToClipBoard } from "@/lib/clipboard";
-
-const InstancesSelectionSchema = z.object({
-  instanceIdCanUse: z.record(z.boolean()),
-});
-
-type InstancesSelection = z.infer<typeof InstancesSelectionSchema>;
 
 export function popupUserInstanceTokensViewer(userId: string, username: string) {
   const closePopup = popup({
