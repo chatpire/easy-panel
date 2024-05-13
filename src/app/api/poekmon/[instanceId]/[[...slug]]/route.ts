@@ -69,7 +69,9 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     });
 
     if (!proxyResponse.ok) {
-      return new NextResponse(await proxyResponse.text(), {
+      const text = await proxyResponse.text();
+      console.warn("Poekmon API proxy response not ok", proxyResponse.status, text);
+      return new NextResponse(text, {
         status: proxyResponse.status,
         headers: proxyResponse.headers,
       });

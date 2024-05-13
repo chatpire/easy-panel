@@ -8,12 +8,17 @@ import { PoekmonAPIInstanceDataSchema } from "./service/poekmon-api.schema";
 export const ServiceInstanceDataSchema = z.discriminatedUnion("type", [PoekmonAPIInstanceDataSchema]);
 export type ServiceInstanceData = z.infer<typeof ServiceInstanceDataSchema>;
 
-export const ServiceInstanceSchema = createSelectSchema(serviceInstances).merge(
+export const ServiceInstanceAdminSchema = createSelectSchema(serviceInstances).merge(
   z.object({
     type: ServiceTypeSchema,
   }),
 );
-export type ServiceInstance = z.infer<typeof ServiceInstanceSchema>;
+export type ServiceInstance = z.infer<typeof ServiceInstanceAdminSchema>;
+
+export const ServiceInstanceUserReadSchema = ServiceInstanceAdminSchema.omit({
+  data: true,
+});
+export type ServiceInstanceUserRead = z.infer<typeof ServiceInstanceUserReadSchema>;
 
 const ServiceInstanceInsertSchema = createInsertSchema(serviceInstances).merge(
   z.object({
@@ -35,7 +40,7 @@ export const ServiceInstanceUpdateSchema = ServiceInstanceInsertSchema.omit({
   createdAt: true,
 });
 
-export const ServiceInstanceWithToken = ServiceInstanceSchema.merge(
+export const ServiceInstanceWithToken = ServiceInstanceUserReadSchema.merge(
   z.object({
     token: z.string(),
   }),

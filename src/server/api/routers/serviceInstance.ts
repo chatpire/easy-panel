@@ -10,9 +10,10 @@ import {
 import { z } from "zod";
 import {
   ServiceInstanceCreateSchema,
-  ServiceInstanceSchema,
+  ServiceInstanceAdminSchema,
   ServiceInstanceUpdateSchema,
   ServiceInstanceWithToken,
+  ServiceInstanceUserReadSchema,
 } from "@/schema/serviceInstance.schema";
 import { resourceUsageLogs, serviceInstances, userInstanceAbilities, users } from "@/server/db/schema";
 import { createCUID } from "@/lib/cuid";
@@ -27,7 +28,7 @@ export const serviceInstanceRouter = createTRPCRouter({
         ...input,
       })
       .returning();
-    return ServiceInstanceSchema.parse(result[0]);
+    return ServiceInstanceAdminSchema.parse(result[0]);
   }),
 
   grantToAllActiveUsers: adminProcedure.input(z.object({ instanceId: z.string() })).mutation(async ({ ctx, input }) => {
@@ -66,7 +67,7 @@ export const serviceInstanceRouter = createTRPCRouter({
       })
       .where(eq(serviceInstances.id, input.id))
       .returning();
-    return ServiceInstanceSchema.parse(result[0]);
+    return ServiceInstanceAdminSchema.parse(result[0]);
   }),
 
   updateData: adminProcedure.input(ServiceInstanceUpdateSchema.pick({ id: true, data: true })).mutation(
@@ -82,13 +83,13 @@ export const serviceInstanceRouter = createTRPCRouter({
         })
         .where(eq(serviceInstances.id, input.id))
         .returning();
-      return ServiceInstanceSchema.parse(result[0]);
+      return ServiceInstanceAdminSchema.parse(result[0]);
     },
   ),
 
   getAllAdmin: adminProcedure.query(async ({ ctx }) => {
     const result = await ctx.db.query.serviceInstances.findMany();
-    return ServiceInstanceSchema.array().parse(result);
+    return ServiceInstanceAdminSchema.array().parse(result);
   }),
 
   getAllWithToken: protectedWithUserProcedure.query(async ({ ctx }) => {
@@ -114,18 +115,18 @@ export const serviceInstanceRouter = createTRPCRouter({
     return ServiceInstanceWithToken.array().parse(instances);
   }),
 
-  getById: protectedProcedure.input(ServiceInstanceSchema.pick({ id: true })).query(async ({ ctx, input }) => {
+  getById: protectedProcedure.input(ServiceInstanceUserReadSchema.pick({ id: true })).query(async ({ ctx, input }) => {
     const result = await ctx.db.query.serviceInstances.findFirst({
       where: eq(serviceInstances.id, input.id),
     });
     if (!result) {
       throw new TRPCError({ code: "NOT_FOUND", message: "Service instance not found" });
     }
-    return ServiceInstanceSchema.parse(result);
+    return ServiceInstanceUserReadSchema.parse(result);
   }),
 
   delete: adminProcedure
-    .input(ServiceInstanceSchema.pick({ id: true }).merge(z.object({ deleteLogs: z.boolean() })))
+    .input(ServiceInstanceAdminSchema.pick({ id: true }).merge(z.object({ deleteLogs: z.boolean() })))
     .mutation(async ({ ctx, input }) => {
       await ctx.db.transaction(async (tx) => {
         await tx.delete(userInstanceAbilities).where(eq(userInstanceAbilities.instanceId, input.id));

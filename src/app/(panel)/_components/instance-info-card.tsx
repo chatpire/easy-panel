@@ -26,32 +26,10 @@ export function SharedChatGPTCardContent({ instance }: { instance: ServiceInstan
 }
 
 export function PoekmonAPICardContent({ instance }: { instance: ServiceInstance }) {
-  const [baseUrl, setBaseUrl] = React.useState("<base_url>");
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      setBaseUrl(`${window.location.protocol}//${window.location.host}`);
-    }
-  }, []);
+
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      {/* <pre>
-        {`curl -X 'POST' \\
-  ${baseUrl}/api/poekmon/${instance.id}/v1/chat/completions \\
-  -H 'accept: application/json' \\
-  -H 'Content-Type: application/json' \\
-  -H 'Authorization: <YOUR_TOKEN>' \\
-  -d '{
-  "model": "gpt-3.5-turbo",
-  "messages": [
-    {
-      "role": "user",
-      "content": "hello"
-    }
-  ],
-  "stream": true
-}'`}
-      </pre> */}
       <PoekmonAPIModelUsage instanceId={instance.id} />
       <PoekmonAPIInstanceUsageStatistics instanceId={instance.id} />
     </div>

@@ -10,6 +10,7 @@ import { copyToClipBoard } from "@/lib/clipboard";
 import { InstanceInfoCard } from "../_components/instance-info-card";
 import { type ServiceInstanceWithToken } from "@/schema/serviceInstance.schema";
 import { cn } from "@/lib/utils";
+import { PoekmonAPIConfigSheet } from "../_components/poekmon-api/poekmon-api-usage-sheet";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instanceWithToken: ServiceInstanceWithToken;
@@ -57,10 +58,7 @@ function UserPoekmonAPIInstanceInfoCardBottom({ instanceWithToken }: { instanceW
   const { token, ...instance } = instanceWithToken;
   return (
     <div className="flex w-full flex-col items-center justify-between md:flex-row">
-      <Button className={"my-1 w-full md:w-auto"}>
-        <Icons.eye className="mr-2 h-4 w-4" />
-        查看使用说明
-      </Button>
+      <PoekmonAPIConfigSheet instanceDetails={instanceWithToken} />
       <div className="hidden flex-row items-center space-x-3 md:flex">
         <Label>Token</Label>
         <span className="rounded-md border px-3 py-1 text-sm">
