@@ -52,6 +52,17 @@
     }
   },
   {
+    "id": "Qm90OjMwMTU=",
+    "botId": 3015,
+    "handle": "GPT-4o",
+    "displayName": "GPT-4o",
+    "description": "OpenAI最强大的模型。在数量问题（数学和物理）、创意写作以及许多其他挑战性任务中比ChatGPT更强。由GPT-4o提供支持。",
+    "picture": {
+      "__typename": "URLBotImage",
+      "url": "https://qph.cf2.poecdn.net/main-thumb-pb-3015-200-ivodfqemfvztmvgafhdouijhknthkvmp.jpeg"
+    }
+  },
+  {
     "id": "Qm90OjMwMDc=",
     "botId": 3007,
     "handle": "GPT-4",

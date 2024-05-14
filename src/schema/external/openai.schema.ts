@@ -17,6 +17,8 @@ export const OpenAIChatCompletionRequestSchema = z.object({
   model: z.string(),
   messages: z.array(OpenAIRequestMessageSchema),
   stream: z.boolean().nullish(),
+  logit_bias: z.record(z.number()).nullish(),
+  temperature: z.number().nullish(),
 });
 export type OpenAIChatCompletionRequest = z.infer<typeof OpenAIChatCompletionRequestSchema>;
 

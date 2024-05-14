@@ -3,12 +3,10 @@
 import * as React from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { FunctionButton } from "@/components/loading-button";
 import { api } from "@/trpc/react";
-import { copyToClipBoard } from "@/lib/clipboard";
 import { InstanceInfoCard } from "../../_components/instance-info-card";
 import { toast } from "sonner";
 import { TRPCClientError } from "@trpc/client";
