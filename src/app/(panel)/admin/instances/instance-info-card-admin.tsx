@@ -75,10 +75,12 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">
         <div className="-mx-4">
-          <Link className={buttonVariants({ variant: "link" })} href={instance.url ?? ""}>
+          {
+            instance.url && <Link className={buttonVariants({ variant: "link" })} href={instance.url ?? ""}>
             <Icons.externalLink className="mr-2 h-4 w-4" />
             {instance.url}
           </Link>
+          }
         </div>
         <div className="flex flex-row items-center space-x-4 max-md:hidden">
           <FunctionButton className="lt-md:w-full" variant={"outline"} onClick={() => grantToAll(instance.id)}>
@@ -98,7 +100,7 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
           {instance.type === "POEKMON_API" && (
             <Button
               onClick={() =>
-                popupPoekmonAPIConfigForm({ url: instance.url ?? "", id: instance.id, data: instance.data })
+                popupPoekmonAPIConfigForm({ id: instance.id, data: instance.data })
               }
             >
               <Icons.pencil className="mr-2 h-4 w-4" />

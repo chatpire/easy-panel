@@ -73,7 +73,7 @@ export const serviceInstances = pgTable(
     type: text("type").notNull().$type<ServiceType>(),
     name: text("name").notNull(),
     description: text("description"),
-    url: text("url").notNull(),
+    url: text("url"),
     data: createJsonbType<ServiceInstanceData>("data"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

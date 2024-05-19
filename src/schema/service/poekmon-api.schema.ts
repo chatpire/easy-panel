@@ -7,6 +7,7 @@ import { resourceUsageLogs } from "@/server/db/schema";
 
 export const PoekmonAPIInstanceDataSchema = z.object({
   type: z.literal("POEKMON_API"),
+  url: z.string().url(),
   auth_key: z.string(),
   record_prompts: z.boolean(),
   record_completions: z.boolean(),

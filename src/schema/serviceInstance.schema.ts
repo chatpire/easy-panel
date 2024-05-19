@@ -24,7 +24,7 @@ const ServiceInstanceInsertSchema = createInsertSchema(serviceInstances).merge(
   z.object({
     type: ServiceTypeSchema,
     description: z.string().optional(),
-    url: z.string().url(),
+    url: z.string().url().optional(),
   }),
 );
 

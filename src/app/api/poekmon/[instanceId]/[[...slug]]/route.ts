@@ -77,7 +77,8 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     const requestBody = await request.json();
     const openaiRequest = OpenAIChatCompletionRequestSchema.parse(requestBody);
 
-    const proxyUrl = `${instance.url}/v1/chat/completions`;
+    const url = instance.data.url;
+    const proxyUrl = `${url}/v1/chat/completions`;
     const proxyResponse = await fetch(proxyUrl, {
       method: "POST",
       headers: {

@@ -15,11 +15,21 @@ export const InstanceFormSchema = ServiceInstanceCreateSchema.merge(
     url: z
       .string()
       .url()
-      .refine((url) => !url.endsWith("/"), { message: "URL should not end with a slash" }),
+      .optional()
+      .refine(
+        (url) => {
+          if (!url) return true;
+          return !url.endsWith("/");
+        },
+        { message: "URL should not end with a slash" },
+      ),
     description: z.string().optional(),
     grantToAllActiveUsers: z.boolean(),
   }),
-);
+).refine((data) => data.type !== "CHATGPT_SHARED" || data.url, {
+  path: ["url"],
+  message: "URL is required when type is CHATGPT_SHARED",
+});
 
 type InstanceFormProps = {
   onSubmit: (values: z.infer<typeof InstanceFormSchema>) => Promise<void>;
@@ -86,7 +96,7 @@ export function InstanceForm({ onSubmit, defaultValues, loading }: InstanceFormP
           name="url"
           render={({ field }) => (
             <FormItem>
-              <FormLabel required>Url</FormLabel>
+              <FormLabel required={form.watch("type") === "CHATGPT_SHARED"}>Url</FormLabel>
               <FormControl>
                 <Input placeholder="https://" {...field} />
               </FormControl>

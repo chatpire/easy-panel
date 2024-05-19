@@ -46,14 +46,14 @@ export function PoekmonAPIConfigSheet({ instanceDetails }: InstanceConfigDetails
 
   const form = useForm<z.infer<typeof PoekmonAPIUsageFormSchema>>({
     defaultValues: {
-      model: "gpt-4",
-      stream: true,
+      model: "gpt-4o",
+      stream: false,
     },
     resolver: zodResolver(PoekmonAPIUsageFormSchema),
   });
 
   const systemPrompt = "You are a helpful assistant.";
-  const userPrompt = "What is the purpose of life?";
+  const userPrompt = "Hello!";
 
   const codeExampleMap: Record<string, string> = {
     curl: `curl -X 'POST' \\

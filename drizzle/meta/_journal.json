@@ -15,6 +15,13 @@
       "when": 1714383623906,
       "tag": "0001_sparkling_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1716118022533,
+      "tag": "0002_faithful_prodigy",
+      "breakpoints": true
     }
   ]
 }

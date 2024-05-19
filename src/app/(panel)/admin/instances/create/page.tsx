@@ -20,6 +20,11 @@ export default function CreateInstancePage({}) {
   async function onSubmit(values: z.infer<typeof InstanceFormSchema>) {
     const { grantToAllActiveUsers, ...instanceCreate } = values;
 
+    if (instanceCreate.type === "CHATGPT_SHARED" && !instanceCreate.url) {
+      toast.error("URL is required for ChatGPT Shared instance");
+      return;
+    }
+
     const grantToUserIds = [];
     if (grantToAllActiveUsers) {
       grantToUserIds.push(...(usersQuery.data?.map((user) => user.id) ?? []));
@@ -36,7 +41,13 @@ export default function CreateInstancePage({}) {
       }
       toast.success("Instance created");
       if (instance.type === "CHATGPT_SHARED") {
-        popupChatGPTShareInstanceConfigDetails(instance);
+        if (instance.url === null) {
+          throw new Error("Instance URL is missing"); 
+        }
+        popupChatGPTShareInstanceConfigDetails({
+          ...instance,
+          url: instance.url,
+        });
       } else if (instance.type === "POEKMON_API") {
         popupPoekmonAPIConfigForm({
           ...instance,

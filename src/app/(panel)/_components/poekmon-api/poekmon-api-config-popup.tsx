@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { api } from "@/trpc/react";
 
 const ServiceInstanceSchema = z.object({
-  url: z.string().url(),
   id: z.string(),
   data: PoekmonAPIInstanceDataSchema.optional(),
 });
@@ -39,7 +38,7 @@ interface InstanceConfigDetailsProps {
 }
 
 function PoekmonAPIConfigPopup({ className, instanceDetails, closePopup }: InstanceConfigDetailsProps) {
-  const { id, url, data } = instanceDetails;
+  const { id, data } = instanceDetails;
   const [loading, setLoading] = React.useState(false);
   const updateDataMutation = api.serviceInstance.updateData.useMutation();
 
@@ -53,23 +52,23 @@ function PoekmonAPIConfigPopup({ className, instanceDetails, closePopup }: Insta
     resolver: zodResolver(PoekmonAPIInstanceDataSchema),
   });
 
-  const testAuthKey = async () => {
-    try {
-      const response = await fetch(`${url}/status`, {
-        headers: {
-          Authorization: `Bearer ${form.getValues().auth_key}`,
-        },
-      });
-      if (response.ok) {
-        toast.success("Auth key is valid");
-      } else {
-        toast.error("Test connection failed");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Test connection failed: " + String(error));
-    }
-  };
+  // const testAuthKey = async () => {
+  //   try {
+  //     const response = await fetch(`${url}/status`, {
+  //       headers: {
+  //         Authorization: `Bearer ${form.getValues().auth_key}`,
+  //       },
+  //     });
+  //     if (response.ok) {
+  //       toast.success("Auth key is valid");
+  //     } else {
+  //       toast.error("Test connection failed");
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error("Test connection failed: " + String(error));
+  //   }
+  // };
 
   const onSubmit = async (values: z.infer<typeof PoekmonAPIInstanceDataSchema>) => {
     try {
@@ -90,18 +89,34 @@ function PoekmonAPIConfigPopup({ className, instanceDetails, closePopup }: Insta
 
   return (
     <Form {...form}>
-      <form key={id} onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form key={id} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <FormField
+          control={form.control}
+          name="url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>URL</FormLabel>
+              <div className="flex flex-row">
+                <FormControl>
+                  <Input placeholder="" {...field} />
+                </FormControl>
+                {/* <FunctionButton onClick={testAuthKey}>Test</FunctionButton> */}
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name="auth_key"
           render={({ field }) => (
             <FormItem>
               <FormLabel required>Auth Key</FormLabel>
-              <div className="flex flex-row space-x-2">
+              <div className="flex flex-row">
                 <FormControl>
                   <Input placeholder="" {...field} />
                 </FormControl>
-                <FunctionButton onClick={testAuthKey}>Test</FunctionButton>
+                {/* <FunctionButton onClick={testAuthKey}>Test</FunctionButton> */}
               </div>
               <FormMessage />
             </FormItem>

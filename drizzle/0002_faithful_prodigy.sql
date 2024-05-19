@@ -1,0 +1,1 @@
+ALTER TABLE "service_instances" ALTER COLUMN "url" DROP NOT NULL;
