@@ -17,7 +17,7 @@ import { writeUserCreateEventLog } from "@/server/actions/write-event-log";
 import { type Db } from "@/server/db";
 import { sessions, userInstanceAbilities, users } from "@/server/db/schema";
 import { and, asc, desc, eq, getTableColumns, sql } from "drizzle-orm";
-import { UserInstanceAbilitySchema } from "@/schema/userInstanceToken.schema";
+import { UserInstanceAbilitySchema } from "@/schema/userInstanceAbility.schema";
 import { createCUID } from "@/lib/cuid";
 import { generateId } from "lucia";
 import { type UserCreateEventContentCreatedBy } from "@/schema/definition.schema";

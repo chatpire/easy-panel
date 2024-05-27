@@ -47,6 +47,7 @@ export default function UpdateInstancePage({ params }: { params: { id: string } 
               onSubmit={onSubmit}
               defaultValues={{
                 ...instanceQuery.data,
+                url: instanceQuery.data?.url ?? undefined,
                 description: instanceQuery.data?.description ?? undefined,
               }}
               loading={loading}

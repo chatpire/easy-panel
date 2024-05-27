@@ -12,7 +12,7 @@ export const PoekmonAPIInstanceDataSchema = z.object({
   record_prompts: z.boolean(),
   record_completions: z.boolean(),
 });
-export type PoekmonInstanceData = z.infer<typeof PoekmonAPIInstanceDataSchema>;
+export type PoekmonAPIInstanceData = z.infer<typeof PoekmonAPIInstanceDataSchema>;
 
 export const OpenAIResponseUsageSchema = z.object({
   prompt_tokens: z.number().int(),

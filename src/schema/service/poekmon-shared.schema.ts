@@ -5,12 +5,10 @@ import { resourceUsageLogs } from "@/server/db/schema";
 
 export const PoekmonSharedInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
-  url: z.string().url(),
-  auth_key: z.string(),
   secret: z.string(), // client secret
   points_remain: z.number().int(),
 });
-export type PoekmonInstanceData = z.infer<typeof PoekmonSharedInstanceDataSchema>;
+export type PoekmonSharedInstanceData = z.infer<typeof PoekmonSharedInstanceDataSchema>;
 
 export const PoekmonSharedUserInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),

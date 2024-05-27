@@ -91,20 +91,22 @@ export function InstanceForm({ onSubmit, defaultValues, loading }: InstanceFormP
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="url"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel required={form.watch("type") === "CHATGPT_SHARED"}>Url</FormLabel>
-              <FormControl>
-                <Input placeholder="https://" {...field} />
-              </FormControl>
-              <FormDescription>Base URL of the service.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {form.watch("type") !== "POEKMON_API" && (
+          <FormField
+            control={form.control}
+            name="url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel required>Url</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://" {...field} />
+                </FormControl>
+                <FormDescription>Base URL of the service.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
         <FormField
           control={form.control}
           name="description"

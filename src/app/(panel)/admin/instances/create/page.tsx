@@ -10,6 +10,9 @@ import { type z } from "zod";
 import { popupChatGPTShareInstanceConfigDetails } from "../../../_components/chatgpt-shared/chatgpt-share-config-popup";
 import { useState } from "react";
 import { popupPoekmonAPIConfigForm } from "../../../_components/poekmon-api/poekmon-api-config-popup";
+import { popupPoekmonSharedInstanceConfigDetails } from "@/app/(panel)/_components/poekmon-shared/poekmon-shared-config-popup";
+import { PoekmonSharedInstanceData } from "@/schema/service/poekmon-shared.schema";
+import { generateId } from "lucia";
 
 export default function CreateInstancePage({}) {
   const [loading, setLoading] = useState(false);
@@ -23,6 +26,18 @@ export default function CreateInstancePage({}) {
     if (instanceCreate.type === "CHATGPT_SHARED" && !instanceCreate.url) {
       toast.error("URL is required for ChatGPT Shared instance");
       return;
+    }
+
+    if (instanceCreate.type === "POEKMON_SHARED") {
+      if (!instanceCreate.url) {
+        toast.error("URL is required for Poekmon Shared instance");
+        return;
+      }
+      instanceCreate.data = {
+        type: "POEKMON_SHARED",
+        secret: generateId(48),
+        points_remain: -1,
+      } as PoekmonSharedInstanceData;
     }
 
     const grantToUserIds = [];
@@ -42,7 +57,7 @@ export default function CreateInstancePage({}) {
       toast.success("Instance created");
       if (instance.type === "CHATGPT_SHARED") {
         if (instance.url === null) {
-          throw new Error("Instance URL is missing"); 
+          throw new Error("Instance URL is missing");
         }
         popupChatGPTShareInstanceConfigDetails({
           ...instance,
@@ -52,6 +67,11 @@ export default function CreateInstancePage({}) {
         popupPoekmonAPIConfigForm({
           ...instance,
           data: undefined,
+        });
+      } else if (instance.type === "POEKMON_SHARED") {
+        popupPoekmonSharedInstanceConfigDetails({
+          ...instance,
+          data: instance.data!,
         });
       }
     } catch (error) {
