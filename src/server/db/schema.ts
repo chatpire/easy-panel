@@ -16,6 +16,7 @@ import { createJsonbType } from "./jsonb";
 import { type GlobalSettingContent } from "@/schema/globalSetting.schema";
 import { type ResourceUsageLogDetails } from "@/schema/resourceLog.schema";
 import { type ServiceInstanceData } from "@/schema/serviceInstance.schema";
+import { type UserInstanceData } from "@/schema/userInstanceAbility.schema";
 
 // Enums
 export const userRole = pgEnum("user_role", ["USER", "ADMIN"]);
@@ -94,7 +95,7 @@ export const userInstanceAbilities = pgTable(
     instanceId: text("instance_id").notNull(),
     token: text("token"),
     canUse: boolean("can_use").notNull().default(true),
-    data: createJsonbType<Record<string, unknown>>("data"),
+    data: createJsonbType<UserInstanceData>("data"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

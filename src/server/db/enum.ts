@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const ServiceTypeSchema = z.enum(["CHATGPT_SHARED", "POEKMON_API"]);
+export const ServiceTypeSchema = z.enum(["CHATGPT_SHARED", "POEKMON_API", "POEKMON_SHARED"]);
 export type ServiceType = z.infer<typeof ServiceTypeSchema>;
 
 export const DURATION_WINDOWS = {
