@@ -3,10 +3,24 @@ import { z } from "zod";
 import { createSelectSchema } from "drizzle-zod";
 import { resourceUsageLogs } from "@/server/db/schema";
 
+export const PoekmonSharedAccountSchema = z.object({
+  status: z.enum(["active", "inactive"]),
+  account_email: z.string().nullable(),
+  account_info: z.object({
+    subscription_active: z.boolean(),
+    subscription_plan_type: z.string().nullable(),
+    subscription_expires_time: z.number().int().nullable(),
+    message_point_balance: z.number().int(),
+    message_point_alloment: z.number().int(),
+    message_point_reset_time: z.number().int().nullable(),
+  }),
+});
+export type PoekmonSharedAccount = z.infer<typeof PoekmonSharedAccountSchema>;
+
 export const PoekmonSharedInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
   secret: z.string(), // client secret
-  points_remain: z.number().int(),
+  poe_account: PoekmonSharedAccountSchema,
 });
 export type PoekmonSharedInstanceData = z.infer<typeof PoekmonSharedInstanceDataSchema>;
 

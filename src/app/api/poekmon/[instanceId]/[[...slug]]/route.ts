@@ -12,7 +12,7 @@ import {
   OpenAIChatCompletionStreamResponseSchema,
   type OpenAIResponseMessage,
 } from "@/schema/external/openai.schema";
-import { type PoekmonAPIResourceUsageLogDetails } from "@/schema/service/poekmon-api.schema";
+import { PoekmonAPIInstanceData, type PoekmonAPIResourceUsageLogDetails } from "@/schema/service/poekmon-api.schema";
 
 export const dynamic = "force-dynamic";
 
@@ -71,13 +71,13 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       return NextResponse.json({ detail: "Instance not configuered" }, { status: 404 });
     }
 
-    const instanceData = instance.data;
+    const instanceData = instance.data as PoekmonAPIInstanceData;
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestBody = await request.json();
     const openaiRequest = OpenAIChatCompletionRequestSchema.parse(requestBody);
 
-    const url = instance.data.url;
+    const url = instanceData.url;
     const proxyUrl = `${url}/v1/chat/completions`;
     const proxyResponse = await fetch(proxyUrl, {
       method: "POST",

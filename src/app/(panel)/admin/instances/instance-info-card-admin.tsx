@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { popup } from "@/components/popup";
 import { Checkbox } from "@/components/ui/checkbox";
 import { popupPoekmonAPIConfigForm } from "../../_components/poekmon-api/poekmon-api-config-popup";
+import { popupPoekmonSharedInstanceConfigDetails } from "../../_components/poekmon-shared/poekmon-shared-config-popup";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -75,12 +76,12 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
     <InstanceInfoCard instance={instance} className={className}>
       <div className="flex w-full flex-row items-center justify-between">
         <div className="-mx-4">
-          {
-            instance.url && <Link className={buttonVariants({ variant: "link" })} href={instance.url ?? ""}>
-            <Icons.externalLink className="mr-2 h-4 w-4" />
-            {instance.url}
-          </Link>
-          }
+          {instance.url && (
+            <Link className={buttonVariants({ variant: "link" })} href={instance.url ?? ""}>
+              <Icons.externalLink className="mr-2 h-4 w-4" />
+              {instance.url}
+            </Link>
+          )}
         </div>
         <div className="flex flex-row items-center space-x-4 max-md:hidden">
           <FunctionButton className="lt-md:w-full" variant={"outline"} onClick={() => grantToAll(instance.id)}>
@@ -98,11 +99,13 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
             </Button>
           )}
           {instance.type === "POEKMON_API" && (
-            <Button
-              onClick={() =>
-                popupPoekmonAPIConfigForm({ id: instance.id, data: instance.data })
-              }
-            >
+            <Button onClick={() => popupPoekmonAPIConfigForm({ id: instance.id, data: instance.data })}>
+              <Icons.pencil className="mr-2 h-4 w-4" />
+              Edit Config
+            </Button>
+          )}
+          {instance.type === "POEKMON_SHARED" && (
+            <Button onClick={() => popupPoekmonSharedInstanceConfigDetails({ id: instance.id, data: instance.data })}>
               <Icons.pencil className="mr-2 h-4 w-4" />
               Edit Config
             </Button>

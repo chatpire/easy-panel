@@ -8,6 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@hono/node-server':
+        specifier: ^1.11.1
+        version: 1.11.1
+      '@hono/zod-openapi':
+        specifier: ^0.14.0
+        version: 0.14.0(hono@4.3.11)(zod@3.22.4)
+      '@hono/zod-validator':
+        specifier: ^0.2.1
+        version: 0.2.1(hono@4.3.11)(zod@3.22.4)
       '@hookform/resolvers':
         specifier: ^3.3.4
         version: 3.3.4(react-hook-form@7.51.2(react@18.2.0))
@@ -119,6 +128,9 @@ importers:
       generate-password-browser:
         specifier: ^1.1.0
         version: 1.1.0
+      hono:
+        specifier: ^4.3.11
+        version: 4.3.11
       lucia:
         specifier: ^3.1.1
         version: 3.1.1
@@ -247,6 +259,11 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@asteasolutions/zod-to-openapi@7.0.0':
+    resolution: {integrity: sha512-rJRKHD2m6nUb/9ZheeN8nqOURX24WTzY8Sex1ZKT0Kpx+xfpRcD0fTD6vEeXNHGaDGxzu65Jj/jb2x6nLTjcMw==}
+    peerDependencies:
+      zod: ^3.20.2
 
   '@babel/runtime@7.24.4':
     resolution: {integrity: sha512-dkxf7+hn8mFBwKjs9bvBlArzLVxVbS8usaPUDd5p2a9JCL9tB8OaOVN1isD4+Xyk4ns89/xeOmbQvgdK7IIVdA==}
@@ -717,6 +734,23 @@ packages:
 
   '@floating-ui/utils@0.2.1':
     resolution: {integrity: sha512-9TANp6GPoMtYzQdt54kfAyMmz1+osLlXdg2ENroU7zzrtflTLrrC/lgrIfaSe+Wu0b89GKccT7vxXA0MoAIO+Q==}
+
+  '@hono/node-server@1.11.1':
+    resolution: {integrity: sha512-GW1Iomhmm1o4Z+X57xGby8A35Cu9UZLL7pSMdqDBkD99U5cywff8F+8hLk5aBTzNubnsFAvWQ/fZjNwPsEn9lA==}
+    engines: {node: '>=18.14.1'}
+
+  '@hono/zod-openapi@0.14.0':
+    resolution: {integrity: sha512-sbOdfPlm8uT/2RypeNw9BIcqZ9AkLJdWYhfx6r6/RamkE193FO9Z980W9+IaYCkqBTlDWAh5zHYWjLkN8lfmCg==}
+    engines: {node: '>=16.0.0'}
+    peerDependencies:
+      hono: '>=4.3.6'
+      zod: 3.*
+
+  '@hono/zod-validator@0.2.1':
+    resolution: {integrity: sha512-HFoxln7Q6JsE64qz2WBS28SD33UB2alp3aRKmcWnNLDzEL1BLsWfbdX6e1HIiUprHYTIXf5y7ax8eYidKUwyaA==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.19.1
 
   '@hookform/resolvers@3.3.4':
     resolution: {integrity: sha512-o5cgpGOuJYrd+iMKvkttOclgwRW86EsWJZZRC23prf0uU2i48Htq4PuT73AVb9ionFyZrwYEITuOFGF+BydEtQ==}
@@ -2825,6 +2859,10 @@ packages:
   heap@0.2.7:
     resolution: {integrity: sha512-2bsegYkkHO+h/9MGbn6KWcE45cHZgPANo5LXF7EvWdT0yT2EguSVO1nDgU5c8+ZOPwp2vMNa7YFsJhVcDR9Sdg==}
 
+  hono@4.3.11:
+    resolution: {integrity: sha512-Hle1uNqJJKkebFkFEEWr3UAElJP922Xy0STfl8c+1PH1q+l6WrmhwAJFS6YH8ZWJY4z46qJtssbyVwwPm3dP5w==}
+    engines: {node: '>=16.0.0'}
+
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
 
@@ -3208,6 +3246,9 @@ packages:
 
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
+
+  openapi3-ts@4.3.2:
+    resolution: {integrity: sha512-IvKNb3hPHwfuyVJnseTsFvZ0DO2EODpitYMsLcmfVwJ2p41zAHh2VDConzLLEB5h5YFbne9vv1zZxCeUICYZ8A==}
 
   optionator@0.9.3:
     resolution: {integrity: sha512-JjCoypp+jKn1ttEFExxhetCKeJt9zhAgAve5FXHixTvFDW/5aEktX9bufBKLRRMdU7bNtpLfcGu94B3cdEJgjg==}
@@ -3877,6 +3918,11 @@ packages:
     engines: {node: '>= 14'}
     hasBin: true
 
+  yaml@2.4.2:
+    resolution: {integrity: sha512-B3VqDZ+JAg1nZpaEmWtTXUlBneoGx6CPM9b0TENK6aoSu5t73dItudwdgmi6tHlIZZId4dZ9skcAQ2UbcyAeVA==}
+    engines: {node: '>= 14'}
+    hasBin: true
+
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
@@ -3889,6 +3935,11 @@ snapshots:
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@asteasolutions/zod-to-openapi@7.0.0(zod@3.22.4)':
+    dependencies:
+      openapi3-ts: 4.3.2
+      zod: 3.22.4
 
   '@babel/runtime@7.24.4':
     dependencies:
@@ -4173,6 +4224,20 @@ snapshots:
       react-dom: 18.2.0(react@18.2.0)
 
   '@floating-ui/utils@0.2.1': {}
+
+  '@hono/node-server@1.11.1': {}
+
+  '@hono/zod-openapi@0.14.0(hono@4.3.11)(zod@3.22.4)':
+    dependencies:
+      '@asteasolutions/zod-to-openapi': 7.0.0(zod@3.22.4)
+      '@hono/zod-validator': 0.2.1(hono@4.3.11)(zod@3.22.4)
+      hono: 4.3.11
+      zod: 3.22.4
+
+  '@hono/zod-validator@0.2.1(hono@4.3.11)(zod@3.22.4)':
+    dependencies:
+      hono: 4.3.11
+      zod: 3.22.4
 
   '@hookform/resolvers@3.3.4(react-hook-form@7.51.2(react@18.2.0))':
     dependencies:
@@ -6389,6 +6454,8 @@ snapshots:
 
   heap@0.2.7: {}
 
+  hono@4.3.11: {}
+
   ieee754@1.2.1: {}
 
   ignore@5.3.1: {}
@@ -6772,6 +6839,10 @@ snapshots:
   once@1.4.0:
     dependencies:
       wrappy: 1.0.2
+
+  openapi3-ts@4.3.2:
+    dependencies:
+      yaml: 2.4.2
 
   optionator@0.9.3:
     dependencies:
@@ -7443,6 +7514,8 @@ snapshots:
   yallist@4.0.0: {}
 
   yaml@2.4.1: {}
+
+  yaml@2.4.2: {}
 
   yocto-queue@0.1.0: {}
 

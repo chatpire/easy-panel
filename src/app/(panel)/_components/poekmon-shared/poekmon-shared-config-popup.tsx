@@ -34,11 +34,7 @@ interface InstanceConfigDetailsProps {
   closePopup: () => void;
 }
 
-function InstanceConfigDetailsPopup({
-  className,
-  instanceDetails,
-  closePopup,
-}: InstanceConfigDetailsProps) {
+function InstanceConfigDetailsPopup({ className, instanceDetails, closePopup }: InstanceConfigDetailsProps) {
   const { id } = instanceDetails;
   const [baseUrl, setBaseUrl] = React.useState("<base_url>");
 
@@ -47,7 +43,7 @@ function InstanceConfigDetailsPopup({
       setBaseUrl(`${window.location.protocol}//${window.location.host}`);
     }
   }, []);
-  const configValue = `panel_url: "${baseUrl}/api/external/poekmon/${id}"\n\npanel_secret: ${instanceDetails.data.secret}`;
+  const configValue = `panel_api_url: "${baseUrl}/api/external/poekmon-shared/${id}"\n\npanel_secret: ${instanceDetails.data.secret}\n\npanel_redirect_login_url: "${baseUrl}"`;
 
   return (
     <div className={cn("grid items-start gap-4", className)}>
