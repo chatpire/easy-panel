@@ -16,7 +16,7 @@ export const DURATION_WINDOWS = {
 export const DurationWindowSchema = z.enum(["10m", "30m", "1h", "3h", "8h", "24h", "7d", "30d"]);
 export type DurationWindow = z.infer<typeof DurationWindowSchema>;
 
-export const EventTypeSchema = z.enum(["user.login", "user.create", "chatgpt_shared.oauth"]);
+export const EventTypeSchema = z.enum(["user.login", "user.create", "chatgpt_shared.oauth", "poekmon_shared.auth"]);
 export type EventType = z.infer<typeof EventTypeSchema>;
 
 export const EventResultTypeSchema = z.enum(["success", "failure"]);

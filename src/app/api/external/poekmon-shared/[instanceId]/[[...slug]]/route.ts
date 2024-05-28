@@ -1,34 +1,40 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createAuthMiddleware, createRouter } from "./hono-router";
+import { type Router, createAuthMiddleware, createRouter, extendRouter, setRouterContext } from "./hono-router";
 import { db } from "@/server/db";
 import { and, eq } from "drizzle-orm";
 import { serviceInstances } from "@/server/db/schema";
 import { type PoekmonSharedInstanceData } from "@/schema/service/poekmon-shared.schema";
-import { Hono } from "hono";
+
+const ROUTERS: Record<string, Router> = {};
 
 const handler = async (req: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) => {
   const { instanceId, slug } = params;
 
-  const instance = await db.query.serviceInstances.findFirst({
-    where: and(eq(serviceInstances.id, instanceId), eq(serviceInstances.type, "POEKMON_SHARED")),
-  });
-  if (!instance) {
-    return NextResponse.json({ detail: "Instance Not Found" }, { status: 404 });
+  const basePath = `/api/external/poekmon-shared/${params.instanceId}`;
+
+  if (ROUTERS[instanceId] === undefined) {
+    const instance = await db.query.serviceInstances.findFirst({
+      where: and(eq(serviceInstances.id, instanceId), eq(serviceInstances.type, "POEKMON_SHARED")),
+    });
+    if (!instance) {
+      return NextResponse.json({ detail: "Instance Not Found" }, { status: 404 });
+    }
+
+    const instanceData = instance.data as PoekmonSharedInstanceData;
+
+    const router = createRouter(basePath);
+    router.use(createAuthMiddleware(instanceData.secret));
+
+    setRouterContext(router, {
+      instanceId,
+      instanceData,
+    });
+
+    extendRouter(router);
+    ROUTERS[instanceId] = router;
   }
 
-  const instanceData = instance.data as PoekmonSharedInstanceData;
-
-  const authMiddleware = createAuthMiddleware(instanceData.secret);
-
-  const router = createRouter(`/api/external/poekmon-shared/${params.instanceId}`);
-
-  router.use(authMiddleware);
-
-  router.use(async (c, next) => {
-    c.set("instanceId", instanceId);
-    c.set("instanceData", instanceData);
-    await next();
-  });
+  const router = ROUTERS[instanceId]!;
 
   return await router.fetch(req);
 };

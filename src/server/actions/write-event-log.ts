@@ -10,6 +10,7 @@ import { type Db } from "../db";
 import { eventLogs } from "../db/schema";
 import { createCUID } from "@/lib/cuid";
 import { type User } from "@/schema/user.schema";
+import { type PoekmonSharedAuthEventContentSchema } from "@/schema/service/poekmon-shared.schema";
 
 export async function writeUserLoginEventLog(
   db: Db,
@@ -73,6 +74,30 @@ export async function writeChatgptSharedOAuthLog(
         requestIp,
         userIp,
       } as z.infer<typeof ChatGPTSharedOAuthEventContentSchema>,
+    })
+    .returning();
+}
+
+export async function writePoekmonSharedAuthLog(
+  db: Db,
+  userId: string,
+  instanceId: string,
+  userIp: string | null,
+  requestIp: string | null,
+) {
+  return await db
+    .insert(eventLogs)
+    .values({
+      id: createCUID(),
+      userId,
+      type: "poekmon_shared.auth",
+      resultType: "success",
+      content: {
+        type: "poekmon_shared.auth",
+        instanceId,
+        requestIp,
+        userIp,
+      } as z.infer<typeof PoekmonSharedAuthEventContentSchema>,
     })
     .returning();
 }

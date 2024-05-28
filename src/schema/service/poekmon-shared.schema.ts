@@ -39,6 +39,7 @@ export const PoekmonSharedResourceUsageLogDetailsSchema = z.object({
   query: z.string(),
   attachments: z.array(z.string()),
   consume_point: z.number().int(),
+  poe_account_id: z.string().nullable(),
 });
 export type PoekmonSharedResourceUsageLogDetails = z.infer<typeof PoekmonSharedResourceUsageLogDetailsSchema>;
 
@@ -82,3 +83,10 @@ export const PoekmonSharedResourceUsageLogSchema = createSelectSchema(resourceUs
   }),
 );
 export type PoekmonSharedResourceUsageLog = z.infer<typeof PoekmonSharedResourceUsageLogSchema>;
+
+export const PoekmonSharedAuthEventContentSchema = z.object({
+  type: z.literal("poekmon_shared.auth"),
+  intanceId: z.string().optional(),
+  requestIp: z.string().ip().nullable(),
+  userIp: z.string().ip().nullable(),
+});

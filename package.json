@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.11.1",
+    "@hono/swagger-ui": "^0.2.2",
     "@hono/zod-openapi": "^0.14.0",
     "@hono/zod-validator": "^0.2.1",
     "@hookform/resolvers": "^3.3.4",

@@ -1,16 +1,21 @@
 import { db } from "@/server/db";
-import { serviceInstances, userInstanceAbilities } from "@/server/db/schema";
+import { eventLogs, resourceUsageLogs, serviceInstances, userInstanceAbilities } from "@/server/db/schema";
 import { and, eq } from "drizzle-orm";
-import { Hono } from "hono";
 import {
-  PoekmonSharedAccountSchema,
+  type PoekmonSharedResourceUsageLogDetails,
   type PoekmonSharedInstanceData,
   type PoekmonSharedUserInstanceData,
 } from "@/schema/service/poekmon-shared.schema";
-import { UserDataModel, PoeAccountDataModel, UserData } from "./models";
+import { UserDataModel, PoeAccountDataModel, type UserData, ChatLogModel } from "./models";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { env } from "@/env";
 import { createMiddleware } from "hono/factory";
+import { createCUID } from "@/lib/cuid";
+import { ServiceTypeSchema } from "@/server/db/enum";
+import { writePoekmonSharedAuthLog } from "@/server/actions/write-event-log";
+import { type NextRequest } from "next/server";
+import { swaggerUI } from "@hono/swagger-ui";
+import { th } from "@faker-js/faker";
 
 type Variables = {
   instanceId: string;
@@ -22,13 +27,16 @@ const ResponseDataSchema = z.object({
   content: z.unknown().nullable(),
 });
 
-const responseDataSchema = (schema: z.ZodSchema) => {
-  return ResponseDataSchema.merge(
-    z.object({
-      content: schema,
-    }),
-  );
-};
+function responseDataSchema<T extends z.ZodType<any>>(schema: T, name?: string) {
+  const resultSchema = z.object({
+    message: z.string().optional(),
+    content: schema,
+  });
+  if (name) {
+    resultSchema.openapi(name);
+  }
+  return resultSchema;
+}
 
 type ResponseData = z.infer<typeof ResponseDataSchema>;
 
@@ -41,6 +49,8 @@ const err = (message?: string): ResponseData => ({
   content: null,
 });
 
+export type Router = ReturnType<typeof createRouter>;
+
 export const createRouter = (basePath: string) => {
   const router = new OpenAPIHono<{ Variables: Variables }>({
     defaultHook: (result, c) => {
@@ -51,6 +61,25 @@ export const createRouter = (basePath: string) => {
     },
   }).basePath(basePath);
 
+  router.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+    type: "http",
+    scheme: "bearer",
+  });
+
+  return router;
+};
+
+export const setRouterContext = (router: Router, variables: Partial<Variables>) => {
+  router.use(async (c, next) => {
+    if (variables.instanceId) c.set("instanceId", variables.instanceId);
+    if (variables.instanceData) c.set("instanceData", variables.instanceData);
+    await next();
+  });
+
+  return router;
+};
+
+export const extendRouter = (router: Router) => {
   const ParamUserIdSchema = z.object({
     userId: z.string().openapi({
       param: {
@@ -74,9 +103,73 @@ export const createRouter = (basePath: string) => {
         description: "pong",
       },
     },
+    security: [{ Bearer: [] }],
   });
   router.openapi(pingRoute, (c) => {
     return c.json(ok("pong"));
+  });
+
+  const authenticateUserRoute = createRoute({
+    method: "get",
+    path: "/auth/{userId}",
+    operationId: "authenticateUser",
+    request: {
+      params: ParamUserIdSchema,
+      body: {
+        content: {
+          "application/json": {
+            schema: z.object({
+              token: z.string(),
+              user_ip: z.string().nullable(),
+            }),
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: responseDataSchema(z.null()),
+          },
+        },
+        description: "success",
+      },
+      403: {
+        content: {
+          "application/json": {
+            schema: responseDataSchema(z.literal("Denied")),
+          },
+        },
+        description: "Denied",
+      },
+    },
+    security: [{ Bearer: [] }],
+  });
+
+  router.openapi(authenticateUserRoute, async (c) => {
+    const userId = c.req.param("userId");
+    const data = c.req.valid("json");
+    const ability = await db.query.userInstanceAbilities.findFirst({
+      where: and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, c.var.instanceId)),
+    });
+    if (!ability) return c.json(err("User instance ability not exist"), 403);
+    if (!ability.canUse) return c.json(err("Permission Denied"), 403);
+    if (data.token !== ability.token) return c.json(err("Denied"), 403);
+    // await db.insert(eventLogs).values({
+    //   id: createCUID(),
+    //   userId,
+    //   type: "poekmon_shared.auth",
+    //   resultType: "success",
+    //   content: {
+    //     type: "poekmon_shared.auth",
+    //     intanceId: c.var.instanceId,
+    //     requestIp: c.req.ip,
+    //     userIp: c.req.header("X-Real-IP"),
+    //   },
+    await writePoekmonSharedAuthLog(db, userId, c.var.instanceId, data.user_ip, c.req.header("X-Real-IP") ?? null);
+
+    return c.json(ok(null));
   });
 
   const getUserDataRoute = createRoute({
@@ -90,23 +183,15 @@ export const createRouter = (basePath: string) => {
       200: {
         content: {
           "application/json": {
-            schema: responseDataSchema(UserDataModel),
+            schema: responseDataSchema(UserDataModel, "UserDataResponse"),
           },
         },
         description: "User data",
       },
-      404: {
-        content: {
-          "application/json": {
-            schema: responseDataSchema(z.literal("Not Found")),
-          },
-        },
-        description: "Not Found",
-      },
       403: {
         content: {
           "application/json": {
-            schema: responseDataSchema(z.literal("Denied")),
+            schema: responseDataSchema(z.string()),
           },
         },
         description: "Denied",
@@ -127,7 +212,7 @@ export const createRouter = (basePath: string) => {
     const ability = await db.query.userInstanceAbilities.findFirst({
       where: and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, c.var.instanceId)),
     });
-    if (!ability) return c.json(err("Not Found"), 404);
+    if (!ability) return c.json(err("Not Found"), 403);
     if (!ability.canUse) return c.json(err("Denied"), 403);
     if (!ability.data) return c.json(err("No Data"), 500);
     if (ability.data.type !== "POEKMON_SHARED") return c.json(err("Invalid Data"), 500);
@@ -155,7 +240,15 @@ export const createRouter = (basePath: string) => {
             schema: responseDataSchema(z.null()),
           },
         },
-        description: "ok",
+        description: "success",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: responseDataSchema(z.literal("Error Update")),
+          },
+        },
+        description: "Error Update",
       },
     },
   });
@@ -167,11 +260,15 @@ export const createRouter = (basePath: string) => {
       type: "POEKMON_SHARED",
       ...data,
     } as PoekmonSharedUserInstanceData;
-    await db
+    const result = await db
       .update(userInstanceAbilities)
       .set({ data: abilityData })
-      .where(and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, c.var.instanceId)));
-    return c.json(ok());
+      .where(and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, c.var.instanceId)))
+      .returning({ userId: userInstanceAbilities.userId, instanceId: userInstanceAbilities.instanceId });
+    if (result.length !== 1) {
+      return c.json(err(`Error Update: ${result.length} userInstanceAbilities returned`), 400);
+    }
+    return c.json(ok(null));
   });
 
   const updatePoeAccountDataRoute = createRoute({
@@ -194,7 +291,7 @@ export const createRouter = (basePath: string) => {
             schema: responseDataSchema(z.null()),
           },
         },
-        description: "ok",
+        description: "success",
       },
       400: {
         content: {
@@ -228,17 +325,15 @@ export const createRouter = (basePath: string) => {
     return c.json(ok());
   });
 
-  const healthReportRoute = createRoute({
+  const createLogRoute = createRoute({
     method: "post",
-    path: "/report",
-    operationId: "healthReport",
+    path: "/log",
+    operationId: "createLog",
     request: {
       body: {
         content: {
           "application/json": {
-            schema: z.object({
-              poekmon_version: z.string(),
-            }),
+            schema: ChatLogModel,
           },
         },
       },
@@ -250,15 +345,35 @@ export const createRouter = (basePath: string) => {
             schema: responseDataSchema(z.null()),
           },
         },
-        description: "ok",
+        description: "success",
       },
     },
   });
 
-  router.openapi(healthReportRoute, async (c) => {
+  router.openapi(createLogRoute, async (c) => {
     const data = c.req.valid("json");
-    console.log("Poekmon reported version", data.poekmon_version);
-    return c.json(ok(null));
+    const logDetail = {
+      type: "POEKMON_SHARED",
+      query: data.query,
+      attachments: data.attachments,
+      consume_point: data.consume_point,
+      bot: data.bot,
+      chatId: data.chat_id,
+      poe_account_id: data.poe_account_id,
+    } as PoekmonSharedResourceUsageLogDetails;
+
+    await db
+      .insert(resourceUsageLogs)
+      .values({
+        id: createCUID(),
+        userId: data.user_id,
+        instanceId: c.var.instanceId,
+        type: ServiceTypeSchema.Values.POEKMON_SHARED,
+        details: logDetail,
+        createdAt: new Date(),
+      })
+      .returning();
+    return c.json(ok());
   });
 
   if (env.NODE_ENV === "development") {
@@ -270,15 +385,14 @@ export const createRouter = (basePath: string) => {
         title: "Poekmon Panel API",
       },
     });
+    router.get("/swagger", swaggerUI({ url: "./doc" }));
   }
-
-  return router;
 };
 
 export const createAuthMiddleware = (secret: string) => {
   return createMiddleware(async (c, next) => {
     console.log(c.req.path);
-    if (c.req.path.endsWith("/doc")) {
+    if (c.req.path.endsWith("/doc") || c.req.path.endsWith("/swagger")) {
       return next();
     }
     const authSecret = c.req.header("Authorization")?.replace("Bearer ", "");

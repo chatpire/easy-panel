@@ -3,6 +3,7 @@ import {
   ChatGPTSharedInstanceAttributesSchema,
   ChatGPTSharedOAuthEventContentSchema,
 } from "./service/chatgpt-shared.schema";
+import { PoekmonSharedAuthEventContentSchema } from "./service/poekmon-shared.schema";
 
 export const ServiceInstanceAttributesSchema = z.discriminatedUnion("type", [ChatGPTSharedInstanceAttributesSchema]);
 
@@ -28,6 +29,7 @@ export const EventContentSchema = z.discriminatedUnion("type", [
   ChatGPTSharedOAuthEventContentSchema,
   UserLoginEventContentSchema,
   UserCreateEventContentSchema,
+  PoekmonSharedAuthEventContentSchema
 ]);
 export type EventContent = z.infer<typeof EventContentSchema>;
 
