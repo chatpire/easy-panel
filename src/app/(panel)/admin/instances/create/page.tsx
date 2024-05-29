@@ -11,7 +11,7 @@ import { popupChatGPTShareInstanceConfigDetails } from "../../../_components/cha
 import { useState } from "react";
 import { popupPoekmonAPIConfigForm } from "../../../_components/poekmon-api/poekmon-api-config-popup";
 import { popupPoekmonSharedInstanceConfigDetails } from "@/app/(panel)/_components/poekmon-shared/poekmon-shared-config-popup";
-import { PoekmonSharedInstanceData } from "@/schema/service/poekmon-shared.schema";
+import { PoekmonSharedInstanceData, defaultPoekmonSharedAccount } from "@/schema/service/poekmon-shared.schema";
 import { generateId } from "lucia";
 
 export default function CreateInstancePage({}) {
@@ -33,11 +33,7 @@ export default function CreateInstancePage({}) {
         toast.error("URL is required for Poekmon Shared instance");
         return;
       }
-      instanceCreate.data = {
-        type: "POEKMON_SHARED",
-        secret: generateId(48),
-        points_remain: -1,
-      } as PoekmonSharedInstanceData;
+      instanceCreate.data = defaultPoekmonSharedAccount();
     }
 
     const grantToUserIds = [];

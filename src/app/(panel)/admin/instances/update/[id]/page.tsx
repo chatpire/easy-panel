@@ -42,6 +42,7 @@ export default function UpdateInstancePage({ params }: { params: { id: string } 
       <div className="max-w-full overflow-hidden">
         <Card>
           <CardHeader>Update Instance {instanceQuery.data?.name}</CardHeader>
+          {instanceQuery.data ? (
           <CardContent>
             <InstanceForm
               onSubmit={onSubmit}
@@ -53,6 +54,10 @@ export default function UpdateInstancePage({ params }: { params: { id: string } 
               loading={loading}
             />
           </CardContent>
+          ) : (
+            <CardContent>Loading...</CardContent>
+          
+          )}
         </Card>
       </div>
     </PageShell>

@@ -37,9 +37,11 @@ export const UserReadAdminWithLastLoginSchema = UserReadAdminSchema.merge(
 );
 
 export type UserReadAdmin = z.infer<typeof UserReadAdminSchema>;
+
 export const UserReadSchema = UserReadAdminSchema.omit({
   comment: true,
 });
+export type UserRead = z.infer<typeof UserReadSchema>;
 
 const UserPasswordSchema = z.object({
   password: z.string().min(6),

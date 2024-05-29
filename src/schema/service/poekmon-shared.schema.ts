@@ -4,18 +4,26 @@ import { createSelectSchema } from "drizzle-zod";
 import { resourceUsageLogs } from "@/server/db/schema";
 
 export const PoekmonSharedAccountSchema = z.object({
-  status: z.enum(["active", "inactive"]),
+  status: z.enum(["active", "inactive", "initialized"]),
   account_email: z.string().nullable(),
-  account_info: z.object({
-    subscription_active: z.boolean(),
-    subscription_plan_type: z.string().nullable(),
-    subscription_expires_time: z.number().int().nullable(),
-    message_point_balance: z.number().int(),
-    message_point_alloment: z.number().int(),
-    message_point_reset_time: z.number().int().nullable(),
-  }),
+  account_info: z
+    .object({
+      subscription_active: z.boolean(),
+      subscription_plan_type: z.string(),
+      subscription_expires_time: z.number().int(),
+      message_point_balance: z.number().int(),
+      message_point_alloment: z.number().int(),
+      message_point_reset_time: z.number().int(),
+    })
+    .nullable(),
 });
 export type PoekmonSharedAccount = z.infer<typeof PoekmonSharedAccountSchema>;
+
+export const defaultPoekmonSharedAccount = (): PoekmonSharedAccount => ({
+  status: "initialized",
+  account_email: null,
+  account_info: null,
+});
 
 export const PoekmonSharedInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
@@ -26,8 +34,12 @@ export type PoekmonSharedInstanceData = z.infer<typeof PoekmonSharedInstanceData
 
 export const PoekmonSharedUserInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
-  chat_ids: z.array(z.string()),
-  bot_ids: z.array(z.string()),
+  poe_account_states: z.record(
+    z.object({
+      chat_ids: z.array(z.string()),
+      bot_ids: z.array(z.string()),
+    }),
+  ),
   available_points: z.number().int(), // -1 为无限
 });
 export type PoekmonSharedUserInstanceData = z.infer<typeof PoekmonSharedUserInstanceDataSchema>;

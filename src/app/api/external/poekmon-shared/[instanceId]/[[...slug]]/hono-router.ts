@@ -156,17 +156,6 @@ export const extendRouter = (router: Router) => {
     if (!ability) return c.json(err("User instance ability not exist"), 403);
     if (!ability.canUse) return c.json(err("Permission Denied"), 403);
     if (data.token !== ability.token) return c.json(err("Denied"), 403);
-    // await db.insert(eventLogs).values({
-    //   id: createCUID(),
-    //   userId,
-    //   type: "poekmon_shared.auth",
-    //   resultType: "success",
-    //   content: {
-    //     type: "poekmon_shared.auth",
-    //     intanceId: c.var.instanceId,
-    //     requestIp: c.req.ip,
-    //     userIp: c.req.header("X-Real-IP"),
-    //   },
     await writePoekmonSharedAuthLog(db, userId, c.var.instanceId, data.user_ip, c.req.header("X-Real-IP") ?? null);
 
     return c.json(ok(null));
@@ -199,7 +188,7 @@ export const extendRouter = (router: Router) => {
       500: {
         content: {
           "application/json": {
-            schema: responseDataSchema(z.literal("No Data")),
+            schema: responseDataSchema(z.string()),
           },
         },
         description: "No Data",
@@ -212,10 +201,13 @@ export const extendRouter = (router: Router) => {
     const ability = await db.query.userInstanceAbilities.findFirst({
       where: and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, c.var.instanceId)),
     });
+    console.log(ability);
     if (!ability) return c.json(err("Not Found"), 403);
     if (!ability.canUse) return c.json(err("Denied"), 403);
-    if (!ability.data) return c.json(err("No Data"), 500);
-    if (ability.data.type !== "POEKMON_SHARED") return c.json(err("Invalid Data"), 500);
+    if (ability.data?.type !== "POEKMON_SHARED") {
+      console.error("Invalid Ability Data Type", ability);
+      return c.json(err("Invalid Data Type"), 500);
+    }
     return c.json(ok(ability.data as UserData));
   });
 

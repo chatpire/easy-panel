@@ -6,9 +6,10 @@ import { UserInstanceInfoCard } from "./instance-info-card-user";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Icons } from "@/components/icons";
 import { globalSettingsManager } from "@/server/globalSettings";
+import { UserRead } from "@/schema/user.schema";
 
 export default async function DashboardPage({}) {
-  await getCurrentUserOrRedirect();
+  const user = await getCurrentUserOrRedirect();
   const instances = await api.serviceInstance.getAllWithToken();
   const announcement = await globalSettingsManager.getSettingContent("chatGPTShareAnnouncement");
 
@@ -24,7 +25,7 @@ export default async function DashboardPage({}) {
       </Alert>
       <div className="grid gap-6">
         {instances.map((instance) => (
-          <UserInstanceInfoCard key={instance.id} instanceWithToken={instance} />
+          <UserInstanceInfoCard key={instance.id} user={user} instanceWithToken={instance} />
         ))}
       </div>
       {instances.length === 0 && (
