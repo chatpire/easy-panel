@@ -43,8 +43,8 @@ interface Props extends React.ComponentProps<"form"> {
 
 function UserInstanceAbilityForm({ className, userId, closePopup }: Props) {
   const instancesQuery = api.serviceInstance.getAllAdmin.useQuery();
-  const userInstanceAbilitiesQuery = api.user.getInstanceAbilities.useQuery({ userId });
-  const mutation = api.user.editInstanceAbilities.useMutation();
+  const userInstanceAbilitiesQuery = api.userInstanceAbility.getMany.useQuery({ userId });
+  const mutation = api.userInstanceAbility.grantInstancesToUser.useMutation();
 
   const [isSaving, setIsSaving] = React.useState<boolean>(false);
 
@@ -115,8 +115,8 @@ function UserInstanceAbilityForm({ className, userId, closePopup }: Props) {
                     <DropdownMenu>
                       <DropdownMenuTrigger className="w-full">
                         <div className="w-full rounded-md border p-2 text-sm">
-                          {instancesQuery.data?.length ?? "null"} Instances, {Object.values(value).filter(Boolean).length} can
-                          use
+                          {instancesQuery.data?.length ?? "null"} Instances,{" "}
+                          {Object.values(value).filter(Boolean).length} can use
                         </div>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">

@@ -14,7 +14,7 @@ export default function UpdateUserPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = React.useState(false);
   const userQuery = api.user.getById.useQuery({ id }, { retry: false });
   const updateMutation = api.user.update.useMutation();
-  const editAbilitiesMutation = api.user.editInstanceAbilities.useMutation();
+  const createAbilitiesMutation = api.userInstanceAbility.grantInstancesToUser.useMutation();
   const instancesQuery = api.serviceInstance.getAllWithToken.useQuery();
 
   if (userQuery.error) {
@@ -28,7 +28,7 @@ export default function UpdateUserPage({ params }: { params: { id: string } }) {
     try {
       setLoading(true);
       await updateMutation.mutateAsync({ id, ...userUpdate });
-      await editAbilitiesMutation.mutateAsync({
+      await createAbilitiesMutation.mutateAsync({
         userId: id,
         instanceIdCanUse: instanceIds.reduce((acc, id) => ({ ...acc, [id]: true }), {}),
       });

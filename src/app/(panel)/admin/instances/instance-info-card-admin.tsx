@@ -57,7 +57,7 @@ export function DeleteInstance({ instanceId, closePopup }: { instanceId: string;
 
 export function AdminInstanceInfoCard({ instance, className }: Props) {
   const router = useRouter();
-  const grantMutation = api.serviceInstance.grantToAllActiveUsers.useMutation();
+  const grantMutation = api.userInstanceAbility.grantInstanceToAllActiveUsers.useMutation();
 
   const grantToAll = async (instanceId: string) => {
     try {

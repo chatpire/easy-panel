@@ -17,7 +17,7 @@ import { generateId } from "lucia";
 export default function CreateInstancePage({}) {
   const [loading, setLoading] = useState(false);
   const createMutation = api.serviceInstance.create.useMutation();
-  const grantMutation = api.serviceInstance.grantToAllActiveUsers.useMutation();
+  const grantMutation = api.userInstanceAbility.grantInstanceToAllActiveUsers.useMutation();
   const usersQuery = api.user.getAll.useQuery();
 
   async function onSubmit(values: z.infer<typeof InstanceFormSchema>) {

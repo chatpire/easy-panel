@@ -26,7 +26,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
   }
 
   try {
-    const userId = await api.serviceInstance.verifyUserAbility({
+    const userId = await api.userInstanceAbility.verifyUserAbility({
       instanceId,
       userToken,
       requestIp,

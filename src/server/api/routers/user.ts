@@ -129,47 +129,4 @@ export const userRouter = createTRPCRouter({
       .groupBy(users.id);
     return UserReadAdminWithLastLoginSchema.array().parse(results);
   }),
-
-  editInstanceAbilities: adminProcedure
-    .input(
-      z.object({
-        userId: z.string(),
-        instanceIdCanUse: z.record(z.boolean()),
-      }),
-    )
-    .mutation(async ({ input, ctx }) => {
-      const { userId, instanceIdCanUse } = input;
-
-      const user = await ctx.db.query.users.findFirst({ where: eq(users.id, userId) });
-      if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-
-      await ctx.db.transaction(async (tx) => {
-        for (const [instanceId, canUse] of Object.entries(instanceIdCanUse)) {
-          await tx
-            .insert(userInstanceAbilities)
-            .values({
-              userId,
-              instanceId,
-              token: user.username + "__" + generateId(16),
-              canUse,
-            })
-            .onConflictDoUpdate({
-              target: [userInstanceAbilities.userId, userInstanceAbilities.instanceId],
-              set: {
-                canUse,
-                updatedAt: new Date(),
-              },
-            });
-        }
-      });
-    }),
-
-  getInstanceAbilities: adminProcedure.input(z.object({ userId: z.string() })).query(async ({ ctx, input }) => {
-    const abilities = await ctx.db.query.userInstanceAbilities.findMany({
-      where: eq(userInstanceAbilities.userId, input.userId),
-    });
-    return UserInstanceAbilitySchema.array().parse(abilities);
-  }),
 });

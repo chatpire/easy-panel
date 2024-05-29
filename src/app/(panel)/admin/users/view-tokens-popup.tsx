@@ -28,7 +28,7 @@ interface Props extends React.ComponentProps<"form"> {
 
 function TokenViewer({ className, userId, closePopup }: Props) {
   const instancesQuery = api.serviceInstance.getAllAdmin.useQuery();
-  const userInstanceAbilitiesQuery = api.user.getInstanceAbilities.useQuery({ userId });
+  const userInstanceAbilitiesQuery = api.userInstanceAbility.getMany.useQuery({ userId });
 
   const abilities = userInstanceAbilitiesQuery.data ?? [];
 
