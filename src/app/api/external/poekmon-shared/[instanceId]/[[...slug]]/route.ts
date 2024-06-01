@@ -39,4 +39,4 @@ const handler = async (req: NextRequest, { params }: { params: { instanceId: str
   return await router.fetch(req);
 };
 
-export { handler as GET, handler as POST, handler as PATCH, handler as CREATE, handler as DELETE };
+export { handler as GET, handler as POST, handler as PATCH, handler as DELETE, handler as OPTIONS };
