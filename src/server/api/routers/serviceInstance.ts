@@ -1,11 +1,6 @@
 import { TRPCError } from "@trpc/server";
 
-import {
-  createTRPCRouter,
-  adminProcedure,
-  protectedProcedure,
-  protectedWithUserProcedure,
-} from "@/server/trpc";
+import { createTRPCRouter, adminProcedure, protectedProcedure, protectedWithUserProcedure } from "@/server/trpc";
 import { z } from "zod";
 import {
   ServiceInstanceCreateSchema,
@@ -17,6 +12,10 @@ import {
 import { resourceUsageLogs, serviceInstances, userInstanceAbilities } from "@/server/db/schema";
 import { createCUID } from "@/lib/cuid";
 import { and, eq } from "drizzle-orm";
+import {
+  PoekmonSharedAccountInfoUserReadableSchema,
+  PoekmonSharedInstanceData,
+} from "@/schema/service/poekmon-shared.schema";
 
 export const serviceInstanceRouter = createTRPCRouter({
   create: adminProcedure.input(ServiceInstanceCreateSchema).mutation(async ({ ctx, input }) => {
@@ -91,6 +90,18 @@ export const serviceInstanceRouter = createTRPCRouter({
     return ServiceInstanceWithToken.array().parse(instances);
   }),
 
+  getByIdAdmin: protectedProcedure
+    .input(ServiceInstanceUserReadSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.db.query.serviceInstances.findFirst({
+        where: eq(serviceInstances.id, input.id),
+      });
+      if (!result) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Service instance not found" });
+      }
+      return ServiceInstanceAdminSchema.parse(result);
+    }),
+
   getById: protectedProcedure.input(ServiceInstanceUserReadSchema.pick({ id: true })).query(async ({ ctx, input }) => {
     const result = await ctx.db.query.serviceInstances.findFirst({
       where: eq(serviceInstances.id, input.id),
@@ -100,6 +111,25 @@ export const serviceInstanceRouter = createTRPCRouter({
     }
     return ServiceInstanceUserReadSchema.parse(result);
   }),
+
+  getPoekmonSharedAccountInfo: protectedProcedure
+    .input(ServiceInstanceUserReadSchema.pick({ id: true }))
+    .query(async ({ ctx, input }) => {
+      const result = await ctx.db.query.serviceInstances.findFirst({
+        where: eq(serviceInstances.id, input.id),
+      });
+      if (!result) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Service instance not found" });
+      }
+      if (result.type !== "POEKMON_SHARED") {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Invalid instance type" });
+      }
+      const data = result.data as PoekmonSharedInstanceData;
+      if (!data.poe_account.account_info) {
+        return null;
+      }
+      return PoekmonSharedAccountInfoUserReadableSchema.parse(data.poe_account.account_info);
+    }),
 
   delete: adminProcedure
     .input(ServiceInstanceAdminSchema.pick({ id: true }).merge(z.object({ deleteLogs: z.boolean() })))

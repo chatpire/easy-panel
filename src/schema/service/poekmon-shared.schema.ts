@@ -3,26 +3,33 @@ import { z } from "zod";
 import { createSelectSchema } from "drizzle-zod";
 import { resourceUsageLogs } from "@/server/db/schema";
 
+export const PoekmonSharedAccountInfoSchema = z.object({
+  account_email: z.string(),
+  subscription_active: z.boolean(),
+  subscription_plan_type: z.string().nullable(),
+  subscription_expires_time: z.number().int().nullable(),
+  message_point_balance: z.number().int(),
+  message_point_alloment: z.number().int(),
+  message_point_reset_time: z.number().int(),
+});
+
+export const PoekmonSharedAccountInfoUserReadableSchema = PoekmonSharedAccountInfoSchema.omit({
+  account_email: true,
+  subscription_plan_type: true,
+  subscription_expires_time: true,
+});
+
 export const PoekmonSharedAccountSchema = z.object({
   status: z.enum(["active", "inactive", "initialized"]),
-  account_email: z.string().nullable(),
-  account_info: z
-    .object({
-      subscription_active: z.boolean(),
-      subscription_plan_type: z.string(),
-      subscription_expires_time: z.number().int(),
-      message_point_balance: z.number().int(),
-      message_point_alloment: z.number().int(),
-      message_point_reset_time: z.number().int(),
-    })
-    .nullable(),
+  account_info: PoekmonSharedAccountInfoSchema.nullable(),
+  account_info_dirty: z.boolean(),
 });
 export type PoekmonSharedAccount = z.infer<typeof PoekmonSharedAccountSchema>;
 
 export const defaultPoekmonSharedAccount = (): PoekmonSharedAccount => ({
   status: "initialized",
-  account_email: null,
   account_info: null,
+  account_info_dirty: false,
 });
 
 export const PoekmonSharedInstanceDataSchema = z.object({
@@ -61,18 +68,6 @@ export const PoekmonSharedResourceLogSumResultSchema = z.object({
   }),
 });
 export type PoekmonSharedResourceLogSumResult = z.infer<typeof PoekmonSharedResourceLogSumResultSchema>;
-
-export const PoekmonSharedLogGroupbyModelResultSchema = z.object({
-  durationWindow: DurationWindowSchema,
-  groups: z.array(
-    z.object({
-      model: z.string(),
-      count: z.number().int(),
-      sumTotalPoints: z.number().int(),
-    }),
-  ),
-});
-export type PoekmonSharedLogGroupbyModelResult = z.infer<typeof PoekmonSharedLogGroupbyModelResultSchema>;
 
 export const PoekmonSharedResourceUsageLogSchema = createSelectSchema(resourceUsageLogs).merge(
   z.object({

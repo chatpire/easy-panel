@@ -346,17 +346,33 @@ export const extendRouter = (router: Router) => {
       ...data,
     } as PoekmonSharedResourceUsageLogDetails;
 
-    await db
-      .insert(resourceUsageLogs)
-      .values({
+    await db.transaction(async (tx) => {
+      await tx.insert(resourceUsageLogs).values({
         id: createCUID(),
         userId: data.user_id,
         instanceId: c.var.instanceId,
         type: ServiceTypeSchema.Values.POEKMON_SHARED,
         details: logDetail,
         createdAt: new Date(),
-      })
-      .returning();
+      });
+
+      if (logDetail.status === "success") {
+        const instance = await tx.query.serviceInstances.findFirst({
+          where: eq(serviceInstances.id, c.var.instanceId),
+        });
+        const instanceData = instance!.data as PoekmonSharedInstanceData;
+        if (instanceData.poe_account.account_info !== null) {
+          instanceData.poe_account.account_info.message_point_balance -= logDetail.consume_point;
+        }
+        await tx
+          .update(serviceInstances)
+          .set({
+            data: instanceData,
+          })
+          .where(eq(serviceInstances.id, c.var.instanceId));
+      }
+    });
+
     return c.json(ok());
   });
 
