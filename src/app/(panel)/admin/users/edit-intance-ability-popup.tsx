@@ -80,7 +80,7 @@ function UserInstanceAbilityForm({ className, userId, closePopup }: Props) {
         ),
       );
     }
-  }, [userInstanceAbilitiesQuery.data, instancesQuery.data]);
+  }, [userInstanceAbilitiesQuery.data, instancesQuery.data, form]);
 
   async function onSubmit(values: InstancesSelection) {
     const { instanceIdCanUse } = values;
@@ -88,7 +88,13 @@ function UserInstanceAbilityForm({ className, userId, closePopup }: Props) {
     try {
       form.clearErrors();
       setIsSaving(true);
-      await mutation.mutateAsync({ userId, instanceIdCanUse });
+      const instanceIds = Object.entries(instanceIdCanUse).reduce((acc, [instanceId, canUse]) => {
+        if (canUse) {
+          acc.push(instanceId);
+        }
+        return acc;
+      }, [] as string[]);
+      await mutation.mutateAsync({ userId, instanceIds });
       form.reset();
       toast.success("Edit abilities successfully");
       closePopup();

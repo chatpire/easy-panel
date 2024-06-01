@@ -2,11 +2,62 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, adminProcedure, publicProcedure } from "@/server/trpc";
 import { z } from "zod";
-import { userInstanceAbilities, users } from "@/server/db/schema";
-import { createCUID } from "@/lib/cuid";
-import { type SQL, and, eq } from "drizzle-orm";
+import { serviceInstances, userInstanceAbilities, users } from "@/server/db/schema";
+import { type SQL, and, eq, inArray } from "drizzle-orm";
 import { generateId } from "lucia";
-import { UserInstanceAbilitySchema } from "@/schema/userInstanceAbility.schema";
+import { UserInstanceAbilitySchema, type UserInstanceData } from "@/schema/userInstanceAbility.schema";
+import { type ServiceType, ServiceTypeSchema } from "@/server/db/enum";
+import { type Db } from "@/server/db";
+
+function createDefaultInstanceData(type: ServiceType): UserInstanceData | null {
+  switch (type) {
+    case ServiceTypeSchema.Values.POEKMON_SHARED:
+      return {
+        type,
+        chat_ids: [],
+        bot_ids: [],
+        available_points: -1,
+      };
+    default:
+      return null;
+  }
+}
+
+async function batchCreateAbilities(db: Db, userIds: string[], instanceIds: string[], updateCanUse = false) {
+  await db.transaction(async (tx) => {
+    const instances = await tx.query.serviceInstances.findMany({
+      where: inArray(serviceInstances.id, instanceIds),
+    });
+    if (instances.length !== instanceIds.length) {
+      const missingIds = instanceIds.filter((id) => !instances.some((instance) => instance.id === id));
+      throw new TRPCError({ code: "NOT_FOUND", message: "Some Instance not found: " + String(missingIds) });
+    }
+    for (const instance of instances) {
+      const data = createDefaultInstanceData(instance.type);
+      const values = userIds.map((userId) => ({
+        userId,
+        instanceId: instance.id,
+        token: generateId(24),
+        canUse: true,
+        data,
+      }));
+      if (updateCanUse) {
+        await tx
+          .insert(userInstanceAbilities)
+          .values(values)
+          .onConflictDoUpdate({
+            target: [userInstanceAbilities.userId, userInstanceAbilities.instanceId],
+            set: {
+              canUse: true,
+              updatedAt: new Date(),
+            },
+          });
+      } else {
+        await tx.insert(userInstanceAbilities).values(values).onConflictDoNothing();
+      }
+    }
+  });
+}
 
 export const userInstanceAbilityRouter = createTRPCRouter({
   getMany: adminProcedure
@@ -30,63 +81,31 @@ export const userInstanceAbilityRouter = createTRPCRouter({
     .input(
       z.object({
         userId: z.string(),
-        instanceIdCanUse: z.record(z.boolean()),
+        instanceIds: z.string().array(),
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const { userId, instanceIdCanUse } = input;
+      const { userId, instanceIds: instanceIdCanUse } = input;
 
       const user = await ctx.db.query.users.findFirst({ where: eq(users.id, userId) });
       if (!user) {
         throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
-      await ctx.db.transaction(async (tx) => {
-        for (const [instanceId, canUse] of Object.entries(instanceIdCanUse)) {
-          // todo create default data
-          await tx
-            .insert(userInstanceAbilities)
-            .values({
-              userId,
-              instanceId,
-              token: user.username + "__" + generateId(16),
-              canUse,
-            })
-            .onConflictDoUpdate({
-              target: [userInstanceAbilities.userId, userInstanceAbilities.instanceId],
-              set: {
-                canUse,
-                updatedAt: new Date(),
-              },
-            });
-        }
-      });
+      await batchCreateAbilities(ctx.db, [userId], instanceIdCanUse, true);
     }),
 
   grantInstanceToAllActiveUsers: adminProcedure
     .input(z.object({ instanceId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const userIds = await ctx.db.select({ id: users.id }).from(users).where(eq(users.isActive, true));
-      await ctx.db.transaction(async (tx) => {
-        for (const { id } of userIds) {
-          await tx
-            .insert(userInstanceAbilities)
-            .values({
-              userId: id,
-              instanceId: input.instanceId,
-              token: createCUID(),
-              canUse: true,
-              updatedAt: new Date(),
-            })
-            .onConflictDoUpdate({
-              target: [userInstanceAbilities.userId, userInstanceAbilities.instanceId],
-              set: {
-                canUse: true,
-                updatedAt: new Date(),
-              },
-            });
-        }
-      });
+
+      await batchCreateAbilities(
+        ctx.db,
+        userIds.map((user) => user.id),
+        [input.instanceId],
+        true,
+      );
     }),
 
   verifyUserAbility: publicProcedure

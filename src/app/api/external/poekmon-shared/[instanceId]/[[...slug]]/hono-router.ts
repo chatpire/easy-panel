@@ -6,16 +6,14 @@ import {
   type PoekmonSharedInstanceData,
   type PoekmonSharedUserInstanceData,
 } from "@/schema/service/poekmon-shared.schema";
-import { UserDataModel, PoeAccountDataModel, type UserData, ChatLogModel } from "./models";
+import { UserDataModel, PoeAccountDataModel, type UserData, ChatLogContentModel } from "./models";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { env } from "@/env";
 import { createMiddleware } from "hono/factory";
 import { createCUID } from "@/lib/cuid";
 import { ServiceTypeSchema } from "@/server/db/enum";
 import { writePoekmonSharedAuthLog } from "@/server/actions/write-event-log";
-import { type NextRequest } from "next/server";
 import { swaggerUI } from "@hono/swagger-ui";
-import { th } from "@faker-js/faker";
 
 type Variables = {
   instanceId: string;
@@ -41,7 +39,7 @@ function responseDataSchema<T extends z.ZodType<any>>(schema: T, name?: string) 
 type ResponseData = z.infer<typeof ResponseDataSchema>;
 
 const ok = (content?: unknown): ResponseData => ({
-  content,
+  content: content ?? null,
 });
 
 const err = (message?: string): ResponseData => ({
@@ -201,7 +199,6 @@ export const extendRouter = (router: Router) => {
     const ability = await db.query.userInstanceAbilities.findFirst({
       where: and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, c.var.instanceId)),
     });
-    console.log(ability);
     if (!ability) return c.json(err("Not Found"), 403);
     if (!ability.canUse) return c.json(err("Denied"), 403);
     if (ability.data?.type !== "POEKMON_SHARED") {
@@ -314,7 +311,7 @@ export const extendRouter = (router: Router) => {
       return c.json(err(`Error Update: ${instance.length} instance returned`), 400);
     }
     c.set("instanceData", instance[0]!.data as PoekmonSharedInstanceData);
-    return c.json(ok());
+    return c.json(ok(null));
   });
 
   const createLogRoute = createRoute({
@@ -325,7 +322,7 @@ export const extendRouter = (router: Router) => {
       body: {
         content: {
           "application/json": {
-            schema: ChatLogModel,
+            schema: ChatLogContentModel,
           },
         },
       },
@@ -346,12 +343,7 @@ export const extendRouter = (router: Router) => {
     const data = c.req.valid("json");
     const logDetail = {
       type: "POEKMON_SHARED",
-      query: data.query,
-      attachments: data.attachments,
-      consume_point: data.consume_point,
-      bot: data.bot,
-      chatId: data.chat_id,
-      poe_account_id: data.poe_account_id,
+      ...data,
     } as PoekmonSharedResourceUsageLogDetails;
 
     await db
@@ -369,7 +361,6 @@ export const extendRouter = (router: Router) => {
   });
 
   if (env.NODE_ENV === "development") {
-    console.log("OpenAPI spec available at /api/external/poekmon-shared/[instanceId]/doc");
     router.doc("/doc", {
       openapi: "3.0.0",
       info: {
@@ -383,7 +374,7 @@ export const extendRouter = (router: Router) => {
 
 export const createAuthMiddleware = (secret: string) => {
   return createMiddleware(async (c, next) => {
-    console.log(c.req.path);
+    // console.log(c.req.path);
     if (c.req.path.endsWith("/doc") || c.req.path.endsWith("/swagger")) {
       return next();
     }

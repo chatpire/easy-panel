@@ -34,12 +34,8 @@ export type PoekmonSharedInstanceData = z.infer<typeof PoekmonSharedInstanceData
 
 export const PoekmonSharedUserInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
-  poe_account_states: z.record(
-    z.object({
-      chat_ids: z.array(z.string()),
-      bot_ids: z.array(z.string()),
-    }),
-  ),
+  chat_ids: z.array(z.number().int()),
+  bot_ids: z.array(z.number().int()),
   available_points: z.number().int(), // -1 为无限
 });
 export type PoekmonSharedUserInstanceData = z.infer<typeof PoekmonSharedUserInstanceDataSchema>;
@@ -47,11 +43,12 @@ export type PoekmonSharedUserInstanceData = z.infer<typeof PoekmonSharedUserInst
 export const PoekmonSharedResourceUsageLogDetailsSchema = z.object({
   type: z.literal(ServiceTypeSchema.Values.POEKMON_SHARED),
   bot: z.string(),
-  chatId: z.string(), // 实际为 number
+  chat_id: z.number().int().nullable(),
+  chat_code: z.string().nullable(),
   query: z.string(),
+  status: z.string(),
   attachments: z.array(z.string()),
   consume_point: z.number().int(),
-  poe_account_id: z.string().nullable(),
 });
 export type PoekmonSharedResourceUsageLogDetails = z.infer<typeof PoekmonSharedResourceUsageLogDetailsSchema>;
 

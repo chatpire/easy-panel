@@ -28,10 +28,12 @@ export default function UpdateUserPage({ params }: { params: { id: string } }) {
     try {
       setLoading(true);
       await updateMutation.mutateAsync({ id, ...userUpdate });
-      await createAbilitiesMutation.mutateAsync({
-        userId: id,
-        instanceIdCanUse: instanceIds.reduce((acc, id) => ({ ...acc, [id]: true }), {}),
-      });
+      if (generateTokens && instancesQuery.data) {
+        await createAbilitiesMutation.mutateAsync({
+          userId: id,
+          instanceIds: instanceIds,
+        });
+      }
       toast.success("User updated");
     } catch (error) {
       console.error(error);
