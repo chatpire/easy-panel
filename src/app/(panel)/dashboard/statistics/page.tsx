@@ -21,11 +21,11 @@ async function fetchData(pagination: PaginationInput) {
 export default async function UsersPage({}) {
   return (
     <PageShell>
-      <PageHeader heading="Logs" text="对话日志" />
+      <PageHeader heading="Statistics" text="对话统计" />
       <UserUsageStatistics />
-      <div className="max-w-full overflow-hidden">
+      {/* <div className="max-w-full overflow-hidden">
         <UserResourceLogsTable fetchData={fetchData} />
-      </div>
+      </div> */}
     </PageShell>
   );
 }

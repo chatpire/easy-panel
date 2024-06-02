@@ -11,7 +11,7 @@ export function formatValueToNode(key: string, value: unknown): React.ReactNode 
   if (value instanceof Date) {
     return <span className="text-muted-foreground">{value.toLocaleString()}</span>;
   }
-  if (key === "text") {
+  if (key === "text" || key.endsWith("query")) {
     const text = value as string;
     return (
       <Button

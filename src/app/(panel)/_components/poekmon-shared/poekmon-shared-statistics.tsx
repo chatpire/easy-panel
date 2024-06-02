@@ -44,15 +44,15 @@ export function PoekmonSharedInstanceUsageStatistics({
                       </div>
                       <div className="flex flex-row items-center">
                         {" "}
-                        <Icons.fileBarChart className="mr-2 h-4 w-4" />
-                        {item.stats.sumPoints}
+                        <Icons.coins className="mr-2 h-4 w-4" />
+                        {item.stats.sumPoints ?? 0}
                       </div>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="left">
                     <p>
                       最近 {item.durationWindow}：{item.stats.userCount} 用户使用，请求 {item.stats.count} 次，消耗{" "}
-                      {item.stats.sumPoints} 积分点数
+                      {item.stats.sumPoints ?? 0} 积分点数
                     </p>
                   </TooltipContent>
                 </Tooltip>

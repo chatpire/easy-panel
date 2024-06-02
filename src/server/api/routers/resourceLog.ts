@@ -9,9 +9,13 @@ import { resourceUsageLogs, serviceInstances, users } from "@/server/db/schema";
 import { UserRoles } from "@/schema/user.schema";
 import { DurationWindowSchema } from "@/server/db/enum";
 import { alignTimeToGranularity } from "@/lib/utils";
-import { groupGPT4LogsInDurationWindow, groupPoekmonAPILogsInDurationWindowByModel, sumChatGPTSharedLogsInDurationWindows, sumPoekmonAPILogsInDurationWindows, sumPoekmonSharedLogsInDurationWindows } from "./resourceLogHelper";
-
-
+import {
+  groupGPT4LogsInDurationWindow,
+  groupPoekmonAPILogsInDurationWindowByModel,
+  sumChatGPTSharedLogsInDurationWindows,
+  sumPoekmonAPILogsInDurationWindows,
+  sumPoekmonSharedLogsInDurationWindows,
+} from "./resourceLogHelper";
 
 const PaginationResourceLogsInputSchema = z.object({
   where: ResourceUsageLogWhereInputSchema,
@@ -196,6 +200,26 @@ export const resourceLogRouter = createTRPCRouter({
         durationWindows: input.durationWindows,
         timeEnd: alignTimeToGranularity(60),
         instanceId: input.instanceId,
+      });
+    }),
+
+  sumPoekmonSharedLogsInDurationWindowsByUserId: protectedWithUserProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        durationWindows: DurationWindowSchema.array(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const userId = input.userId ?? ctx.user.id;
+      if (ctx.user.role !== UserRoles.ADMIN && ctx.user.id !== userId) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "You are not allowed to access this data" });
+      }
+      return sumPoekmonSharedLogsInDurationWindows({
+        ctx,
+        durationWindows: input.durationWindows,
+        timeEnd: alignTimeToGranularity(60),
+        userId,
       });
     }),
 });

@@ -254,7 +254,7 @@ export function DataTable<T>({
   const [lastPage, setLastPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(lazyPagination ? 1 : null);
 
-  const columns = React.useMemo(() => createColumns(schema, rowIconActions, rowDropdownActions), []);
+  const columns = React.useMemo(() => createColumns(schema, rowIconActions, rowDropdownActions), [rowDropdownActions, rowIconActions, schema]);
 
   // TODO: Implement lazy pagination
   if (lazyPagination) {
@@ -287,6 +287,8 @@ export function DataTable<T>({
     },
     enableColumnPinning: true,
   });
+
+  console.log(table.getVisibleFlatColumns());
 
   React.useEffect(() => {
     if (!lazyPagination || !fetchData) {

@@ -8,6 +8,7 @@ import { ChatGPTSharedResourceUsageLogSchema } from "@/schema/service/chatgpt-sh
 import {
   PoekmonAPIResourceUsageLogSchema,
 } from "@/schema/service/poekmon-api.schema";
+import { PoekmonSharedResourceUsageLogSchema } from "@/schema/service/poekmon-shared.schema";
 
 type TabConfig = {
   type: ServiceType,
@@ -32,6 +33,26 @@ export function ResourceLogsTable({ fetchData }: { fetchData: (input: Pagination
         details: false,
         details_type: false,
         details_inputTokens: false,
+      }
+    },
+    {
+      type: ServiceTypeSchema.Values.POEKMON_SHARED,
+      name: "Poekmon Shared",
+      schema: PoekmonSharedResourceUsageLogSchema,
+      visibility: {
+        type: false,
+        userId: false,
+        text: false,
+        textBytes: false,
+        instanceId: false,
+        instance: false,
+        instance_url: false,
+        user: false,
+        details: false,
+        details_type: false,
+        details_attachments: false,
+        details_chat_id: false,
+        details_chat_code: false,
       }
     },
     {

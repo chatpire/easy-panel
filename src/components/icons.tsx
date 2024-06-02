@@ -35,6 +35,7 @@ import {
   Eye,
   MessageSquareMore,
   FileBarChart,
+  Coins,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
@@ -43,6 +44,7 @@ export const Icons = {
   logo: Command,
   close: X,
   copy: Copy,
+  coins: Coins,
   spinner: Loader2,
   chevronLeft: ChevronLeft,
   chevronRight: ChevronRight,
