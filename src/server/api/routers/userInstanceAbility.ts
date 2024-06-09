@@ -15,6 +15,7 @@ function createDefaultInstanceData(type: ServiceType): UserInstanceData | null {
       return {
         type,
         chat_ids: [],
+        chat_codes: [],
         bot_ids: [],
         available_points: -1,
       };

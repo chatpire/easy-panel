@@ -50,6 +50,7 @@ export type PoekmonSharedInstanceData = z.infer<typeof PoekmonSharedInstanceData
 export const PoekmonSharedUserInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
   chat_ids: z.array(z.number().int()),
+  chat_codes: z.array(z.string()),
   bot_ids: z.array(z.number().int()),
   available_points: z.number().int(), // -1 为无限
 });
