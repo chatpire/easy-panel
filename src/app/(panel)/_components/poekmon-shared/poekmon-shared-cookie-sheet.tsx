@@ -84,7 +84,7 @@ export function PoekmonSharedCookieConfigSheet({ instanceDetails }: { instanceDe
       .map((cookie: ParsedCookie) => ({
         name: cookie.name,
         value: cookie.value,
-        expired_at: new Date(cookie.expirationDate * 1000),
+        expired_at: cookie.expirationDate * 1000,
       }));
       form.setValue("currentCookies", parsedCookies);
       console.log(parsedCookies);
@@ -129,7 +129,7 @@ export function PoekmonSharedCookieConfigSheet({ instanceDetails }: { instanceDe
                           <TableRow key={index}>
                             <TableCell>{cookie.name}</TableCell>
                             <TableCell>{cookie.value}</TableCell>
-                            <TableCell>{cookie.expired_at.toLocaleString()}</TableCell>
+                            <TableCell>{new Date(cookie.expired_at).toLocaleString()}</TableCell>
                           </TableRow>
                         ))}
                         {field.value.length === 0 && (
