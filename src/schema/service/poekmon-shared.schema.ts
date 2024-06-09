@@ -23,7 +23,7 @@ export const PoeAccountCookieSchema = z
   .object({
     name: z.string(),
     value: z.string(),
-    expired_at: z.number(),
+    expired_at: z.number().nullable(),
   });
 
 export const PoekmonSharedAccountDataSchema = z.object({

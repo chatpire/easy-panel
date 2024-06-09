@@ -351,7 +351,7 @@ export const extendRouter = (router: Router) => {
       200: {
         content: {
           "application/json": {
-            schema: responseDataSchema(z.null()),
+            schema: responseDataSchema(PoeAccountCookiesModel),
           },
         },
         description: "success",
@@ -371,21 +371,29 @@ export const extendRouter = (router: Router) => {
     const data = c.req.valid("json");
 
     const instanceData = c.var.instanceData;
+    const poe_cookies = instanceData.poe_cookies.filter(
+      (cookie) => !data.some((newCookie) => newCookie.name === cookie.name),
+    );
+    poe_cookies.push(...data);
+
     const instance = await db
       .update(serviceInstances)
       .set({
         data: {
           ...instanceData,
-          poe_cookies: data,
+          poe_cookies,
         } as PoekmonSharedInstanceData,
       })
       .where(eq(serviceInstances.id, c.var.instanceId))
       .returning();
+
     if (instance.length !== 1) {
       return c.json(err(`Error Update: ${instance.length} instance returned`), 400);
     }
-    c.set("instanceData", instance[0]!.data as PoekmonSharedInstanceData);
-    return c.json(ok(null));
+    const newInstanceData = instance[0]!.data as PoekmonSharedInstanceData;
+    c.set("instanceData", newInstanceData);
+
+    return c.json(ok(newInstanceData.poe_cookies));
   });
 
   const createLogRoute = createRoute({
