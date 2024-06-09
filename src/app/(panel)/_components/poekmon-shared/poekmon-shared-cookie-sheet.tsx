@@ -129,7 +129,7 @@ export function PoekmonSharedCookieConfigSheet({ instanceDetails }: { instanceDe
                           <TableRow key={index}>
                             <TableCell>{cookie.name}</TableCell>
                             <TableCell>{cookie.value}</TableCell>
-                            <TableCell>{new Date(cookie.expired_at).toLocaleString()}</TableCell>
+                            <TableCell>{cookie.expired_at ? new Date(cookie.expired_at).toLocaleString() : "-"}</TableCell>
                           </TableRow>
                         ))}
                         {field.value.length === 0 && (
