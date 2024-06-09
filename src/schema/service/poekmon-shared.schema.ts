@@ -19,23 +19,31 @@ export const PoekmonSharedAccountInfoUserReadableSchema = PoekmonSharedAccountIn
   subscription_expires_time: true,
 });
 
-export const PoekmonSharedAccountSchema = z.object({
+export const PoeAccountCookieSchema = z
+  .object({
+    name: z.string(),
+    value: z.string(),
+    expired_at: z.date(),
+  });
+
+export const PoekmonSharedAccountDataSchema = z.object({
   status: z.enum(["active", "inactive", "initialized"]),
   account_info: PoekmonSharedAccountInfoSchema.nullable(),
-  account_info_dirty: z.boolean(),
+  is_dirty: z.boolean(),
 });
-export type PoekmonSharedAccount = z.infer<typeof PoekmonSharedAccountSchema>;
+export type PoekmonSharedAccount = z.infer<typeof PoekmonSharedAccountDataSchema>;
 
 export const defaultPoekmonSharedAccount = (): PoekmonSharedAccount => ({
   status: "initialized",
   account_info: null,
-  account_info_dirty: false,
+  is_dirty: false,
 });
 
 export const PoekmonSharedInstanceDataSchema = z.object({
   type: z.literal("POEKMON_SHARED"),
   secret: z.string(), // client secret
-  poe_account: PoekmonSharedAccountSchema,
+  poe_account: PoekmonSharedAccountDataSchema,
+  poe_cookies: z.array(PoeAccountCookieSchema),
 });
 export type PoekmonSharedInstanceData = z.infer<typeof PoekmonSharedInstanceDataSchema>;
 

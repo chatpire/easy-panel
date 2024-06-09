@@ -16,7 +16,8 @@ import { useRouter } from "next/navigation";
 import { popup } from "@/components/popup";
 import { Checkbox } from "@/components/ui/checkbox";
 import { popupPoekmonAPIConfigForm } from "../../_components/poekmon-api/poekmon-api-config-popup";
-import { popupPoekmonSharedInstanceConfigDetails } from "../../_components/poekmon-shared/poekmon-shared-config-popup";
+import { popupPoekmonSharedInstanceViewConfigDetails } from "../../_components/poekmon-shared/poekmon-shared-config-popup";
+import { PoekmonSharedCookieConfigSheet } from "../../_components/poekmon-shared/poekmon-shared-cookie-sheet";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -105,10 +106,15 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
             </Button>
           )}
           {instance.type === "POEKMON_SHARED" && (
-            <Button onClick={() => popupPoekmonSharedInstanceConfigDetails({ id: instance.id, data: instance.data })}>
-              <Icons.pencil className="mr-2 h-4 w-4" />
-              Edit Config
-            </Button>
+            <>
+              <Button
+                onClick={() => popupPoekmonSharedInstanceViewConfigDetails({ id: instance.id, data: instance.data })}
+              >
+                <Icons.eye className="mr-2 h-4 w-4" />
+                View Config
+              </Button>
+              <PoekmonSharedCookieConfigSheet instanceDetails={{ id: instance.id, data: instance.data }} />
+            </>
           )}
           <Button onClick={() => router.push(`/admin/instances/update/${instance.id}`)}>
             <Icons.pencil className="mr-2 h-4 w-4" />

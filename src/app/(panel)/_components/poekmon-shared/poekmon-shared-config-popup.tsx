@@ -18,11 +18,11 @@ const ServiceInstanceSchema = z.object({
 
 type ServiceInstanceDetails = z.infer<typeof ServiceInstanceSchema>;
 
-export function popupPoekmonSharedInstanceConfigDetails(instanceDetails: ServiceInstanceDetails) {
+export function popupPoekmonSharedInstanceViewConfigDetails(instanceDetails: ServiceInstanceDetails) {
   const closePopup = popup({
     title: "Instance Configuration",
     description: "View details of the service instance",
-    content: () => <InstanceConfigDetailsPopup instanceDetails={instanceDetails} closePopup={closePopup} />,
+    content: () => <InstanceViewConfigDetailsPopup instanceDetails={instanceDetails} closePopup={closePopup} />,
   });
 
   return closePopup;
@@ -34,7 +34,7 @@ interface InstanceConfigDetailsProps {
   closePopup: () => void;
 }
 
-function InstanceConfigDetailsPopup({ className, instanceDetails, closePopup }: InstanceConfigDetailsProps) {
+function InstanceViewConfigDetailsPopup({ className, instanceDetails, closePopup }: InstanceConfigDetailsProps) {
   const { id } = instanceDetails;
   const [baseUrl, setBaseUrl] = React.useState("<base_url>");
 

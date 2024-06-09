@@ -1,5 +1,6 @@
 import {
-  PoekmonSharedAccountSchema,
+  PoeAccountCookieSchema,
+  PoekmonSharedAccountDataSchema,
   PoekmonSharedResourceUsageLogDetailsSchema,
   PoekmonSharedUserInstanceDataSchema,
 } from "@/schema/service/poekmon-shared.schema";
@@ -9,16 +10,18 @@ import { z } from "@hono/zod-openapi";
 export const UserDataModel = PoekmonSharedUserInstanceDataSchema.omit({ type: true }).openapi("UserDataModel");
 export type UserData = z.infer<typeof UserDataModel>;
 
-export const PoeAccountDataModel = PoekmonSharedAccountSchema.openapi("PoeAccountDataModel");
+export const PoeAccountModel = PoekmonSharedAccountDataSchema.openapi("PoeAccountModel");
 
-export const ChatLogContentModel = PoekmonSharedResourceUsageLogDetailsSchema
-  .omit({
-    type: true,
-  })
+export const PoeAccountCookiesModel = z.array(PoeAccountCookieSchema).openapi("PoeAccountCookiesModel");
+
+export const ChatLogContentModel = PoekmonSharedResourceUsageLogDetailsSchema.omit({
+  type: true,
+})
   .merge(
     z.object({
       user_id: z.string(),
     }),
-  ).openapi("ChatLogContentModel");
+  )
+  .openapi("ChatLogContentModel");
 
 export type ChatLogContent = z.infer<typeof ChatLogContentModel>;

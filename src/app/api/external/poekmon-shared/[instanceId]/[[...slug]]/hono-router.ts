@@ -6,7 +6,7 @@ import {
   type PoekmonSharedInstanceData,
   type PoekmonSharedUserInstanceData,
 } from "@/schema/service/poekmon-shared.schema";
-import { UserDataModel, PoeAccountDataModel, type UserData, ChatLogContentModel } from "./models";
+import { UserDataModel, PoeAccountModel, type UserData, ChatLogContentModel, PoeAccountCookiesModel } from "./models";
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 import { env } from "@/env";
 import { createMiddleware } from "hono/factory";
@@ -262,13 +262,13 @@ export const extendRouter = (router: Router) => {
 
   const updatePoeAccountDataRoute = createRoute({
     method: "post",
-    path: "/poe-account",
+    path: "/poe-account-data",
     operationId: "updatePoeAccountData",
     request: {
       body: {
         content: {
           "application/json": {
-            schema: PoeAccountDataModel,
+            schema: PoeAccountModel,
           },
         },
       },
@@ -303,6 +303,80 @@ export const extendRouter = (router: Router) => {
         data: {
           ...instanceData,
           poe_account: data,
+        } as PoekmonSharedInstanceData,
+      })
+      .where(eq(serviceInstances.id, c.var.instanceId))
+      .returning();
+    if (instance.length !== 1) {
+      return c.json(err(`Error Update: ${instance.length} instance returned`), 400);
+    }
+    c.set("instanceData", instance[0]!.data as PoekmonSharedInstanceData);
+    return c.json(ok(null));
+  });
+
+  const getPoeAccountCookiesRoute = createRoute({
+    method: "get",
+    path: "/poe-account-cookies",
+    operationId: "getPoeAccountCookies",
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: responseDataSchema(PoeAccountCookiesModel, "PoeAccountCookiesResponse"),
+          },
+        },
+        description: "success",
+      },
+    },
+  });
+
+  router.openapi(getPoeAccountCookiesRoute, async (c) => {
+    return c.json(ok(c.var.instanceData.poe_cookies));
+  });
+
+  const updatePoeAccountCookiesRoute = createRoute({
+    method: "post",
+    path: "/poe-account-cookies",
+    operationId: "updatePoeAccountCookies",
+    request: {
+      body: {
+        content: {
+          "application/json": {
+            schema: PoeAccountCookiesModel,
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        content: {
+          "application/json": {
+            schema: responseDataSchema(z.null()),
+          },
+        },
+        description: "success",
+      },
+      400: {
+        content: {
+          "application/json": {
+            schema: responseDataSchema(z.literal("Error Update")),
+          },
+        },
+        description: "Error Update",
+      },
+    },
+  });
+
+  router.openapi(updatePoeAccountCookiesRoute, async (c) => {
+    const data = c.req.valid("json");
+
+    const instanceData = c.var.instanceData;
+    const instance = await db
+      .update(serviceInstances)
+      .set({
+        data: {
+          ...instanceData,
+          poe_cookies: data,
         } as PoekmonSharedInstanceData,
       })
       .where(eq(serviceInstances.id, c.var.instanceId))
