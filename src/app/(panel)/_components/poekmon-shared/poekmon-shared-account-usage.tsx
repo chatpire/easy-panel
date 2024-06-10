@@ -30,11 +30,11 @@ export default function PoekmonSharedAccountUsage({
 
   const getTextColor = (value: number) => {
     let color;
-    if (value > 0.6) {
+    if (value > 0.4) {
       color = "text-green-500";
-    } else if (value > 0.3) {
+    } else if (value > 0.2) {
       color = "text-yellow-500";
-    } else if (value > 0.1) {
+    } else if (value > 0.05) {
       color = "text-orange-500";
     } else {
       color = "text-red-500";
@@ -43,11 +43,11 @@ export default function PoekmonSharedAccountUsage({
   };
 
   const getStatusLabel = (percentage: number) => {
-    if (percentage > 0.6) {
+    if (percentage > 0.4) {
       return "富余";
-    } else if (percentage > 0.3) {
+    } else if (percentage > 0.2) {
       return "充裕";
-    } else if (percentage > 0.1) {
+    } else if (percentage > 0.05) {
       return "将满";
     }
     return "耗尽";
@@ -62,7 +62,7 @@ export default function PoekmonSharedAccountUsage({
     alloment = accountInfo.message_point_alloment.toString();
     balance = accountInfo.message_point_balance.toString();
     if (accountInfo.message_point_alloment !== 0) {
-      percentage = 1 - accountInfo.message_point_balance / accountInfo.message_point_alloment;
+      percentage = accountInfo.message_point_balance / accountInfo.message_point_alloment;
     }
     message_point_reset_time = new Date(accountInfo.message_point_reset_time / 1000).toLocaleString();
   }
