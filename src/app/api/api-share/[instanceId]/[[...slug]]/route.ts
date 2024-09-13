@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 export async function OPTIONS(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
   const { slug } = params;
   const p = slug.join("/");
-  
+
   const headers = new Headers({
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
@@ -99,6 +99,8 @@ async function completion(request: NextRequest, { params }: { params: { instance
 
     // console.log("openaiRequest", openaiRequest);
 
+    const start = Date.now();
+
     const url = instanceData.upstream_url;
     const proxyUrl = `${url}/chat/completions`;
     const proxyResponse = await fetch(proxyUrl, {
@@ -109,6 +111,7 @@ async function completion(request: NextRequest, { params }: { params: { instance
       },
       body: JSON.stringify(openaiRequest),
     });
+
 
     if (!proxyResponse.ok) {
       const text = await proxyResponse.text();
@@ -123,7 +126,7 @@ async function completion(request: NextRequest, { params }: { params: { instance
 
     const resourceLogDetail = {
       type: ServiceTypeSchema.Values.API_SHARE,
-      model: openaiRequest.model,
+      model: modelConfig.code,
       prompt_messages: openaiRequest.messages,
       completion_messages: [],
       is_stream: false,
@@ -165,6 +168,8 @@ async function completion(request: NextRequest, { params }: { params: { instance
                 resourceLogDetail.finish_reason = finish_reason;
               }
               controller.close();
+              const timeElapsed = (Date.now() - start) / 1000;
+              resourceLogDetail.time_elapsed = timeElapsed;
               await writeChatResourceUsageLog(db, {
                 userId: userInstanceAbility.userId,
                 instanceId,
@@ -224,6 +229,8 @@ async function completion(request: NextRequest, { params }: { params: { instance
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result = await proxyResponse.json();
       const openaiResponse = OpenAIChatCompletionResponseSchema.parse(result);
+      const timeElapsed = (Date.now() - start) / 1000;
+      resourceLogDetail.time_elapsed = timeElapsed;
 
       if (openaiResponse.choices[0]) {
         resourceLogDetail.completion_messages = [openaiResponse.choices[0].message];
@@ -240,6 +247,16 @@ async function completion(request: NextRequest, { params }: { params: { instance
         },
       });
 
+      console.log(
+        "API Share chat completion | username=",
+        userInstanceAbility.userId,
+        "| model:",
+        openaiRequest.model,
+        "| instanceId:",
+        instanceId,
+        "| time_elapsed:",
+        timeElapsed,
+      );
       await writeChatResourceUsageLog(db, {
         userId: userInstanceAbility.userId,
         instanceId,

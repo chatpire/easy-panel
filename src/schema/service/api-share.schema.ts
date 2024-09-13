@@ -70,6 +70,7 @@ export const APIShareResourceUsageLogDetailsSchema = z.object({
   finish_reason: z.string().optional(),
   usage: APIShareResponseUsageSchema.optional(),
   cost: z.number().optional(),
+  time_elapsed: z.number().optional(),
 });
 export type APIShareResourceUsageLogDetails = z.infer<typeof APIShareResourceUsageLogDetailsSchema>;
 
