@@ -12,6 +12,7 @@ import {
   type PoekmonAPIResourceLogSumResult,
 } from "@/schema/service/poekmon-api.schema";
 import { PoekmonSharedResourceLogSumResult } from "@/schema/service/poekmon-shared.schema";
+import { APIShareLogGroupbyModelResult, APIShareResourceLogSumResult } from "@/schema/service/api-share.schema";
 
 const _sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,
@@ -224,55 +225,162 @@ export const groupPoekmonAPILogsInDurationWindowByModel = memoize(_groupPoekmonA
 });
 
 const _sumPoekmonSharedLogsInDurationWindows = async ({
-    ctx,
-    durationWindows,
-    timeEnd,
-    userId,
-    instanceId,
-  }: {
-    ctx: TRPCContext;
-    durationWindows: DurationWindow[];
-    timeEnd: Date;
-    userId?: string;
-    instanceId?: string;
-  }): Promise<PoekmonSharedResourceLogSumResult[]> => {
-    const results = [] as PoekmonSharedResourceLogSumResult[];
-  
-    for (const durationWindow of durationWindows) {
-      const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
-      const aggResult = await ctx.db
-        .select({
-          userCount: countDistinct(resourceUsageLogs.userId),
-          count: count(),
-          sumPoints:
-            sql<number>`SUM((${resourceUsageLogs.details} -> 'consume_point')::integer)`.mapWith(Number),
-        })
-        .from(resourceUsageLogs)
-        .where(
-          and(
-            eq(resourceUsageLogs.type, ServiceTypeSchema.Values.POEKMON_SHARED),
-            gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
-            userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
-            instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
-          ),
-        );
-      // .groupBy(resourceUsageLogs.userId);
-  
-      results.push({
-        durationWindow,
-        stats: aggResult[0]!,
-      });
-    }
-  
-    return results;
+  ctx,
+  durationWindows,
+  timeEnd,
+  userId,
+  instanceId,
+}: {
+  ctx: TRPCContext;
+  durationWindows: DurationWindow[];
+  timeEnd: Date;
+  userId?: string;
+  instanceId?: string;
+}): Promise<PoekmonSharedResourceLogSumResult[]> => {
+  const results = [] as PoekmonSharedResourceLogSumResult[];
+
+  for (const durationWindow of durationWindows) {
+    const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+    const aggResult = await ctx.db
+      .select({
+        userCount: countDistinct(resourceUsageLogs.userId),
+        count: count(),
+        sumPoints: sql<number>`SUM((${resourceUsageLogs.details} -> 'consume_point')::integer)`.mapWith(Number),
+      })
+      .from(resourceUsageLogs)
+      .where(
+        and(
+          eq(resourceUsageLogs.type, ServiceTypeSchema.Values.POEKMON_SHARED),
+          gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
+          userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
+          instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
+        ),
+      );
+    // .groupBy(resourceUsageLogs.userId);
+
+    results.push({
+      durationWindow,
+      stats: aggResult[0]!,
+    });
+  }
+
+  return results;
+};
+
+export const sumPoekmonSharedLogsInDurationWindows = memoize(_sumPoekmonSharedLogsInDurationWindows, {
+  genKey: ({ durationWindows, timeEnd, userId, instanceId }) => {
+    return JSON.stringify({ durationWindows, timeEnd, userId, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});
+
+const _sumAPIShareLogsInDurationWindows = async ({
+  ctx,
+  durationWindows,
+  timeEnd,
+  userId,
+  instanceId,
+}: {
+  ctx: TRPCContext;
+  durationWindows: DurationWindow[];
+  timeEnd: Date;
+  userId?: string;
+  instanceId?: string;
+}): Promise<APIShareResourceLogSumResult[]> => {
+  const results = [] as APIShareResourceLogSumResult[];
+
+  for (const durationWindow of durationWindows) {
+    const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+    const aggResult = await ctx.db
+      .select({
+        userCount: countDistinct(resourceUsageLogs.userId),
+        count: count(),
+        sumPromptTokens:
+          sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'prompt_tokens')::integer)`.mapWith(Number),
+        sumCompletionTokens:
+          sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'completion_tokens')::integer)`.mapWith(Number),
+        sumTotalTokens: sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'total_tokens')::integer)`.mapWith(
+          Number,
+        ),
+      })
+      .from(resourceUsageLogs)
+      .where(
+        and(
+          eq(resourceUsageLogs.type, ServiceTypeSchema.Values.API_SHARE),
+          gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
+          userId ? eq(resourceUsageLogs.userId, userId) : sql`true`,
+          instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
+        ),
+      );
+    // .groupBy(resourceUsageLogs.userId);
+
+    results.push({
+      durationWindow,
+      stats: aggResult[0]!,
+    });
+  }
+
+  return results;
+};
+
+export const sumAPIShareLogsInDurationWindows = memoize(_sumAPIShareLogsInDurationWindows, {
+  genKey: ({ durationWindows, timeEnd, userId, instanceId }) => {
+    return JSON.stringify({ durationWindows, timeEnd, userId, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});
+
+const _groupAPIShareLogsInDurationWindowByModel = async ({
+  ctx,
+  durationWindow,
+  instanceId,
+  timeEnd,
+}: {
+  ctx: TRPCContext;
+  durationWindow: DurationWindow;
+  instanceId?: string;
+  timeEnd: Date;
+}): Promise<APIShareLogGroupbyModelResult> => {
+  const durationWindowSeconds = DURATION_WINDOWS[durationWindow];
+  const groupByResult = await ctx.db
+    .select({
+      model: sql<string | null>`${resourceUsageLogs.details}->>'model'`,
+      count: count(),
+      sumTotalTokens: sql<number>`SUM((${resourceUsageLogs.details} -> 'usage' ->> 'total_tokens')::integer)`.mapWith(
+        Number,
+      ),
+    })
+    .from(resourceUsageLogs)
+    .where(
+      and(
+        eq(resourceUsageLogs.type, ServiceTypeSchema.Values.API_SHARE),
+        gte(resourceUsageLogs.createdAt, new Date(timeEnd.getTime() - durationWindowSeconds * 1000)),
+        instanceId ? eq(resourceUsageLogs.instanceId, instanceId) : sql`true`,
+      ),
+    )
+    .groupBy(sql`${resourceUsageLogs.details}->>'model'`);
+  const result = {
+    durationWindow,
+    groups: groupByResult
+      .filter((item) => item.model !== null)
+      .map((item) => ({
+        model: item.model!,
+        count: item.count,
+        sumTotalTokens: item.sumTotalTokens,
+      })),
   };
-  
-  export const sumPoekmonSharedLogsInDurationWindows = memoize(_sumPoekmonSharedLogsInDurationWindows, {
-    genKey: ({ durationWindows, timeEnd, userId, instanceId }) => {
-      return JSON.stringify({ durationWindows, timeEnd, userId, instanceId });
-    },
-    shouldUpdate: (args, lastArgs) => {
-      return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
-    },
-  });
-  
+  return result;
+};
+
+export const groupAPIShareLogsInDurationWindowByModel = memoize(_groupAPIShareLogsInDurationWindowByModel, {
+  genKey: ({ durationWindow, instanceId }) => {
+    return JSON.stringify({ durationWindow, instanceId });
+  },
+  shouldUpdate: (args, lastArgs) => {
+    return args[0].timeEnd.getTime() !== lastArgs[0].timeEnd.getTime();
+  },
+});

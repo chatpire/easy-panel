@@ -5,6 +5,7 @@ import { DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 import { ChatGPTSharedResourceUsageLogDetailsSchema } from "./service/chatgpt-shared.schema";
 import { PoekmonAPIResourceUsageLogDetailsSchema } from "./service/poekmon-api.schema";
 import { PoekmonSharedResourceUsageLogDetailsSchema } from "./service/poekmon-shared.schema";
+import { APIShareResourceUsageLogDetailsSchema } from "./service/api-share.schema";
 
 export const ResourceUsageLogWhereInputSchema = z.object({
   userId: z.string().optional(),
@@ -18,6 +19,7 @@ export const ResourceUsageLogDetailsSchema = z.discriminatedUnion("type", [
   ChatGPTSharedResourceUsageLogDetailsSchema,
   PoekmonAPIResourceUsageLogDetailsSchema,
   PoekmonSharedResourceUsageLogDetailsSchema,
+  APIShareResourceUsageLogDetailsSchema,
 ]);
 export type ResourceUsageLogDetails = z.infer<typeof ResourceUsageLogDetailsSchema>;
 

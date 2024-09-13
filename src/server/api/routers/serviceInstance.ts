@@ -16,6 +16,8 @@ import {
   PoekmonSharedAccountInfoUserReadableSchema,
   PoekmonSharedInstanceData,
 } from "@/schema/service/poekmon-shared.schema";
+import { APIShareInstanceData, APIShareUserInstanceData } from "@/schema/service/api-share.schema";
+import { filterUserAvailableModels } from "../helpers/api-share";
 
 export const serviceInstanceRouter = createTRPCRouter({
   create: adminProcedure.input(ServiceInstanceCreateSchema).mutation(async ({ ctx, input }) => {

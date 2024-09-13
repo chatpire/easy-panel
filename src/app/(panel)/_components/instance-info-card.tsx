@@ -12,6 +12,8 @@ import { PoekmonAPIInstanceUsageStatistics } from "./poekmon-api/poekmon-api-sta
 import { PoekmonAPIModelUsage } from "./poekmon-api/poekmon-api-model-usage";
 import { PoekmonSharedInstanceUsageStatistics } from "./poekmon-shared/poekmon-shared-statistics";
 import PoekmonSharedAccountUsage from "./poekmon-shared/poekmon-shared-account-usage";
+import { APIShareModelUsage } from "./api-share/model-usage";
+import { APIShareInstanceUsageStatistics } from "./api-share/statistics";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -45,6 +47,15 @@ export function PoekmonSharedCardContent({ instance }: { instance: ServiceInstan
   );
 }
 
+export function APIShareCardContent({ instance }: { instance: ServiceInstance }) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <APIShareModelUsage instanceId={instance.id} />
+      <APIShareInstanceUsageStatistics instanceId={instance.id} />
+    </div>
+  );
+}
+
 export function InstanceInfoCard({ instance, className, children }: Props) {
   return (
     <Card className={cn("max-w-full overflow-x-hidden", className)}>
@@ -58,6 +69,7 @@ export function InstanceInfoCard({ instance, className, children }: Props) {
         {instance.type === "CHATGPT_SHARED" && <SharedChatGPTCardContent instance={instance} />}
         {instance.type === "POEKMON_API" && <PoekmonAPICardContent instance={instance} />}
         {instance.type === "POEKMON_SHARED" && <PoekmonSharedCardContent instance={instance} />}
+        {instance.type === "API_SHARE" && <APIShareCardContent instance={instance} />}
       </CardContent>
       <CardFooter className="border-t py-3">{children}</CardFooter>
     </Card>

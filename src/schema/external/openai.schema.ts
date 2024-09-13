@@ -61,3 +61,9 @@ export const OpenAIChatCompletionStreamResponseSchema = z.object({
   usage: OpenAIChatCompletionResponseUsageSchema.nullish(),
 });
 export type OpenAIChatCompletionStreamResponse = z.infer<typeof OpenAIChatCompletionStreamResponseSchema>;
+
+export const OpenAIResponseUsageSchema = z.object({
+  prompt_tokens: z.number().int(),
+  completion_tokens: z.number().int(),
+  total_tokens: z.number().int(),
+});

@@ -1,7 +1,7 @@
 import { DurationWindowSchema, ServiceTypeSchema } from "@/server/db/enum";
 import { create } from "domain";
 import { z } from "zod";
-import { OpenAIRequestMessageSchema, OpenAIResponseMessageSchema } from "../external/openai.schema";
+import { OpenAIRequestMessageSchema, OpenAIResponseMessageSchema, OpenAIResponseUsageSchema } from "../external/openai.schema";
 import { createSelectSchema } from "drizzle-zod";
 import { resourceUsageLogs } from "@/server/db/schema";
 
@@ -13,12 +13,6 @@ export const PoekmonAPIInstanceDataSchema = z.object({
   record_completions: z.boolean(),
 });
 export type PoekmonAPIInstanceData = z.infer<typeof PoekmonAPIInstanceDataSchema>;
-
-export const OpenAIResponseUsageSchema = z.object({
-  prompt_tokens: z.number().int(),
-  completion_tokens: z.number().int(),
-  total_tokens: z.number().int(),
-});
 
 export const PoekmonAPIResourceUsageLogDetailsSchema = z.object({
   type: z.literal(ServiceTypeSchema.Values.POEKMON_API),

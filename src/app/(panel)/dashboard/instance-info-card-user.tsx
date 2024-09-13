@@ -12,6 +12,7 @@ import { type ServiceInstanceWithToken } from "@/schema/serviceInstance.schema";
 import { cn } from "@/lib/utils";
 import { PoekmonAPIConfigSheet } from "../_components/poekmon-api/poekmon-api-usage-sheet";
 import { type UserRead } from "@/schema/user.schema";
+import { APIShareGuideSheet } from "../_components/api-share/guide-sheet";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   user: UserRead;
@@ -122,6 +123,32 @@ function UserPoekmonSharedInstanceInfoCardBottom({
   );
 }
 
+function UserAPIShareInstanceInfoCardBottom({ instanceWithToken }: { instanceWithToken: ServiceInstanceWithToken }) {
+  const { token, ...instance } = instanceWithToken;
+  return (
+    <div className="flex w-full flex-col items-center justify-between md:flex-row">
+      <APIShareGuideSheet instanceDetails={instanceWithToken} />
+      <div className="hidden flex-row items-center space-x-3 md:flex">
+        <Label>Token</Label>
+        <span className="rounded-md border px-3 py-1 text-sm">
+          {token ?? "无使用权限，请联系管理员创建 Token"}
+          <Button
+            className="ml-2 rounded p-1"
+            variant={"ghost"}
+            size={"sm"}
+            disabled={!token}
+            onClick={async () => {
+              await copyToClipBoard(token);
+            }}
+          >
+            <Icons.copy className="h-3 w-3" />
+          </Button>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function UserInstanceInfoCard({ user, instanceWithToken, className }: Props) {
   const { token, ...instance } = instanceWithToken;
   return (
@@ -134,6 +161,9 @@ export function UserInstanceInfoCard({ user, instanceWithToken, className }: Pro
       )}
       {instance.type === "POEKMON_SHARED" && (
         <UserPoekmonSharedInstanceInfoCardBottom user={user} instanceWithToken={instanceWithToken} />
+      )}
+      {instance.type === "API_SHARE" && (
+        <UserAPIShareInstanceInfoCardBottom instanceWithToken={instanceWithToken} />
       )}
     </InstanceInfoCard>
   );

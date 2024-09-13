@@ -5,8 +5,13 @@ import { z } from "zod";
 import { ServiceTypeSchema } from "@/server/db/enum";
 import { PoekmonAPIInstanceDataSchema } from "./service/poekmon-api.schema";
 import { PoekmonSharedInstanceDataSchema } from "./service/poekmon-shared.schema";
+import { APIShareInstanceDataSchema } from "./service/api-share.schema";
 
-export const ServiceInstanceDataSchema = z.discriminatedUnion("type", [PoekmonAPIInstanceDataSchema, PoekmonSharedInstanceDataSchema]);
+export const ServiceInstanceDataSchema = z.discriminatedUnion("type", [
+  PoekmonAPIInstanceDataSchema,
+  PoekmonSharedInstanceDataSchema,
+  APIShareInstanceDataSchema,
+]);
 export type ServiceInstanceData = z.infer<typeof ServiceInstanceDataSchema>;
 
 export const ServiceInstanceAdminSchema = createSelectSchema(serviceInstances).merge(

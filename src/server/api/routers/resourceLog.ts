@@ -10,8 +10,10 @@ import { UserRoles } from "@/schema/user.schema";
 import { DurationWindowSchema } from "@/server/db/enum";
 import { alignTimeToGranularity } from "@/lib/utils";
 import {
+  groupAPIShareLogsInDurationWindowByModel,
   groupGPT4LogsInDurationWindow,
   groupPoekmonAPILogsInDurationWindowByModel,
+  sumAPIShareLogsInDurationWindows,
   sumChatGPTSharedLogsInDurationWindows,
   sumPoekmonAPILogsInDurationWindows,
   sumPoekmonSharedLogsInDurationWindows,
@@ -220,6 +222,38 @@ export const resourceLogRouter = createTRPCRouter({
         durationWindows: input.durationWindows,
         timeEnd: alignTimeToGranularity(60),
         userId,
+      });
+    }),
+
+  sumAPIShareLogsInDurationWindowsByInstance: protectedProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+        durationWindows: DurationWindowSchema.array(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return sumAPIShareLogsInDurationWindows({
+        ctx,
+        durationWindows: input.durationWindows,
+        timeEnd: alignTimeToGranularity(60),
+        instanceId: input.instanceId,
+      });
+    }),
+
+  groupAPIShareLogsInDurationWindowByModel: protectedProcedure
+    .input(
+      z.object({
+        instanceId: z.string(),
+        durationWindow: DurationWindowSchema,
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      return groupAPIShareLogsInDurationWindowByModel({
+        ctx,
+        durationWindow: input.durationWindow,
+        instanceId: input.instanceId,
+        timeEnd: alignTimeToGranularity(60),
       });
     }),
 });

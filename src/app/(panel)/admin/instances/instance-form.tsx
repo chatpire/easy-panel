@@ -72,7 +72,6 @@ export function InstanceForm({ onSubmit, defaultValues, loading }: InstanceFormP
                   </SelectContent>
                 </Select>
               </FormControl>
-              <FormDescription>“CHATGPT_SHARED” for CockroackAI.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -91,7 +90,7 @@ export function InstanceForm({ onSubmit, defaultValues, loading }: InstanceFormP
             </FormItem>
           )}
         />
-        {form.watch("type") !== "POEKMON_API" && (
+        {form.watch("type") !== "POEKMON_API" && form.watch("type") !== "API_SHARE" && (
           <FormField
             control={form.control}
             name="url"

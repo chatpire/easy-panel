@@ -13,6 +13,8 @@ import { popupPoekmonAPIConfigForm } from "../../../_components/poekmon-api/poek
 import { popupPoekmonSharedInstanceViewConfigDetails } from "@/app/(panel)/_components/poekmon-shared/poekmon-shared-config-popup";
 import { type PoekmonSharedInstanceData, defaultPoekmonSharedAccount } from "@/schema/service/poekmon-shared.schema";
 import { generateId } from "lucia";
+import { APIShareInstanceData, defaultAPIShareInstanceData } from "@/schema/service/api-share.schema";
+import { popupAPIShareConfigForm } from "@/app/(panel)/_components/api-share/config-popup";
 
 export default function CreateInstancePage({}) {
   const [loading, setLoading] = useState(false);
@@ -39,6 +41,10 @@ export default function CreateInstancePage({}) {
         poe_account: defaultPoekmonSharedAccount(),
         poe_cookies: [],
       } as PoekmonSharedInstanceData;
+    }
+
+    if (instanceCreate.type === "API_SHARE") {
+      instanceCreate.data = defaultAPIShareInstanceData();
     }
 
     const grantToUserIds = [];
@@ -71,6 +77,11 @@ export default function CreateInstancePage({}) {
         });
       } else if (instance.type === "POEKMON_SHARED") {
         popupPoekmonSharedInstanceViewConfigDetails({
+          ...instance,
+          data: instance.data!,
+        });
+      } else if (instance.type === "API_SHARE") {
+        popupAPIShareConfigForm({
           ...instance,
           data: instance.data!,
         });

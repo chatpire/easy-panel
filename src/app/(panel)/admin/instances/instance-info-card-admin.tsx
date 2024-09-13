@@ -18,6 +18,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { popupPoekmonAPIConfigForm } from "../../_components/poekmon-api/poekmon-api-config-popup";
 import { popupPoekmonSharedInstanceViewConfigDetails } from "../../_components/poekmon-shared/poekmon-shared-config-popup";
 import { PoekmonSharedCookieConfigSheet } from "../../_components/poekmon-shared/poekmon-shared-cookie-sheet";
+import { popupAPIShareConfigForm } from "../../_components/api-share/config-popup";
+import { APIShareModelConfigSheet } from "../../_components/api-share/model-popup";
 
 interface Props extends React.HTMLAttributes<HTMLFormElement> {
   instance: ServiceInstance;
@@ -114,6 +116,15 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
                 View Config
               </Button>
               <PoekmonSharedCookieConfigSheet instanceDetails={{ id: instance.id, data: instance.data }} />
+            </>
+          )}
+          {instance.type === "API_SHARE" && (
+            <>
+              <Button onClick={() => popupAPIShareConfigForm({ id: instance.id, data: instance.data })}>
+                <Icons.pencil className="mr-2 h-4 w-4" />
+                Edit Config
+              </Button>
+              <APIShareModelConfigSheet instanceDetails={{ id: instance.id, data: instance.data }} />
             </>
           )}
           <Button onClick={() => router.push(`/admin/instances/update/${instance.id}`)}>

@@ -5,36 +5,23 @@ import { type PaginationInput } from "@/schema/pagination.schema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type ServiceType, ServiceTypeSchema } from "@/server/db/enum";
 import { ChatGPTSharedResourceUsageLogSchema } from "@/schema/service/chatgpt-shared.schema";
-import {
-  PoekmonAPIResourceUsageLogSchema,
-} from "@/schema/service/poekmon-api.schema";
+import { PoekmonAPIResourceUsageLogSchema } from "@/schema/service/poekmon-api.schema";
 import { PoekmonSharedResourceUsageLogSchema } from "@/schema/service/poekmon-shared.schema";
+import { APIShareResourceUsageLogSchema } from "@/schema/service/api-share.schema";
 
 type TabConfig = {
-  type: ServiceType,
-  name: string,
-  schema: any,
-  visibility: Record<string, boolean>,
+  type: ServiceType;
+  name: string;
+  schema: any;
+  visibility: Record<string, boolean>;
 };
 
-export function ResourceLogsTable({ fetchData }: { fetchData: (input: PaginationInput, type: ServiceType) => Promise<any> }) {
+export function ResourceLogsTable({
+  fetchData,
+}: {
+  fetchData: (input: PaginationInput, type: ServiceType) => Promise<any>;
+}) {
   const tabsConfig = [
-    {
-      type: ServiceTypeSchema.Values.CHATGPT_SHARED,
-      name: "ChatGPT Shared",
-      schema: ChatGPTSharedResourceUsageLogSchema,
-      visibility: {
-        type: false,
-        userId: false,
-        instanceId: false,
-        instance: false,
-        instance_url: false,
-        user: false,
-        details: false,
-        details_type: false,
-        details_inputTokens: false,
-      }
-    },
     {
       type: ServiceTypeSchema.Values.POEKMON_SHARED,
       name: "Poekmon Shared",
@@ -53,7 +40,7 @@ export function ResourceLogsTable({ fetchData }: { fetchData: (input: Pagination
         details_attachments: false,
         details_chat_id: false,
         details_chat_code: false,
-      }
+      },
     },
     {
       type: ServiceTypeSchema.Values.POEKMON_API,
@@ -71,12 +58,46 @@ export function ResourceLogsTable({ fetchData }: { fetchData: (input: Pagination
         details: false,
         details_type: false,
         details_inputTokens: false,
-      }
+      },
+    },
+    {
+      type: ServiceTypeSchema.Values.API_SHARE,
+      name: "API Share",
+      schema: APIShareResourceUsageLogSchema,
+      visibility: {
+        type: false,
+        userId: false,
+        text: false,
+        textBytes: false,
+        instanceId: false,
+        instance: false,
+        instance_url: false,
+        user: false,
+        details: false,
+        details_type: false,
+        details_inputTokens: false,
+      },
+    },
+    {
+      type: ServiceTypeSchema.Values.CHATGPT_SHARED,
+      name: "ChatGPT Shared",
+      schema: ChatGPTSharedResourceUsageLogSchema,
+      visibility: {
+        type: false,
+        userId: false,
+        instanceId: false,
+        instance: false,
+        instance_url: false,
+        user: false,
+        details: false,
+        details_type: false,
+        details_inputTokens: false,
+      },
     },
   ] as TabConfig[];
 
   return (
-    <Tabs defaultValue={ServiceTypeSchema.Values.CHATGPT_SHARED} className="w-full">
+    <Tabs defaultValue={ServiceTypeSchema.Values.POEKMON_SHARED} className="w-full">
       <TabsList>
         {tabsConfig.map((tab) => (
           <TabsTrigger key={tab.type} value={tab.type}>
