@@ -17,20 +17,17 @@ import {
   type APIShareResourceUsageLogDetails,
   type APIShareUserInstanceData,
 } from "@/schema/service/api-share.schema";
-import { calculateCost, verifyUserAvailableModel } from "@/server/api/helpers/api-share";
+import { calculateCost, filterUserAvailableModels, verifyUserAvailableModel } from "@/server/api/helpers/api-share";
 
 export const dynamic = "force-dynamic";
 
 export async function OPTIONS(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
   const { slug } = params;
   const p = slug.join("/");
-  if (p !== "v1/chat/completions") {
-    return NextResponse.json({ detail: "Not Found" }, { status: 404 });
-  }
-
+  
   const headers = new Headers({
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "*",
   });
 
@@ -40,7 +37,7 @@ export async function OPTIONS(request: NextRequest, { params }: { params: { inst
   });
 }
 
-export async function POST(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
+async function completion(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
   const userToken = request.headers.get("authorization")?.replace("Bearer ", "");
   const { instanceId, slug } = params;
   const p = slug.join("/");
@@ -99,6 +96,8 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     } else {
       openaiRequest.model = modelConfig.code;
     }
+
+    // console.log("openaiRequest", openaiRequest);
 
     const url = instanceData.upstream_url;
     const proxyUrl = `${url}/chat/completions`;
@@ -266,4 +265,82 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       return NextResponse.json({ detail: "Internal server error" }, { status: 500 });
     }
   }
+}
+
+async function listModels(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
+  const userToken = request.headers.get("authorization")?.replace("Bearer ", "");
+  const { instanceId, slug } = params;
+  const p = slug.join("/");
+  if (p !== "v1/models") {
+    return NextResponse.json({ detail: "Not Found" }, { status: 404 });
+  }
+
+  if (!userToken || !instanceId) {
+    return NextResponse.json({ detail: "invalid audit request" }, { status: 400 });
+  }
+
+  try {
+    const userInstanceAbility = await db.query.userInstanceAbilities.findFirst({
+      where: and(eq(userInstanceAbilities.token, userToken), eq(userInstanceAbilities.instanceId, instanceId)),
+    });
+    if (!userInstanceAbility || userInstanceAbility.data?.type !== "API_SHARE") {
+      return NextResponse.json({ detail: "invalid token" }, { status: 401 });
+    }
+    if (!userInstanceAbility.canUse) {
+      return NextResponse.json({ detail: "You are not permitted to use this instance." }, { status: 401 });
+    }
+
+    const userInstanceData = userInstanceAbility.data;
+
+    const instance = await db.query.serviceInstances.findFirst({
+      where: eq(serviceInstances.id, instanceId),
+    });
+    if (!instance) {
+      return NextResponse.json({ detail: "Instance not found" }, { status: 404 });
+    }
+    if (instance.type !== ServiceTypeSchema.Values.API_SHARE) {
+      return NextResponse.json({ detail: "Invalid instance type" }, { status: 400 });
+    }
+    if (!instance.data) {
+      return NextResponse.json({ detail: "Instance not configuered" }, { status: 404 });
+    }
+
+    const instanceData = instance.data as APIShareInstanceData;
+
+    const models = filterUserAvailableModels(instanceData, userInstanceData);
+
+    const result = {
+      object: "list",
+      data: models.map((model) => {
+        return {
+          id: model.code,
+          object: "model",
+          owned_by: "openai",
+          created: 1626777600,
+        };
+      }),
+    };
+    return NextResponse.json(result, { status: 200 });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ detail: "Internal server error" }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
+  const { slug } = params;
+  const p = slug.join("/");
+  if (p === "v1/chat/completions") {
+    return completion(request, { params });
+  }
+  return NextResponse.json({ detail: "Not Found" }, { status: 404 });
+}
+
+export async function GET(request: NextRequest, { params }: { params: { instanceId: string; slug: string[] } }) {
+  const { slug } = params;
+  const p = slug.join("/");
+  if (p === "v1/models") {
+    return listModels(request, { params });
+  }
+  return NextResponse.json({ detail: "Not Found" }, { status: 404 });
 }

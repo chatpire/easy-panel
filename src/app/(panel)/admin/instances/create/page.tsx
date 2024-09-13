@@ -44,6 +44,7 @@ export default function CreateInstancePage({}) {
     }
 
     if (instanceCreate.type === "API_SHARE") {
+      instanceCreate.url = undefined;
       instanceCreate.data = defaultAPIShareInstanceData();
     }
 
