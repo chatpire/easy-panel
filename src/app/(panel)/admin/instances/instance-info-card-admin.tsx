@@ -61,18 +61,59 @@ export function DeleteInstance({ instanceId, closePopup }: { instanceId: string;
 export function AdminInstanceInfoCard({ instance, className }: Props) {
   const router = useRouter();
   const grantMutation = api.userInstanceAbility.grantInstanceToAllActiveUsers.useMutation();
+  const unpublishMutation = api.userInstanceAbility.unpublishToAllActiveUsers.useMutation();
 
   const grantToAll = async (instanceId: string) => {
-    try {
-      await grantMutation.mutateAsync({ instanceId });
-      toast.success("Published to all active users.");
-    } catch (error) {
-      console.error(error);
-      if (error instanceof TRPCClientError) {
-        toast.error(error.message);
+    const doGrant = async (closePopup: () => void) => {
+      try {
+        await grantMutation.mutateAsync({ instanceId });
+        toast.success("Published to all active users.");
+        closePopup();
+      } catch (error) {
+        console.error(error);
+        if (error instanceof TRPCClientError) {
+          toast.error(error.message);
+        }
+        toast.error("An error occured. Did you already grant to all active users?");
       }
-      toast.error("An error occured. Did you already grant to all active users?");
-    }
+    };
+    popup({
+      title: "Publish to all active users",
+      description: "This will publish the instance to all active users.",
+      content: (closePopup) => (
+        <div className="flex w-full flex-row space-x-2">
+          <FunctionButton onClick={() => doGrant(closePopup)}>Confirm</FunctionButton>
+          <Button variant={"outline"} onClick={closePopup}>
+            Cancel
+          </Button>
+        </div>
+      ),
+    });
+  };
+
+  const unpublish = async (instanceId: string) => {
+    const doUnpublish = async (closePopup: () => void) => {
+      try {
+        await unpublishMutation.mutateAsync({ instanceId });
+        toast.success("Unpublished from all active users.");
+        closePopup();
+      } catch (error) {
+        console.error(error);
+        toast.error("An error occured. Did you already unpublish?");
+      }
+    };
+    popup({
+      title: "Unpublish from all active users",
+      description: "This will unpublish the instance from all active users.",
+      content: (closePopup) => (
+        <div className="flex w-full flex-row space-x-2">
+          <FunctionButton onClick={() => doUnpublish(closePopup)}>Confirm</FunctionButton>
+          <Button variant={"outline"} onClick={closePopup}>
+            Cancel
+          </Button>
+        </div>
+      ),
+    });
   };
 
   return (
@@ -88,11 +129,11 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
         </div>
         <div className="flex flex-row items-center space-x-4 max-md:hidden">
           <FunctionButton className="lt-md:w-full" variant={"outline"} onClick={() => grantToAll(instance.id)}>
-            Publish To All Active Users
+            Publish
           </FunctionButton>
-          {/* <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
+          <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
             Unpublish
-          </FunctionButton> */}
+          </FunctionButton>
           {instance.type === "CHATGPT_SHARED" && (
             <Button
               onClick={() => popupChatGPTShareInstanceConfigDetails({ url: instance.url ?? "", id: instance.id })}

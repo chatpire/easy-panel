@@ -43,26 +43,24 @@ async function batchCreateAbilities(db: Db, userIds: string[], instanceIds: stri
     }
     for (const instance of instances) {
       const data = createDefaultInstanceData(instance.type);
-      const values = userIds.map((userId) => ({
-        userId,
-        instanceId: instance.id,
-        token: generateId(24),
-        canUse: true,
-        data,
-      }));
-      if (updateCanUse) {
-        await tx
-          .insert(userInstanceAbilities)
-          .values(values)
-          .onConflictDoUpdate({
-            target: [userInstanceAbilities.userId, userInstanceAbilities.instanceId],
-            set: {
-              canUse: true,
-              updatedAt: new Date(),
-            },
-          });
-      } else {
-        await tx.insert(userInstanceAbilities).values(values).onConflictDoNothing();
+      for (const userId of userIds) {
+        const existingAbility = await tx.query.userInstanceAbilities.findFirst({
+          where: and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, instance.id)),
+        });
+        if (!existingAbility) {
+          await tx.insert(userInstanceAbilities).values({
+            userId,
+            instanceId: instance.id,
+            token: generateId(24),
+            canUse: true,
+            data,
+          }).onConflictDoNothing();
+        } else if (updateCanUse) {
+          await tx.update(userInstanceAbilities).set({
+            canUse: true,
+            updatedAt: new Date(),
+          }).where(and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, instance.id)));
+        }
       }
     }
   });
@@ -115,6 +113,28 @@ export const userInstanceAbilityRouter = createTRPCRouter({
         [input.instanceId],
         true,
       );
+    }),
+  
+  unpublishToAllActiveUsers: adminProcedure
+    .input(z.object({ instanceId: z.string(), delete: z.boolean().optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const userAbilities = await ctx.db
+        .select()
+        .from(userInstanceAbilities)
+        .where(and(eq(userInstanceAbilities.instanceId, input.instanceId)));
+
+      for (const ability of userAbilities) {
+        if (input.delete) {
+          await ctx.db
+            .delete(userInstanceAbilities)
+            .where(and(eq(userInstanceAbilities.instanceId, input.instanceId), eq(userInstanceAbilities.userId, ability.userId)));
+        } else {
+          await ctx.db
+            .update(userInstanceAbilities)
+            .set({ canUse: false })
+            .where(and(eq(userInstanceAbilities.instanceId, input.instanceId), eq(userInstanceAbilities.userId, ability.userId)));
+        }
+      }
     }),
 
   verifyUserAbility: publicProcedure
