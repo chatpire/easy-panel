@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import {getSessionData} from "@/server/auth";
+import {type getSessionData} from "@/server/auth";
 
 type ContextType = Awaited<ReturnType<typeof getSessionData>>;
 

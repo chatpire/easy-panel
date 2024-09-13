@@ -1,5 +1,5 @@
-import { OpenAIChatCompletionResponseUsage } from "@/schema/external/openai.schema";
-import { APIShareInstanceData, APIShareModel, APIShareUserInstanceData } from "@/schema/service/api-share.schema";
+import { type OpenAIChatCompletionResponseUsage } from "@/schema/external/openai.schema";
+import { type APIShareInstanceData, type APIShareModel, type APIShareUserInstanceData } from "@/schema/service/api-share.schema";
 
 function createModelMap(models: APIShareModel[]): Record<string, APIShareModel> {
   return models.reduce(

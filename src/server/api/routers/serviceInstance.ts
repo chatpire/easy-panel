@@ -14,7 +14,7 @@ import { createCUID } from "@/lib/cuid";
 import { and, eq } from "drizzle-orm";
 import {
   PoekmonSharedAccountInfoUserReadableSchema,
-  PoekmonSharedInstanceData,
+  type PoekmonSharedInstanceData,
 } from "@/schema/service/poekmon-shared.schema";
 import { APIShareInstanceData, APIShareUserInstanceData } from "@/schema/service/api-share.schema";
 import { filterUserAvailableModels } from "../helpers/api-share";

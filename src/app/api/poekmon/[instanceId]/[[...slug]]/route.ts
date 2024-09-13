@@ -12,7 +12,7 @@ import {
   OpenAIChatCompletionStreamResponseSchema,
   type OpenAIResponseMessage,
 } from "@/schema/external/openai.schema";
-import { PoekmonAPIInstanceData, type PoekmonAPIResourceUsageLogDetails } from "@/schema/service/poekmon-api.schema";
+import { type PoekmonAPIInstanceData, type PoekmonAPIResourceUsageLogDetails } from "@/schema/service/poekmon-api.schema";
 
 export const dynamic = "force-dynamic";
 

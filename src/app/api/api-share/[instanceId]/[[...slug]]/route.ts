@@ -13,9 +13,9 @@ import {
   type OpenAIResponseMessage,
 } from "@/schema/external/openai.schema";
 import {
-  APIShareInstanceData,
-  APIShareResourceUsageLogDetails,
-  APIShareUserInstanceData,
+  type APIShareInstanceData,
+  type APIShareResourceUsageLogDetails,
+  type APIShareUserInstanceData,
 } from "@/schema/service/api-share.schema";
 import { calculateCost, verifyUserAvailableModel } from "@/server/api/helpers/api-share";
 
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
       return NextResponse.json({ detail: "You are not permitted to use this instance." }, { status: 401 });
     }
 
-    const userInstanceData = userInstanceAbility.data as APIShareUserInstanceData;
+    const userInstanceData = userInstanceAbility.data;
 
     const instance = await db.query.serviceInstances.findFirst({
       where: eq(serviceInstances.id, instanceId),
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
     const requestBody = await request.json();
     const openaiRequest = OpenAIChatCompletionRequestSchema.parse(requestBody);
 
-    let modelConfig = verifyUserAvailableModel(openaiRequest.model, instanceData, userInstanceData);
+    const modelConfig = verifyUserAvailableModel(openaiRequest.model, instanceData, userInstanceData);
     if (!modelConfig) {
       return NextResponse.json(
         {
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest, { params }: { params: { instanc
         return NextResponse.json({ detail: "empty response body" }, { status: 500 });
       }
       // Event stream response
-      const reader = proxyResponse.body!.getReader();
+      const reader = proxyResponse.body.getReader();
 
       const newStream = new ReadableStream({
         async start(controller) {

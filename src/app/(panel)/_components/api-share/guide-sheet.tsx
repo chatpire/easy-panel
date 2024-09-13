@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserRead } from "@/schema/user.schema";
 import { api } from "@/trpc/react";
-import { APIShareModel } from "@/schema/service/api-share.schema";
+import { type APIShareModel } from "@/schema/service/api-share.schema";
 
 const ServiceInstanceSchema = z.object({
   id: z.string(),

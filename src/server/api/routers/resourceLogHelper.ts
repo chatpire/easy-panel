@@ -11,8 +11,8 @@ import {
   type PoekmonAPILogGroupbyModelResult,
   type PoekmonAPIResourceLogSumResult,
 } from "@/schema/service/poekmon-api.schema";
-import { PoekmonSharedResourceLogSumResult } from "@/schema/service/poekmon-shared.schema";
-import { APIShareLogGroupbyModelResult, APIShareResourceLogSumResult } from "@/schema/service/api-share.schema";
+import { type PoekmonSharedResourceLogSumResult } from "@/schema/service/poekmon-shared.schema";
+import { type APIShareLogGroupbyModelResult, type APIShareResourceLogSumResult } from "@/schema/service/api-share.schema";
 
 const _sumChatGPTSharedLogsInDurationWindows = async ({
   ctx,

@@ -8,7 +8,7 @@ import { generateId } from "lucia";
 import { UserInstanceAbilitySchema, type UserInstanceData } from "@/schema/userInstanceAbility.schema";
 import { type ServiceType, ServiceTypeSchema } from "@/server/db/enum";
 import { type Db } from "@/server/db";
-import { APIShareInstanceData, APIShareUserInstanceData } from "@/schema/service/api-share.schema";
+import { type APIShareInstanceData, type APIShareUserInstanceData } from "@/schema/service/api-share.schema";
 import { ServiceInstanceUserReadSchema } from "@/schema/serviceInstance.schema";
 import { filterUserAvailableModels } from "../helpers/api-share";
 
