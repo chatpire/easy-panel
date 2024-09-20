@@ -32,7 +32,13 @@ function createDefaultInstanceData(type: ServiceType): UserInstanceData | null {
   }
 }
 
-async function batchCreateAbilities(db: Db, userIds: string[], instanceIds: string[], updateCanUse = false) {
+async function batchCreateAbilities(
+  db: Db,
+  userIds: string[],
+  instanceIds: string[],
+  updateCanUse = false,
+  resetData = false,
+) {
   await db.transaction(async (tx) => {
     const instances = await tx.query.serviceInstances.findMany({
       where: inArray(serviceInstances.id, instanceIds),
@@ -48,19 +54,37 @@ async function batchCreateAbilities(db: Db, userIds: string[], instanceIds: stri
           where: and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, instance.id)),
         });
         if (!existingAbility) {
-          await tx.insert(userInstanceAbilities).values({
-            userId,
-            instanceId: instance.id,
-            token: generateId(24),
-            canUse: true,
-            data,
-          }).onConflictDoNothing();
-        } else if (updateCanUse) {
-          await tx.update(userInstanceAbilities).set({
-            canUse: true,
-            updatedAt: new Date(),
-          }).where(and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, instance.id)));
+          await tx
+            .insert(userInstanceAbilities)
+            .values({
+              userId,
+              instanceId: instance.id,
+              token: generateId(24),
+              canUse: true,
+              data,
+            })
+            .onConflictDoNothing();
+        } else {
+          if (existingAbility.data === null || existingAbility?.data === undefined || resetData) {
+            await tx
+              .update(userInstanceAbilities)
+              .set({
+                data,
+                updatedAt: new Date(),
+              })
+              .where(and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, instance.id)));
+          }
+          if (updateCanUse && existingAbility.canUse === false) {
+            await tx
+              .update(userInstanceAbilities)
+              .set({
+                canUse: true,
+                updatedAt: new Date(),
+              })
+              .where(and(eq(userInstanceAbilities.userId, userId), eq(userInstanceAbilities.instanceId, instance.id)));
+          }
         }
+        
       }
     }
   });
@@ -114,7 +138,21 @@ export const userInstanceAbilityRouter = createTRPCRouter({
         true,
       );
     }),
-  
+
+  resetInstanceDataToAllActiveUsers: adminProcedure
+    .input(z.object({ instanceId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userIds = await ctx.db.select({ id: users.id }).from(users).where(eq(users.isActive, true));
+
+      await batchCreateAbilities(
+        ctx.db,
+        userIds.map((user) => user.id),
+        [input.instanceId],
+        true,
+        true,
+      );
+    }),
+
   unpublishToAllActiveUsers: adminProcedure
     .input(z.object({ instanceId: z.string(), delete: z.boolean().optional() }))
     .mutation(async ({ ctx, input }) => {
@@ -127,12 +165,22 @@ export const userInstanceAbilityRouter = createTRPCRouter({
         if (input.delete) {
           await ctx.db
             .delete(userInstanceAbilities)
-            .where(and(eq(userInstanceAbilities.instanceId, input.instanceId), eq(userInstanceAbilities.userId, ability.userId)));
+            .where(
+              and(
+                eq(userInstanceAbilities.instanceId, input.instanceId),
+                eq(userInstanceAbilities.userId, ability.userId),
+              ),
+            );
         } else {
           await ctx.db
             .update(userInstanceAbilities)
             .set({ canUse: false })
-            .where(and(eq(userInstanceAbilities.instanceId, input.instanceId), eq(userInstanceAbilities.userId, ability.userId)));
+            .where(
+              and(
+                eq(userInstanceAbilities.instanceId, input.instanceId),
+                eq(userInstanceAbilities.userId, ability.userId),
+              ),
+            );
         }
       }
     }),

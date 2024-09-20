@@ -61,6 +61,7 @@ export function DeleteInstance({ instanceId, closePopup }: { instanceId: string;
 export function AdminInstanceInfoCard({ instance, className }: Props) {
   const router = useRouter();
   const grantMutation = api.userInstanceAbility.grantInstanceToAllActiveUsers.useMutation();
+  const grantAndResetMutation = api.userInstanceAbility.resetInstanceDataToAllActiveUsers.useMutation();
   const unpublishMutation = api.userInstanceAbility.unpublishToAllActiveUsers.useMutation();
 
   const grantToAll = async (instanceId: string) => {
@@ -80,6 +81,34 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
     popup({
       title: "Publish to all active users",
       description: "This will publish the instance to all active users.",
+      content: (closePopup) => (
+        <div className="flex w-full flex-row space-x-2">
+          <FunctionButton onClick={() => doGrant(closePopup)}>Confirm</FunctionButton>
+          <Button variant={"outline"} onClick={closePopup}>
+            Cancel
+          </Button>
+        </div>
+      ),
+    });
+  };
+
+  const grantAndResetToAll = async (instanceId: string) => {
+    const doGrant = async (closePopup: () => void) => {
+      try {
+        await grantAndResetMutation.mutateAsync({ instanceId });
+        toast.success("Published to all active users.");
+        closePopup();
+      } catch (error) {
+        console.error(error);
+        if (error instanceof TRPCClientError) {
+          toast.error(error.message);
+        }
+        toast.error("An error occured. Did you already grant to all active users?");
+      }
+    };
+    popup({
+      title: "Publish and Reset to all active users",
+      description: "This will publish the instance to all active users, and wipe all data.",
       content: (closePopup) => (
         <div className="flex w-full flex-row space-x-2">
           <FunctionButton onClick={() => doGrant(closePopup)}>Confirm</FunctionButton>
@@ -130,6 +159,9 @@ export function AdminInstanceInfoCard({ instance, className }: Props) {
         <div className="flex flex-row items-center space-x-4 max-md:hidden">
           <FunctionButton className="lt-md:w-full" variant={"outline"} onClick={() => grantToAll(instance.id)}>
             Publish
+          </FunctionButton>
+          <FunctionButton className="lt-md:w-full hidden" variant={"destructive"} onClick={() => grantAndResetToAll(instance.id)}>
+            Publish and Reset Data
           </FunctionButton>
           <FunctionButton variant={"outline"} onClick={() => unpublish(instance.id)}>
             Unpublish
